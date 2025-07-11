@@ -1,0 +1,265 @@
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20px;
+  background-color: rgba(var(--dark-color), 0.5);
+  color: rgba(var(--light-color), 1.0);
+  font-size: 40px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+	z-index: 10;
+}
+
+.overlay.show {
+  display: flex;
+}
+
+.overlay.hide {
+  display: none;
+}
+
+.overlayHeading {
+  font-family: "Orbitron", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+  font-size: 50px;
+  line-height: 50px;
+  margin-bottom: 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.button-light {
+  font-size: 24px;
+  line-height: 24px;
+  padding: 5px;
+  color: rgba(var(--light-color), 1.0);
+  border: 2px solid rgba(var(--light-color), 1.0);
+  border-radius: 4px;
+  min-width: 50px;
+  min-height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: all;
+}
+.button-light:hover {
+  outline: 1px solid rgba(var(--light-color), 1.0);
+  cursor: pointer;
+}
+
+.button-dark {
+  font-size: 24px;
+  line-height: 24px;
+  padding: 5px;
+  color: rgba(var(--dark-color), 0.6);
+  border: 1px solid rgba(var(--dark-color), 0.6);
+  border-radius: 4px;
+  min-width: 50px;
+  min-height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  pointer-events: all;
+}
+
+.button-wide {
+  min-width: 70px;
+}
+
+.button-disabled {
+  opacity: 0.3;
+}
+
+.button-dark:hover:not(.button-disabled) {
+  outline: 1px solid rgba(var(--dark-color), 1.0);
+  cursor: pointer;
+}
+
+.pulse,
+.button-pulse:not(.button-disabled) {
+  animation: pulse 1s ease-in-out infinite reverse;
+  animation-delay: 2s;
+}
+
+.button-badge {
+  font-size: 18px;
+}
+
+.button-toggle {
+  flex-direction: column;
+  min-width: 100px;
+  font-size: 20px;
+}
+.button-toggle > span:last-child {
+  font-size: 16px;
+}
+
+.messageContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  font-size: 40px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+	z-index: 10;
+  opacity: 0;
+  transition: all 1s;
+  pointer-events: none;
+}
+
+.messageContainer.show {
+  opacity: 1;
+}
+
+.messageContainer.hide {
+  opacity: 0;
+}
+
+.message {
+  font-size: 50px;
+  line-height: 50px;
+  color: rgba(var(--light-color), 1.0);
+  background: rgba(0, 0, 0, 0.5);
+  width: 100%;
+  padding: 20px;
+}
+
+@keyframes pulse {
+  0%   { scale: 1; }
+  50%  { scale: 1.2; }
+  100% { scale: 1; }
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes fade-out {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.stacked-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;  
+}
+.stacked-icons .fa-solid {
+  position: absolute;
+}
+
+.buttonGroup {
+  display: flex;
+  margin-top: 50px;
+  gap: 10px;
+}
+
+.controlsSection {
+  display: flex;
+  padding-bottom: 30px;
+}
+
+.controlsGroup {
+  font-size: 80px;
+
+  width: 170px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.controlsInfo {
+  font-size: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-top: 20px;
+  align-items: center;
+}
+.controlsInfo.mobile {
+  padding-top: 40px;
+}
+
+.controlsText {
+  display: flex;
+  gap: 10px;
+}
+
+.key {
+  border: 2px solid #FFFFFF;
+  padding: 5px;
+  border-radius: 5px;
+  width: 40px;
+}
+
+.swipe-text {
+  font-size: 15px;
+  line-height: 30px;
+}
+.swipe-arrow {
+  font-size: 25px;
+  text-shadow: 13px 0 #CCCCCC, 26px 0 #999999;
+}
+
+.resultsContainer {
+  display: flex;
+  gap: 40px;
+  padding-bottom: 20px;
+  font-size: 20px;
+}
+
+.resultLabel {
+  font-size: 14px;
+}
+
+.infoHeader {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.infoInstructions {
+  font-size: 16px;
+}
+
+.infoSubHeading {
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.infoBuiltBy {
+  font-size: 16px;
+  display: flex;
+  gap: 10px;
+}
+
+.infoCredits {
+  display: flex;
+  flex-direction: column;
+}
+
+.infoCredit {
+  font-size: 14px;
+  display: flex;
+  gap: 10px;
+}
+
+.infoCreditLabel {
+  min-width: 70px;
+  text-align: left;
+}
