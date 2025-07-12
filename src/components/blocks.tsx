@@ -17,8 +17,7 @@ export default function Blocks (){
       {blocks.map(block => (
         <Block
           key={block.id}
-          id={block.id}
-          position={block.position}
+          {...block}
         />
       ))}
     </>

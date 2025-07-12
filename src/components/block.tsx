@@ -2,9 +2,9 @@ import { Edges, EdgesRef } from "@react-three/drei";
 import { ThreeEvent } from "@react-three/fiber";
 import { useCallback, useEffect, useRef } from "react";
 import { Color, MeshStandardMaterial } from "three";
-import { GlobalState, useGlobalStore } from "../stores/useGlobalStore";
+import { BlockInfo, GlobalState, useGlobalStore } from "../stores/useGlobalStore";
 
-export default function Block ({ id, position }: { id: string, position: [number, number, number]}){
+export default function Block ({ id, position, neighbourIds }: BlockInfo ){
   const material = useRef<MeshStandardMaterial>(null!);
   const edges = useRef<EdgesRef>(null!);
   const edgeColor = useRef(new Color("#444444"));
@@ -27,7 +27,7 @@ export default function Block ({ id, position }: { id: string, position: [number
   useEffect(() => {
     // console.log(`${id}: hoveredIds = `, hoveredIds);
 
-    if (hoveredIds.includes(id)) {
+    if (hoveredIds.length !== 0 && (hoveredIds.includes(id) || neighbourIds.includes(hoveredIds[0]))) {
       edges.current.material.color = edgeHoverColor.current;
     } else {
       edges.current.material.color = edgeColor.current;

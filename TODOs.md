@@ -11,5 +11,6 @@
   - [x] pointer over
     - [x] change edge color
     - [x] change cursor
+    - [x] highlight neighbouring blocks
   - [ ] toggle
 

@@ -1,6 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+
+// --------------
+// --- BLOCKS ---
+// --------------
+export type BlockInfo = {
+  id: string;
+  position: [number, number, number];
+  neighbourIds: string[];
+};
+
 const GRID_SIZE_IN_BLOCKS = 5;
 const BLOCK_SIZE = 1;
 const BLOCK_GAP = 0.1;
@@ -8,22 +18,43 @@ const GRID_WIDTH = ((GRID_SIZE_IN_BLOCKS * BLOCK_SIZE) + ((GRID_SIZE_IN_BLOCKS -
 const MAX_POS = (GRID_WIDTH - BLOCK_SIZE) * 0.5;
 const MIN_POS = -MAX_POS;
 
-const BLOCK_POSITIONS: [number, number, number][] = [];
-for (let x = MIN_POS; x <=MAX_POS; x = x + BLOCK_SIZE + BLOCK_GAP) {
-  for (let y = MIN_POS; y <=MAX_POS; y = y + BLOCK_SIZE + BLOCK_GAP) {
-    for (let z = MIN_POS; z <=MAX_POS; z = z + BLOCK_SIZE + BLOCK_GAP) {
-      const xPos = x;
-      const yPos = y;
-      const zPos = z;
-      BLOCK_POSITIONS.push([xPos, yPos, zPos]);
+const calcBlockNeighbourIds = (x: number, y: number, z: number): string[] => {
+  const neighbourIds: string[] = [];
+
+  // neighbor above & below
+  if (y + 1 < GRID_SIZE_IN_BLOCKS) neighbourIds.push(`block-${x}-${y + 1}-${z}`);
+  if (y - 1 >= 0) neighbourIds.push(`block-${x}-${y - 1}-${z}`);
+
+  // neighbor right & left
+  if (x + 1 < GRID_SIZE_IN_BLOCKS) neighbourIds.push(`block-${x + 1}-${y}-${z}`);
+  if (x - 1 >= 0) neighbourIds.push(`block-${x - 1}-${y}-${z}`);
+
+  // neighbor forward & back
+  if (z + 1 < GRID_SIZE_IN_BLOCKS) neighbourIds.push(`block-${x}-${y}-${z + 1}`);
+  if (z - 1 >= 0) neighbourIds.push(`block-${x}-${y}-${z - 1}`);
+
+  return neighbourIds;
+};
+
+const BLOCKS: BlockInfo[] = [];
+for (let x = 0; x <GRID_SIZE_IN_BLOCKS; x++) {
+  for (let y = 0; y <GRID_SIZE_IN_BLOCKS; y++) {
+    for (let z = 0; z <GRID_SIZE_IN_BLOCKS; z++) {
+      const xPos = MIN_POS + (x * (BLOCK_SIZE + BLOCK_GAP));
+      const yPos = MIN_POS + (y * (BLOCK_SIZE + BLOCK_GAP));
+      const zPos = MIN_POS + (z * (BLOCK_SIZE + BLOCK_GAP));
+      BLOCKS.push({ 
+        id: `block-${x}-${y}-${z}`, 
+        position: [xPos, yPos, zPos], 
+        neighbourIds: calcBlockNeighbourIds(x, y, z)
+      });
     }
   }
 }
 
-type BlockInfo = {
-  id: string;
-  position: [number, number, number];
-};
+// -------------------
+// --- GlobalState ---
+// -------------------
 
 export type GlobalState = {
   playing: boolean;
@@ -39,7 +70,7 @@ export const useGlobalStore = create<GlobalState>()(
     (set) => {
       return {
         playing: true,
-        blocks: BLOCK_POSITIONS.map((position, index) => ({ id: `block-${index}`, position })),
+        blocks: BLOCKS,
         hoveredIds: [],
 
         play: () => set(() => {
