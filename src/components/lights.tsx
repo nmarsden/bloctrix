@@ -1,6 +1,7 @@
 import {folder, useControls} from "leva";
 import {useRef} from "react";
 import {AmbientLight, DirectionalLight} from "three";
+import useShadowHelper from "../hooks/useShadowHelper";
 
 export default function Lights() {
   const ambientLight = useRef<AmbientLight>(null!);
@@ -15,13 +16,13 @@ export default function Lights() {
       'Ambient': folder(
         {
           ambientColor: {value: 'white', label: 'color'},
-          ambientIntensity: {value: 1.0, min: 0, max: 10, step: 0.1, label: 'intensity'}
+          ambientIntensity: {value: 1.5, min: 0, max: 10, step: 0.1, label: 'intensity'}
         }
       ),
       'Directional': folder(
         {
           directionalColor: {value: 'white', label: 'color'},
-          directionalIntensity: {value: 1.0, min: 0, max: 10, step: 0.01, label: 'intensity'},
+          directionalIntensity: {value: 3.0, min: 0, max: 10, step: 0.01, label: 'intensity'},
           directionalPosition: {value: [6.5, 3.25, -6.5], label: 'position'},
         }
       )
@@ -30,6 +31,8 @@ export default function Lights() {
       collapsed: true
     }
   );
+
+  // useShadowHelper(directionalLight, true);
 
   return <>
     <ambientLight
@@ -46,10 +49,10 @@ export default function Lights() {
       shadow-mapSize-width={512}
       shadow-mapSize-height={512}
 
-      shadow-camera-top={3}
-      shadow-camera-bottom={-4}
-      shadow-camera-left={-6}
-      shadow-camera-right={12}
+      shadow-camera-top={5}
+      shadow-camera-bottom={-5}
+      shadow-camera-left={-5}
+      shadow-camera-right={5}
 
       shadow-camera-near={0.1}
       shadow-camera-far={15}      

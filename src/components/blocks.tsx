@@ -1,3 +1,5 @@
+import Block from "./block";
+
 const GRID_SIZE_IN_BLOCKS = 5;
 const BLOCK_SIZE = 1;
 const BLOCK_GAP = 0.1;
@@ -21,18 +23,15 @@ export default function Blocks (){
   return (
     <>
       {blockPositions.map((position, index) => (
-        <mesh
+        <Block
           key={`block-${index}`}
           position={position}
-        >
-          <boxGeometry />
-          <meshBasicMaterial color="red" wireframe={true} />
-        </mesh>
+        />
       ))}
-      <mesh>
+      {/* <mesh>
         <boxGeometry />
-        <meshBasicMaterial color="white" wireframe={true} />
-      </mesh>
+        <meshBasicMaterial color="red" wireframe={false} />
+      </mesh> */}
     </>
   )
 }

@@ -1,6 +1,10 @@
 # TODOs
 
-- [ ] initial layout
-  - [ ] camera
-  - [ ] lights
-  - [ ] blocks
+- [x] initial layout
+  - [x] camera
+  - [x] lights
+  - [x] blocks
+
+- [ ] block
+  - [x] edges
+  - [x] shadows
