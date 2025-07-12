@@ -8,3 +8,8 @@
 - [ ] block
   - [x] edges
   - [x] shadows
+  - [x] pointer over
+    - [x] change edge color
+    - [x] change cursor
+  - [ ] toggle
+
