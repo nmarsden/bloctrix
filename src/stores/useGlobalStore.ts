@@ -11,12 +11,12 @@ export type BlockInfo = {
   neighbourIds: string[];
 };
 
-const GRID_SIZE_IN_BLOCKS = 5;
-const BLOCK_SIZE = 1;
-const BLOCK_GAP = 0.1;
-const GRID_WIDTH = ((GRID_SIZE_IN_BLOCKS * BLOCK_SIZE) + ((GRID_SIZE_IN_BLOCKS - 1) * BLOCK_GAP));
-const MAX_POS = (GRID_WIDTH - BLOCK_SIZE) * 0.5;
-const MIN_POS = -MAX_POS;
+export const GRID_SIZE_IN_BLOCKS = 5;
+export const BLOCK_SIZE = 1;
+export const BLOCK_GAP = 0.1;
+export const GRID_WIDTH = ((GRID_SIZE_IN_BLOCKS * BLOCK_SIZE) + ((GRID_SIZE_IN_BLOCKS - 1) * BLOCK_GAP));
+export const MAX_POS = (GRID_WIDTH - BLOCK_SIZE) * 0.5;
+export const MIN_POS = -MAX_POS;
 
 const calcBlockNeighbourIds = (x: number, y: number, z: number): string[] => {
   const neighbourIds: string[] = [];
@@ -60,6 +60,7 @@ export type GlobalState = {
   playing: boolean;
   blocks: BlockInfo[];
   hoveredIds: string[];
+  activePlane: number;
 
   play: () => void;
   blockHovered: (id: string, isHovered: boolean) => void;
@@ -72,6 +73,7 @@ export const useGlobalStore = create<GlobalState>()(
         playing: true,
         blocks: BLOCKS,
         hoveredIds: [],
+        activePlane: 2,
 
         play: () => set(() => {
           return {};

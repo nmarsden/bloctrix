@@ -1,7 +1,7 @@
 import {folder, useControls} from "leva";
 import {useRef} from "react";
 import {AmbientLight, DirectionalLight} from "three";
-import useShadowHelper from "../hooks/useShadowHelper";
+// import useShadowHelper from "../hooks/useShadowHelper";
 
 export default function Lights() {
   const ambientLight = useRef<AmbientLight>(null!);

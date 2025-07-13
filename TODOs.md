@@ -14,3 +14,11 @@
     - [x] highlight neighbouring blocks
   - [ ] toggle
 
+- [ ] plane tool
+  - [ ] enable/disable on xz plane
+  - [x] only pointer over when on the plane
+  - [ ] shift up/down
+
+- [x] axes
+  - [x] show on pointer over
+
