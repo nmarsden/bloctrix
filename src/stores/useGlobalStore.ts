@@ -64,6 +64,7 @@ export type GlobalState = {
 
   play: () => void;
   blockHovered: (id: string, isHovered: boolean) => void;
+  setActivePlane: (activePlane: number) => void;
 };
 
 export const useGlobalStore = create<GlobalState>()(
@@ -91,6 +92,8 @@ export const useGlobalStore = create<GlobalState>()(
 
           return { hoveredIds };
         }),
+
+        setActivePlane: (activePlane) => set(() => ({ activePlane }))
       }
     },
     {
