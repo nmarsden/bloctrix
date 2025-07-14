@@ -3,8 +3,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Color, DoubleSide, Group, Mesh, ShaderMaterial, Uniform, Vector3 } from "three";
 import { BLOCK_GAP, BLOCK_SIZE, GlobalState, GRID_SIZE_IN_BLOCKS, MAX_POS, MIN_POS, useGlobalStore } from "../stores/useGlobalStore";
 import { ThreeEvent } from "@react-three/fiber";
-import vertexShader from '../shaders/reveal/vertex.glsl';
-import fragmentShader from '../shaders/reveal/fragment.glsl';
+import vertexShader from '../shaders/planeSwitch/vertex.glsl';
+import fragmentShader from '../shaders/planeSwitch/fragment.glsl';
 
 const PLANE_SWITCH_WIDTH = BLOCK_SIZE;
 const PLANE_SWITCH_ACTIVE_COLOR = new Color("#e6edf7");

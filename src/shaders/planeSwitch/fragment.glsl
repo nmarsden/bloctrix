@@ -10,6 +10,8 @@ varying vec2 vUv;
 varying vec3 vWorldPosition;
 
 void main() {
+  // Hide when in line with camera & target:
+  // - Adjust alpha according to fragment's distance from a line from the cameraPosition to the uTargetPosition
   vec3 toCamera = normalize(cameraPosition - uTargetPosition);
   vec3 toFragment = vWorldPosition - uTargetPosition;
 
@@ -22,13 +24,14 @@ void main() {
     alpha = uOpacity - smoothstep(distance, distance + uAlphaFalloff, uDistanceThreshold);
   }
 
+  // Border: Calculate color according distance to edge
   float distToEdgeX = min(vUv.x, 1.0 - vUv.x);
   float distToEdgeY = min(vUv.y, 1.0 - vUv.y);
   float distToEdge = min(distToEdgeX, distToEdgeY);
-
+  vec3 finalColor = uColor;
   if (distToEdge < uBorderWidth) {
-      gl_FragColor = vec4(uBorderColor, alpha);
-  } else {
-      gl_FragColor = vec4(uColor, alpha);
+      finalColor = uBorderColor;
   }
+
+  gl_FragColor = vec4(finalColor, alpha);
 }
