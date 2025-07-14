@@ -12,6 +12,8 @@
     - [x] change edge color
     - [x] change cursor
     - [x] highlight neighbouring blocks
+  - [x] When no block is hovered: show block 
+  - [x] When a block is hovered: only show block which is hovered OR hovered neighbour OR block on the active plane
   - [ ] toggle
 
 - [ ] plane tool

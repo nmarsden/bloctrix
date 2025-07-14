@@ -1,10 +1,10 @@
 import { Edges } from "@react-three/drei";
 import { useCallback,useMemo, useRef } from "react";
 import { Mesh } from "three";
-import { BLOCK_SIZE, BlockInfo, GlobalState, useGlobalStore } from "../stores/useGlobalStore";
+import { BLOCK_GAP, BLOCK_SIZE, BlockInfo, GlobalState, useGlobalStore } from "../stores/useGlobalStore";
 import { ThreeEvent } from "@react-three/fiber";
 
-const PLANE_WIDTH = BLOCK_SIZE;
+const PLANE_WIDTH = BLOCK_SIZE + BLOCK_GAP;
 const PLANE_HEIGHT = 0.025;
 const PLANE_OPACITY = 0.2;
 const PLANE_FACE_COLOR = "#4287ff";
