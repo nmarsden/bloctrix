@@ -17,7 +17,13 @@
 - [ ] plane tool
   - [ ] enable/disable on xz plane
   - [x] only pointer over when on the plane
-  - [ ] shift up/down
+
+- [ ] plane switches  
+  - [x] select active plane
+  - [x] show switches on each corner
+  - [x] hide switches when in the way
+        [x] between camera and blocks
+        [x] behind blocks
 
 - [x] axes
   - [x] show on pointer over
