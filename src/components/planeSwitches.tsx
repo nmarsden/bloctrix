@@ -1,7 +1,7 @@
 import { useCursor } from "@react-three/drei";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Color, DoubleSide, Group, Mesh, ShaderMaterial, Uniform, Vector3 } from "three";
-import { BLOCK_GAP, BLOCK_SIZE, GlobalState, GRID_SIZE_IN_BLOCKS, MAX_POS, MIN_POS, useGlobalStore } from "../stores/useGlobalStore";
+import { BLOCK_GAP, BLOCK_SIZE, GlobalState, GRID_SIZE_IN_BLOCKS, GRID_WIDTH, MAX_POS, MIN_POS, useGlobalStore } from "../stores/useGlobalStore";
 import { ThreeEvent } from "@react-three/fiber";
 import vertexShader from '../shaders/planeSwitch/vertex.glsl';
 import fragmentShader from '../shaders/planeSwitch/fragment.glsl';
@@ -28,6 +28,9 @@ function PlaneSwitch ({ plane, position }: SwitchInfo) {
   useCursor(hovered)
 
   const material: ShaderMaterial = useMemo(() => {
+    const fadeOuterWidth = (GRID_WIDTH - BLOCK_SIZE) * Math.sqrt(2) * 0.5;
+    const fadeInnerWidth = fadeOuterWidth - (BLOCK_SIZE * 0.5);
+
     const shaderMaterial = new ShaderMaterial({
       vertexShader,
       fragmentShader,
@@ -38,8 +41,8 @@ function PlaneSwitch ({ plane, position }: SwitchInfo) {
         uColor: new Uniform(PLANE_SWITCH_INACTIVE_COLOR),
         uOpacity: new Uniform(0.5),
         uTargetPosition: new Uniform(new Vector3(0, 0, 0)),
-        uDistanceThreshold: new Uniform(GRID_SIZE_IN_BLOCKS * 0.8),
-        uAlphaFalloff: new Uniform(3),
+        uFadeInnerWidth: new Uniform(fadeInnerWidth),
+        uFadeOuterWidth: new Uniform(fadeOuterWidth),
         uBorderColor: new Uniform(PLANE_SWITCH_BORDER_COLOR),
         uBorderWidth: new Uniform(0.02)
       }
