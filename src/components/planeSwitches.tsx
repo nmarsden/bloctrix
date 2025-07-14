@@ -1,15 +1,15 @@
 import { useCursor } from "@react-three/drei";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Color, Group, Mesh, ShaderMaterial, Uniform, Vector3 } from "three";
+import { Color, DoubleSide, Group, Mesh, ShaderMaterial, Uniform, Vector3 } from "three";
 import { BLOCK_GAP, BLOCK_SIZE, GlobalState, GRID_SIZE_IN_BLOCKS, MAX_POS, MIN_POS, useGlobalStore } from "../stores/useGlobalStore";
 import { ThreeEvent } from "@react-three/fiber";
 import vertexShader from '../shaders/reveal/vertex.glsl';
 import fragmentShader from '../shaders/reveal/fragment.glsl';
 
 const PLANE_SWITCH_WIDTH = BLOCK_SIZE;
-const PLANE_SWITCH_HEIGHT = 0.025;
-const PLANE_SWITCH_OPACITY = 0.1;
-const PLANE_SWITCH_FACE_COLOR = "#5d5f63";
+const PLANE_SWITCH_ACTIVE_COLOR = new Color("#e6edf7");
+const PLANE_SWITCH_INACTIVE_COLOR = new Color("#f3f6fb");
+const PLANE_SWITCH_BORDER_COLOR = new Color("#DDD");
 
 type SwitchInfo = {
   id: string;
@@ -33,26 +33,29 @@ function PlaneSwitch ({ plane, position }: SwitchInfo) {
       fragmentShader,
       transparent: true,
       depthWrite: false,
+      side: DoubleSide,
       uniforms: {
-        uColor: new Uniform(new Color(PLANE_SWITCH_FACE_COLOR)),
-        uOpacity: new Uniform(PLANE_SWITCH_OPACITY),
+        uColor: new Uniform(PLANE_SWITCH_INACTIVE_COLOR),
+        uOpacity: new Uniform(0.5),
         uTargetPosition: new Uniform(new Vector3(0, 0, 0)),
         uDistanceThreshold: new Uniform(GRID_SIZE_IN_BLOCKS * 0.8),
-        uAlphaFalloff: new Uniform(3)
+        uAlphaFalloff: new Uniform(3),
+        uBorderColor: new Uniform(PLANE_SWITCH_BORDER_COLOR),
+        uBorderWidth: new Uniform(0.02)
       }
     });
     return shaderMaterial;
   }, []);
 
   const onPointerOver = useCallback((event: ThreeEvent<PointerEvent>) => { 
-    material.uniforms.uOpacity.value = 0.2;
+    material.uniforms.uColor.value = PLANE_SWITCH_ACTIVE_COLOR;
     setHovered(true);
     event.stopPropagation();
   }, []);
 
   const onPointerOut = useCallback((event: ThreeEvent<PointerEvent>) => {
-    const opacity = (plane === activePlane) ? 0.2 : 0.1;
-    material.uniforms.uOpacity.value = opacity;
+    const color = (plane === activePlane) ? PLANE_SWITCH_ACTIVE_COLOR : PLANE_SWITCH_INACTIVE_COLOR;
+    material.uniforms.uColor.value = color;
     setHovered(false);
 
     event.stopPropagation();
@@ -64,21 +67,22 @@ function PlaneSwitch ({ plane, position }: SwitchInfo) {
   }, []);
 
   useEffect(() => {
-    const opacity = (plane === activePlane) ? 0.2 : 0.1;
-    material.uniforms.uOpacity.value = opacity;
+    const color = (plane === activePlane) ? PLANE_SWITCH_ACTIVE_COLOR : PLANE_SWITCH_INACTIVE_COLOR;
+    material.uniforms.uColor.value = color;
   }, [activePlane]);
   
   return (
     <mesh
       ref={planeSwitch}
       position={position}
+      rotation-x={Math.PI * -0.5}
       onPointerOver={onPointerOver}
       onPointerOut={onPointerOut}
       onPointerDown={onPointerDown}
       material={material}
     >
-      <boxGeometry 
-        args={[PLANE_SWITCH_WIDTH, PLANE_SWITCH_HEIGHT, PLANE_SWITCH_WIDTH]} 
+      <planeGeometry 
+        args={[PLANE_SWITCH_WIDTH, PLANE_SWITCH_WIDTH]} 
       />
     </mesh>
   )

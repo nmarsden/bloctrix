@@ -3,7 +3,10 @@ uniform float uOpacity;
 uniform vec3 uTargetPosition;
 uniform float uDistanceThreshold;
 uniform float uAlphaFalloff;
+uniform vec3 uBorderColor;
+uniform float uBorderWidth;
 
+varying vec2 vUv;
 varying vec3 vWorldPosition;
 
 void main() {
@@ -19,5 +22,13 @@ void main() {
     alpha = uOpacity - smoothstep(distance, distance + uAlphaFalloff, uDistanceThreshold);
   }
 
-  gl_FragColor = vec4(uColor, alpha);
+  float distToEdgeX = min(vUv.x, 1.0 - vUv.x);
+  float distToEdgeY = min(vUv.y, 1.0 - vUv.y);
+  float distToEdge = min(distToEdgeX, distToEdgeY);
+
+  if (distToEdge < uBorderWidth) {
+      gl_FragColor = vec4(uBorderColor, alpha);
+  } else {
+      gl_FragColor = vec4(uColor, alpha);
+  }
 }
