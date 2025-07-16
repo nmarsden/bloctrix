@@ -68,10 +68,10 @@ type Colors = {
 const COLORS: Colors = {
   block: '#EEEEEE',
   blockEdge: '#d7d6d6',
-  planeTool: '#66a7ff',
-  planeSwitchActive: '#78c6ff',
-  planeSwitchInactive: '#dcf0ff',
-  planeSwitchEdge: '#d7d6d6',
+  planeTool: '#76afff',
+  planeSwitchActive: '#76afff',
+  planeSwitchInactive: '#eeeeee',
+  planeSwitchEdge: '#96c2ff',
 };
 
 // -------------------

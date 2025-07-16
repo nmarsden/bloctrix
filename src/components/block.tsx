@@ -79,8 +79,8 @@ export default function Block ({ id, position, neighbourIds }: BlockInfo ){
   );
     
   useEffect(() => {
-    material.uniforms.uColor.value = new Color(colors.block);
-    material.uniforms.uBorderColor.value = new Color(colors.blockEdge);
+    material.uniforms.uColor.value.set(colors.block);
+    material.uniforms.uBorderColor.value.set(colors.blockEdge);
   }, [colors]);
 
   useEffect(() => {

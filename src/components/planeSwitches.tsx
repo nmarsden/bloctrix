@@ -7,7 +7,7 @@ import vertexShader from '../shaders/planeSwitch/vertex.glsl';
 import fragmentShader from '../shaders/planeSwitch/fragment.glsl';
 
 const PLANE_SWITCH_WIDTH = BLOCK_SIZE;
-const PLANE_SWITCH_OPACITY = 0.5;
+const PLANE_SWITCH_OPACITY = 1;
 const PLANE_SWITCH_BORDER_WIDTH = 0.02;
 const PLANE_SWITCH_TARGET_POSITION = new Vector3(0, 0, 0);
 const PLANE_SWITCH_FADE_OUTER_WIDTH = (GRID_WIDTH - BLOCK_SIZE) * Math.sqrt(2) * 0.5;
@@ -120,15 +120,15 @@ function PlaneSwitch ({ plane, position }: SwitchInfo) {
   }, []);
 
   useEffect(() => {
-    const color = (plane === activePlane) ? new Color(colors.planeSwitchActive) : new Color(colors.planeSwitchInactive);
-    material.uniforms.uColor.value = color;
-    material.uniforms.uBorderColor.value = new Color(colors.planeSwitchEdge);
+    const color = (plane === activePlane) ? colors.planeSwitchActive : colors.planeSwitchInactive;
+    material.uniforms.uColor.value.set(color);
+    material.uniforms.uBorderColor.value.set(colors.planeSwitchEdge);
   }, [colors]);
 
   const onPointerOver = useCallback((event: ThreeEvent<PointerEvent>) => { 
     if (!(planeSwitch.current.parent as Group).visible) return;
 
-    material.uniforms.uColor.value = new Color(colors.planeSwitchActive);
+    material.uniforms.uColor.value.set(colors.planeSwitchActive);
     setHovered(true);
     event.stopPropagation();
   }, [colors]);
@@ -138,8 +138,8 @@ function PlaneSwitch ({ plane, position }: SwitchInfo) {
 
     if (!(planeSwitch.current.parent as Group).visible) return;
 
-    const color = (plane === activePlane) ? new Color(colors.planeSwitchActive) : new Color(colors.planeSwitchInactive);
-    material.uniforms.uColor.value = color;
+    const color = (plane === activePlane) ? colors.planeSwitchActive : colors.planeSwitchInactive;
+    material.uniforms.uColor.value.set(color);
 
     event.stopPropagation();
   }, [activePlane, colors]);
@@ -152,8 +152,8 @@ function PlaneSwitch ({ plane, position }: SwitchInfo) {
   }, []);
 
   useEffect(() => {
-    const color = (plane === activePlane) ? new Color(colors.planeSwitchActive) : new Color(colors.planeSwitchInactive);
-    material.uniforms.uColor.value = color;
+    const color = (plane === activePlane) ? colors.planeSwitchActive : colors.planeSwitchInactive;
+    material.uniforms.uColor.value.set(color);
   }, [activePlane]);
   
   return (
