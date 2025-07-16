@@ -7,10 +7,7 @@ import vertexShader from '../shaders/planeSwitch/vertex.glsl';
 import fragmentShader from '../shaders/planeSwitch/fragment.glsl';
 
 const PLANE_SWITCH_WIDTH = BLOCK_SIZE;
-const PLANE_SWITCH_ACTIVE_COLOR = new Color("#e6edf7");
-const PLANE_SWITCH_INACTIVE_COLOR = new Color("#f3f6fb");
 const PLANE_SWITCH_OPACITY = 0.5;
-const PLANE_SWITCH_BORDER_COLOR = new Color("#DDD");
 const PLANE_SWITCH_BORDER_WIDTH = 0.02;
 const PLANE_SWITCH_TARGET_POSITION = new Vector3(0, 0, 0);
 const PLANE_SWITCH_FADE_OUTER_WIDTH = (GRID_WIDTH - BLOCK_SIZE) * Math.sqrt(2) * 0.5;
@@ -94,6 +91,7 @@ function PlaneSwitchGroup ({ position, switches }: SwitchGroupInfo) {
 function PlaneSwitch ({ plane, position }: SwitchInfo) {
   const planeSwitch = useRef<Group>(null!);
 
+  const colors = useGlobalStore((state: GlobalState) => state.colors);
   const activePlane = useGlobalStore((state: GlobalState) => state.activePlane);
   const setActivePlane = useGlobalStore((state: GlobalState) => state.setActivePlane);  
 
@@ -109,36 +107,42 @@ function PlaneSwitch ({ plane, position }: SwitchInfo) {
       depthWrite: false,
       side: DoubleSide,
       uniforms: {
-        uColor: new Uniform(PLANE_SWITCH_INACTIVE_COLOR),
+        uColor: new Uniform(new Color(colors.planeSwitchInactive)),
         uOpacity: new Uniform(PLANE_SWITCH_OPACITY),
         uTargetPosition: new Uniform(PLANE_SWITCH_TARGET_POSITION),
         uFadeInnerWidth: new Uniform(PLANE_SWITCH_FADE_INNER_WIDTH),
         uFadeOuterWidth: new Uniform(PLANE_SWITCH_FADE_OUTER_WIDTH),
-        uBorderColor: new Uniform(PLANE_SWITCH_BORDER_COLOR),
+        uBorderColor: new Uniform(new Color(colors.planeSwitchEdge)),
         uBorderWidth: new Uniform(PLANE_SWITCH_BORDER_WIDTH)
       }
     });
     return shaderMaterial;
   }, []);
 
+  useEffect(() => {
+    const color = (plane === activePlane) ? new Color(colors.planeSwitchActive) : new Color(colors.planeSwitchInactive);
+    material.uniforms.uColor.value = color;
+    material.uniforms.uBorderColor.value = new Color(colors.planeSwitchEdge);
+  }, [colors]);
+
   const onPointerOver = useCallback((event: ThreeEvent<PointerEvent>) => { 
     if (!(planeSwitch.current.parent as Group).visible) return;
 
-    material.uniforms.uColor.value = PLANE_SWITCH_ACTIVE_COLOR;
+    material.uniforms.uColor.value = new Color(colors.planeSwitchActive);
     setHovered(true);
     event.stopPropagation();
-  }, []);
+  }, [colors]);
 
   const onPointerOut = useCallback((event: ThreeEvent<PointerEvent>) => {
     setHovered(false);
 
     if (!(planeSwitch.current.parent as Group).visible) return;
 
-    const color = (plane === activePlane) ? PLANE_SWITCH_ACTIVE_COLOR : PLANE_SWITCH_INACTIVE_COLOR;
+    const color = (plane === activePlane) ? new Color(colors.planeSwitchActive) : new Color(colors.planeSwitchInactive);
     material.uniforms.uColor.value = color;
 
     event.stopPropagation();
-  }, [activePlane]);
+  }, [activePlane, colors]);
 
   const onPointerDown = useCallback((event: ThreeEvent<PointerEvent>) => {
     if (!(planeSwitch.current.parent as Group).visible) return;
@@ -148,7 +152,7 @@ function PlaneSwitch ({ plane, position }: SwitchInfo) {
   }, []);
 
   useEffect(() => {
-    const color = (plane === activePlane) ? PLANE_SWITCH_ACTIVE_COLOR : PLANE_SWITCH_INACTIVE_COLOR;
+    const color = (plane === activePlane) ? new Color(colors.planeSwitchActive) : new Color(colors.planeSwitchInactive);
     material.uniforms.uColor.value = color;
   }, [activePlane]);
   

@@ -56,15 +56,39 @@ for (let x = 0; x <GRID_SIZE_IN_BLOCKS; x++) {
 // --- GlobalState ---
 // -------------------
 
+type Colors = {
+  block: string;
+  blockEdge: string;
+  planeTool: string;
+  planeSwitchActive: string;
+  planeSwitchInactive: string;
+  planeSwitchEdge: string;
+};
+
+const COLORS: Colors = {
+  block: '#EEEEEE',
+  blockEdge: '#d7d6d6',
+  planeTool: '#66a7ff',
+  planeSwitchActive: '#78c6ff',
+  planeSwitchInactive: '#dcf0ff',
+  planeSwitchEdge: '#d7d6d6',
+};
+
+// -------------------
+// --- GlobalState ---
+// -------------------
+
 export type GlobalState = {
   playing: boolean;
   blocks: BlockInfo[];
   hoveredIds: string[];
   activePlane: number;
+  colors: Colors;
 
   play: () => void;
   blockHovered: (id: string, isHovered: boolean) => void;
   setActivePlane: (activePlane: number) => void;
+  setColors: (colors: Colors) => void;
 };
 
 export const useGlobalStore = create<GlobalState>()(
@@ -75,6 +99,7 @@ export const useGlobalStore = create<GlobalState>()(
         blocks: BLOCKS,
         hoveredIds: [],
         activePlane: 2,
+        colors: COLORS,
 
         play: () => set(() => {
           return {};
@@ -93,7 +118,9 @@ export const useGlobalStore = create<GlobalState>()(
           return { hoveredIds };
         }),
 
-        setActivePlane: (activePlane) => set(() => ({ activePlane }))
+        setActivePlane: (activePlane) => set(() => ({ activePlane })),
+
+        setColors: (colors: Colors) => set(() => ({ colors: {...colors} }))
       }
     },
     {

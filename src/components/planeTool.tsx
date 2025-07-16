@@ -1,4 +1,4 @@
-import { Edges } from "@react-three/drei";
+import { Edges, EdgesRef } from "@react-three/drei";
 import { useCallback,useMemo, useRef } from "react";
 import { Mesh } from "three";
 import { BLOCK_GAP, BLOCK_SIZE, BlockInfo, GlobalState, useGlobalStore } from "../stores/useGlobalStore";
@@ -6,12 +6,13 @@ import { ThreeEvent } from "@react-three/fiber";
 
 const PLANE_WIDTH = BLOCK_SIZE + BLOCK_GAP;
 const PLANE_HEIGHT = 0.025;
-const PLANE_OPACITY = 0.2;
+const PLANE_OPACITY = 1;
 const PLANE_FACE_COLOR = "#4287ff";
-const PLANE_EDGE_COLOR = "#275097";
 
 function PlaneBlock ({ id, position }: BlockInfo) {
+  const edges = useRef<EdgesRef>(null!);
   const blockHovered = useGlobalStore((state: GlobalState) => state.blockHovered);
+  const colors = useGlobalStore((state: GlobalState) => state.colors);
 
   const onPointerOver = useCallback((event: ThreeEvent<PointerEvent>) => { 
     // console.log(`pointerOver: ${id}`);
@@ -28,7 +29,7 @@ function PlaneBlock ({ id, position }: BlockInfo) {
   return (
     <mesh
       position={position}
-      renderOrder={1001}
+      // renderOrder={1001}
       onPointerOver={onPointerOver}
       onPointerOut={onPointerOut}
     >
@@ -37,17 +38,19 @@ function PlaneBlock ({ id, position }: BlockInfo) {
       />
       <meshStandardMaterial
         color={PLANE_FACE_COLOR}
-        transparent={true} 
+        transparent={false} 
         opacity={PLANE_OPACITY}
+        visible={false}
       />
       <Edges
-        renderOrder={1002}
+        ref={edges}
+        // renderOrder={1002}
         linewidth={4}
         scale={1.001}
         threshold={15}
-        transparent={true}
+        transparent={false}
         opacity={PLANE_OPACITY}
-        color={PLANE_EDGE_COLOR}
+        color={colors.planeTool}
       />
     </mesh>
   )

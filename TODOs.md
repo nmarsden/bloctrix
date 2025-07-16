@@ -14,6 +14,7 @@
     - [x] highlight neighbouring blocks
   - [x] When no block is hovered: show block 
   - [x] When a block is hovered: only show block which is hovered OR hovered neighbour OR block on the active plane
+  - [x] Use a custom shader for hiding/showing blocks
   - [ ] toggle
 
 - [ ] plane tool
