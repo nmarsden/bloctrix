@@ -13,6 +13,7 @@ type PointerData = {
 
 const BLOCK_SHOWN_OPACITY = 0.85;
 const BLOCK_BORDER_WIDTH = 0.02;
+const BLOCK_BORDER_SMOOTHNESS = 0.01;
 const BLOCK_TARGET_POSITION = new Vector3(20, 20, 20);
 const BLOCK_DISTANCE_THRESHOLD = (BLOCK_SIZE * 3) + (BLOCK_GAP * 2);
 const BLOCK_ALPHA_FALLOFF = BLOCK_DISTANCE_THRESHOLD * 0.5;
@@ -76,7 +77,8 @@ export default function Block ({ id, position, neighbourIds }: BlockInfo ){
         uDistanceThreshold: new Uniform(0),
         uAlphaFalloff: new Uniform(BLOCK_ALPHA_FALLOFF),
         uBorderColor: new Uniform(new Color(colors.blockEdge)),
-        uBorderWidth: new Uniform(BLOCK_BORDER_WIDTH)
+        uBorderWidth: new Uniform(BLOCK_BORDER_WIDTH),
+        uBorderSmoothness: new Uniform(BLOCK_BORDER_SMOOTHNESS),
       }
     });
     return shaderMaterial;

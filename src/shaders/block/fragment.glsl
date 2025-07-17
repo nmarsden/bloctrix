@@ -5,6 +5,7 @@ uniform float uDistanceThreshold;
 uniform float uAlphaFalloff;
 uniform vec3 uBorderColor;
 uniform float uBorderWidth;
+uniform float uBorderSmoothness;
 
 varying vec2 vUv;
 varying vec3 vWorldPosition;
@@ -31,9 +32,12 @@ void main() {
   float distToEdgeY = min(vUv.y, 1.0 - vUv.y);
   float distToEdge = min(distToEdgeX, distToEdgeY);
   vec3 finalColor = uColor;
-  if (distToEdge < uBorderWidth) {
-      finalColor = uBorderColor;
-  }
+
+  // Use smoothstep for anti-aliased border
+  // uBorderWidth defines the *start* of the border fade
+  // uBorderWidth + uBorderSmoothness defines the *end* of the border fade
+  float borderMixFactor = smoothstep(uBorderWidth, uBorderWidth + uBorderSmoothness, distToEdge);
+  finalColor = mix(uBorderColor, uColor, borderMixFactor);
 
   gl_FragColor = vec4(finalColor, alpha);
 
