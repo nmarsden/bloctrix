@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { Color, Mesh, ShaderMaterial, Uniform, Vector3 } from "three";
-import { BLOCK_GAP, BLOCK_SIZE, BlockInfo, GlobalState, MIN_POS, useGlobalStore } from "../stores/useGlobalStore";
+import { Color, Mesh, ShaderMaterial, Uniform, Vector2, Vector3 } from "three";
+import { BLOCK_GAP, BLOCK_SIZE, BlockInfo, GlobalState, useGlobalStore } from "../stores/useGlobalStore";
 import vertexShader from '../shaders/block/vertex.glsl';
 import fragmentShader from '../shaders/block/fragment.glsl';
 import { useControls } from "leva";
+import { ThreeEvent } from "@react-three/fiber";
 
-const BLOCK_SHOWN_OPACITY = 0.8;
+type PointerData = {
+  pos: Vector2;
+  time: number;
+};
+
+const BLOCK_SHOWN_OPACITY = 0.85;
 const BLOCK_BORDER_WIDTH = 0.02;
 const BLOCK_TARGET_POSITION = new Vector3(20, 20, 20);
 const BLOCK_DISTANCE_THRESHOLD = (BLOCK_SIZE * 3) + (BLOCK_GAP * 2);
@@ -13,24 +19,50 @@ const BLOCK_ALPHA_FALLOFF = BLOCK_DISTANCE_THRESHOLD * 0.5;
 
 export default function Block ({ id, position, neighbourIds }: BlockInfo ){
   const block = useRef<Mesh>(null!);
-  const distanceThreshold = useRef(BLOCK_DISTANCE_THRESHOLD);
+  const distanceThreshold = useRef(0);
 
   const colors = useGlobalStore((state: GlobalState) => state.colors);
-  const activePlane = useGlobalStore((state: GlobalState) => state.activePlane);
   const hoveredIds = useGlobalStore((state: GlobalState) => state.hoveredIds);  
+  const onIds = useGlobalStore((state: GlobalState) => state.onIds);  
+  const blockHovered = useGlobalStore((state: GlobalState) => state.blockHovered);
+  const toggleHovered = useGlobalStore((state: GlobalState) => state.toggleHovered);
 
-  const idToPosition = useCallback((id: string): Vector3 => {
-    const idPartX = parseInt(id.split('-')[1]);
-    const idPartY = parseInt(id.split('-')[2]);
-    const idPartZ = parseInt(id.split('-')[3]);
-
-    const x = MIN_POS + (idPartX * (BLOCK_SIZE + BLOCK_GAP));
-    const y = MIN_POS + (idPartY * (BLOCK_SIZE + BLOCK_GAP));
-    const z = MIN_POS + (idPartZ * (BLOCK_SIZE + BLOCK_GAP));
-
-    return new Vector3(x, y, z);
+  const onPointerOver = useCallback((event: ThreeEvent<PointerEvent>) => { 
+    // console.log(`pointerOver: ${id}`);
+    blockHovered(id, true);
+    event.stopPropagation();
   }, []);
-  
+
+  const onPointerOut = useCallback((event: ThreeEvent<PointerEvent>) => {
+    // console.log(`pointerOut: ${id}`);
+    blockHovered(id, false);
+    event.stopPropagation();
+  }, []);
+
+  const pointerDownData = useRef<PointerData>({ pos: new Vector2(), time: 0 });
+  const pointerUpData = useRef<PointerData>({ pos: new Vector2(), time: 10000 });
+
+  const onPointerDown = useCallback((event: ThreeEvent<PointerEvent>) => {
+    pointerDownData.current.pos.setX(event.x);
+    pointerDownData.current.pos.setY(event.y);
+    pointerDownData.current.time = new Date().getTime();
+    event.stopPropagation();
+  }, []);
+  const onPointerUp = useCallback((event: ThreeEvent<PointerEvent>) => {
+    pointerUpData.current.pos.setX(event.x);
+    pointerUpData.current.pos.setY(event.y);
+    pointerUpData.current.time = new Date().getTime();
+
+    const distance = pointerDownData.current.pos.distanceTo(pointerUpData.current.pos);
+    const time = pointerUpData.current.time - pointerDownData.current.time;
+
+    // Is this a click?
+    if (time < 300 && distance < 5) {
+      toggleHovered();
+    }
+    event.stopPropagation();
+  }, []);
+ 
   const material: ShaderMaterial = useMemo(() => {
     const shaderMaterial = new ShaderMaterial({
       vertexShader,
@@ -38,10 +70,10 @@ export default function Block ({ id, position, neighbourIds }: BlockInfo ){
       transparent: true,
       // depthWrite: false,
       uniforms: {
-        uColor: new Uniform(new Color(colors.block)),
+        uColor: new Uniform(new Color(colors.blockOff)),
         uOpacity: new Uniform(BLOCK_SHOWN_OPACITY),
         uTargetPosition: new Uniform(BLOCK_TARGET_POSITION),
-        uDistanceThreshold: new Uniform(BLOCK_DISTANCE_THRESHOLD),
+        uDistanceThreshold: new Uniform(0),
         uAlphaFalloff: new Uniform(BLOCK_ALPHA_FALLOFF),
         uBorderColor: new Uniform(new Color(colors.blockEdge)),
         uBorderWidth: new Uniform(BLOCK_BORDER_WIDTH)
@@ -72,6 +104,15 @@ export default function Block ({ id, position, neighbourIds }: BlockInfo ){
           material.uniforms.uAlphaFalloff.value = value;
         }
       },
+      opacity: {
+        value: BLOCK_SHOWN_OPACITY,
+        min: 0,
+        max: 1,
+        step: 0.01,
+        onChange: value => {
+          material.uniforms.uOpacity.value = value;
+        }
+      }
     },
     {
       collapsed: true
@@ -79,29 +120,52 @@ export default function Block ({ id, position, neighbourIds }: BlockInfo ){
   );
     
   useEffect(() => {
-    material.uniforms.uColor.value.set(colors.block);
-    material.uniforms.uBorderColor.value.set(colors.blockEdge);
-  }, [colors]);
+    const color = onIds.includes(id) ? colors.blockOn : colors.blockOff;
+    material.uniforms.uColor.value.set(color);
+  }, [colors, onIds]);
 
   useEffect(() => {
-    // When NO block is hovered: show block
+    const color = onIds.includes(id) ? colors.blockOn : colors.blockOff;
+    material.uniforms.uColor.value.set(color);
+  }, [onIds]);
+
+  useEffect(() => {
+    // When NO block is hovered: show normal border
     if (hoveredIds.length === 0) {
-      material.uniforms.uDistanceThreshold.value = 0;
+      material.uniforms.uBorderColor.value.set(colors.blockEdge);
       return;
     }
-    // When a block is hovered: only show block which is hovered OR hovered neighbour
+    // When a block is hovered: show hovered border when block is hovered OR hovered neighbour
     if (hoveredIds.includes(id)) {
-      material.uniforms.uDistanceThreshold.value = 0;
+      material.uniforms.uBorderColor.value.set(colors.blockEdgeHover);
       return;
     }
     if (neighbourIds.includes(hoveredIds[0])) {
-      material.uniforms.uDistanceThreshold.value = 0;
+      material.uniforms.uBorderColor.value.set(colors.blockEdgeHover);
       return;
     }
-    material.uniforms.uDistanceThreshold.value = distanceThreshold.current;
-    material.uniforms.uTargetPosition.value = idToPosition(hoveredIds[0]);
+    material.uniforms.uBorderColor.value.set(colors.blockEdge);
+  }, [hoveredIds, colors]);
 
-  }, [hoveredIds, activePlane]);
+  // useEffect(() => {
+  //   // When NO block is hovered: show block
+  //   if (hoveredIds.length === 0) {
+  //     material.uniforms.uDistanceThreshold.value = 0;
+  //     return;
+  //   }
+  //   // When a block is hovered: only show block which is hovered OR hovered neighbour
+  //   if (hoveredIds.includes(id)) {
+  //     material.uniforms.uDistanceThreshold.value = 0;
+  //     return;
+  //   }
+  //   if (neighbourIds.includes(hoveredIds[0])) {
+  //     material.uniforms.uDistanceThreshold.value = 0;
+  //     return;
+  //   }
+  //   material.uniforms.uDistanceThreshold.value = distanceThreshold.current;
+  //   material.uniforms.uTargetPosition.value = idToPosition(hoveredIds[0]);
+
+  // }, [hoveredIds, activePlane]);
   
   return (
     <mesh
@@ -111,6 +175,10 @@ export default function Block ({ id, position, neighbourIds }: BlockInfo ){
       receiveShadow={true}
       scale={1}
       material={material}
+      onPointerOver={onPointerOver}
+      onPointerOut={onPointerOut}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
     >
       <boxGeometry />
     </mesh>

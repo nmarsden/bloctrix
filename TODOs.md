@@ -16,10 +16,13 @@
   - [x] When a block is hovered: only show block which is hovered OR hovered neighbour OR block on the active plane
   - [x] Use a custom shader for hiding/showing blocks
   - [ ] toggle
+  - [ ] do not adjust block opacity on hover
+  - [ ] make it a 3x3 grid instead of 5x5
 
 - [ ] plane tool
   - [ ] enable/disable on xz plane
   - [x] only pointer over when on the plane
+  - [ ] remove plane tool
 
 - [ ] plane switches  
   - [x] select active plane
@@ -27,7 +30,10 @@
   - [x] hide switches when in the way
         [x] between camera and blocks
         [x] behind blocks
+  - [ ] remove plane switches      
 
 - [x] axes
   - [x] show on pointer over
 
+- [ ] camera
+  - [ ] do not rotate camera while hovering blocks

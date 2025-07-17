@@ -24,8 +24,10 @@ export default function Debug (){
   useControls(
     'Colors',
     {
-      block:                { value: colors.block,                onChange: value => setColors({ ...colors, block: value }) },
+      blockOn:              { value: colors.blockOn,              onChange: value => setColors({ ...colors, blockOn: value }) },
+      blockOff:             { value: colors.blockOff,             onChange: value => setColors({ ...colors, blockOff: value }) },
       blockEdge:            { value: colors.blockEdge,            onChange: value => setColors({ ...colors, blockEdge: value }) },
+      blockEdgeHover:       { value: colors.blockEdgeHover,       onChange: value => setColors({ ...colors, blockEdgeHover: value }) },
       planeTool:            { value: colors.planeTool,            onChange: value => setColors({ ...colors, planeTool: value }) },
       planeSwitchActive:    { value: colors.planeSwitchActive,    onChange: value => setColors({ ...colors, planeSwitchActive: value }) },
       planeSwitchInactive:  { value: colors.planeSwitchInactive,  onChange: value => setColors({ ...colors, planeSwitchInactive: value }) },

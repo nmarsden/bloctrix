@@ -7,9 +7,9 @@ import Lights from "./lights.tsx";
 import Camera from "./camera.tsx";
 import Ui from './ui/ui.tsx';
 import Blocks from './blocks.tsx';
-import PlaneTool from './planeTool.tsx';
-import Axes from './axes.tsx';
-import PlaneSwitches from './planeSwitches.tsx';
+// import PlaneTool from './planeTool.tsx';
+// import Axes from './axes.tsx';
+// import PlaneSwitches from './planeSwitches.tsx';
 
 export default function App() {
   return (
@@ -24,9 +24,9 @@ export default function App() {
           <Lights />
           <Camera />
           <Blocks />
-          <PlaneTool />
+          {/* <PlaneTool />
           <Axes />
-          <PlaneSwitches />
+          <PlaneSwitches /> */}
         </Suspense>
       </Canvas>
       <Ui />

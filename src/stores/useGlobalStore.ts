@@ -11,7 +11,7 @@ export type BlockInfo = {
   neighbourIds: string[];
 };
 
-export const GRID_SIZE_IN_BLOCKS = 5;
+export const GRID_SIZE_IN_BLOCKS = 3;
 export const BLOCK_SIZE = 1;
 export const BLOCK_GAP = 0.1;
 export const GRID_WIDTH = ((GRID_SIZE_IN_BLOCKS * BLOCK_SIZE) + ((GRID_SIZE_IN_BLOCKS - 1) * BLOCK_GAP));
@@ -52,13 +52,22 @@ for (let x = 0; x <GRID_SIZE_IN_BLOCKS; x++) {
   }
 }
 
+const getNeighbourBlockIds = (id: string): string[] => {
+  const x = parseInt(id.split('-')[1]);
+  const y = parseInt(id.split('-')[2]);
+  const z = parseInt(id.split('-')[3]);
+  return calcBlockNeighbourIds(x, y, z);
+}
+
 // -------------------
 // --- GlobalState ---
 // -------------------
 
 type Colors = {
-  block: string;
+  blockOn: string;
+  blockOff: string;
   blockEdge: string;
+  blockEdgeHover: string;
   planeTool: string;
   planeSwitchActive: string;
   planeSwitchInactive: string;
@@ -66,8 +75,10 @@ type Colors = {
 };
 
 const COLORS: Colors = {
-  block: '#EEEEEE',
-  blockEdge: '#d7d6d6',
+  blockOn: '#e63946',
+  blockOff: '#457b9d',
+  blockEdge: '#1d3557',
+  blockEdgeHover: '#f1faee',
   planeTool: '#76afff',
   planeSwitchActive: '#76afff',
   planeSwitchInactive: '#eeeeee',
@@ -82,11 +93,13 @@ export type GlobalState = {
   playing: boolean;
   blocks: BlockInfo[];
   hoveredIds: string[];
+  onIds: string[];
   activePlane: number;
   colors: Colors;
 
   play: () => void;
   blockHovered: (id: string, isHovered: boolean) => void;
+  toggleHovered: () => void;
   setActivePlane: (activePlane: number) => void;
   setColors: (colors: Colors) => void;
 };
@@ -98,6 +111,7 @@ export const useGlobalStore = create<GlobalState>()(
         playing: true,
         blocks: BLOCKS,
         hoveredIds: [],
+        onIds: [ 'block-0-0-0', 'block-1-1-0' ],
         activePlane: 2,
         colors: COLORS,
 
@@ -116,6 +130,19 @@ export const useGlobalStore = create<GlobalState>()(
           // console.log('hoveredIds=', hoveredIds);
 
           return { hoveredIds };
+        }),
+
+        toggleHovered: () => set(({ hoveredIds, onIds }) => {
+          const idsToToggle = [hoveredIds[0], ...getNeighbourBlockIds(hoveredIds[0])];
+
+          // Toggle off
+          const toggleOffIds = onIds.filter(id => idsToToggle.includes(id));
+          let newOnIds = onIds.filter(id => !toggleOffIds.includes(id));
+          // Toggle on
+          const toggleOnIds = idsToToggle.filter(id => !toggleOffIds.includes(id));
+          newOnIds = [...newOnIds, ...toggleOnIds];
+
+          return { onIds: newOnIds };
         }),
 
         setActivePlane: (activePlane) => set(() => ({ activePlane })),
