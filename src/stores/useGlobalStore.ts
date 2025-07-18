@@ -1,3 +1,4 @@
+import { Color } from 'three';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -66,8 +67,8 @@ const getNeighbourBlockIds = (id: string): string[] => {
 type Colors = {
   blockOn: string;
   blockOff: string;
-  blockEdge: string;
-  blockEdgeHover: string;
+  blockEdge: Color;
+  blockEdgeHover: Color;
   planeTool: string;
   planeSwitchActive: string;
   planeSwitchInactive: string;
@@ -77,8 +78,8 @@ type Colors = {
 const COLORS: Colors = {
   blockOn: '#e63946',
   blockOff: '#457b9d',
-  blockEdge: '#1d3557',
-  blockEdgeHover: '#f1faee',
+  blockEdge: new Color('#1d3557'),
+  blockEdgeHover: new Color('#f1faee'),
   planeTool: '#76afff',
   planeSwitchActive: '#76afff',
   planeSwitchInactive: '#eeeeee',

@@ -1,6 +1,7 @@
 import {Leva, useControls} from "leva";
 import {useEffect, useState} from "react";
 import { GlobalState, useGlobalStore } from "../stores/useGlobalStore";
+import { Color } from "three";
 
 export default function Debug (){
   const colors = useGlobalStore((state: GlobalState) => state.colors);
@@ -24,14 +25,14 @@ export default function Debug (){
   useControls(
     'Colors',
     {
-      blockOn:              { value: colors.blockOn,              onChange: value => setColors({ ...colors, blockOn: value }) },
-      blockOff:             { value: colors.blockOff,             onChange: value => setColors({ ...colors, blockOff: value }) },
-      blockEdge:            { value: colors.blockEdge,            onChange: value => setColors({ ...colors, blockEdge: value }) },
-      blockEdgeHover:       { value: colors.blockEdgeHover,       onChange: value => setColors({ ...colors, blockEdgeHover: value }) },
-      planeTool:            { value: colors.planeTool,            onChange: value => setColors({ ...colors, planeTool: value }) },
-      planeSwitchActive:    { value: colors.planeSwitchActive,    onChange: value => setColors({ ...colors, planeSwitchActive: value }) },
-      planeSwitchInactive:  { value: colors.planeSwitchInactive,  onChange: value => setColors({ ...colors, planeSwitchInactive: value }) },
-      planeSwitchEdge:      { value: colors.planeSwitchEdge,      onChange: value => setColors({ ...colors, planeSwitchEdge: value }) },
+      blockOn:              { value: colors.blockOn,                              onChange: value => setColors({ ...colors, blockOn: value }) },
+      blockOff:             { value: colors.blockOff,                             onChange: value => setColors({ ...colors, blockOff: value }) },
+      blockEdge:            { value: `#${colors.blockEdge.getHexString()}`,       onChange: value => setColors({ ...colors, blockEdge: new Color(value) }) },
+      blockEdgeHover:       { value: `#${colors.blockEdgeHover.getHexString()}`,  onChange: value => setColors({ ...colors, blockEdgeHover: new Color(value) }) },
+      planeTool:            { value: colors.planeTool,                            onChange: value => setColors({ ...colors, planeTool: value }) },
+      planeSwitchActive:    { value: colors.planeSwitchActive,                    onChange: value => setColors({ ...colors, planeSwitchActive: value }) },
+      planeSwitchInactive:  { value: colors.planeSwitchInactive,                  onChange: value => setColors({ ...colors, planeSwitchInactive: value }) },
+      planeSwitchEdge:      { value: colors.planeSwitchEdge,                      onChange: value => setColors({ ...colors, planeSwitchEdge: value }) },
     },
     {
       collapsed: true

@@ -5,6 +5,7 @@ import vertexShader from '../shaders/block/vertex.glsl';
 import fragmentShader from '../shaders/block/fragment.glsl';
 import { useControls } from "leva";
 import { ThreeEvent } from "@react-three/fiber";
+import gsap from "gsap";
 
 type PointerData = {
   pos: Vector2;
@@ -121,32 +122,34 @@ export default function Block ({ id, position, neighbourIds }: BlockInfo ){
     }
   );
     
+  const updateBorderColor = useCallback((borderColor: Color) => {
+    gsap.to(
+      material.uniforms.uBorderColor.value,
+      {
+        r: borderColor.r,
+        g: borderColor.g,
+        b: borderColor.b,
+        duration: 0.2,
+        ease: "linear",
+      }
+    );
+
+  }, [colors]);
+
   useEffect(() => {
     const color = onIds.includes(id) ? colors.blockOn : colors.blockOff;
     material.uniforms.uColor.value.set(color);
   }, [colors, onIds]);
 
   useEffect(() => {
-    const color = onIds.includes(id) ? colors.blockOn : colors.blockOff;
-    material.uniforms.uColor.value.set(color);
-  }, [onIds]);
-
-  useEffect(() => {
-    // When NO block is hovered: show normal border
-    if (hoveredIds.length === 0) {
-      material.uniforms.uBorderColor.value.set(colors.blockEdge);
-      return;
-    }
     // When a block is hovered: show hovered border when block is hovered OR hovered neighbour
-    if (hoveredIds.includes(id)) {
-      material.uniforms.uBorderColor.value.set(colors.blockEdgeHover);
+    if (hoveredIds.length !== 0 && (hoveredIds.includes(id) || neighbourIds.includes(hoveredIds[0]))) {
+      updateBorderColor(colors.blockEdgeHover);
       return;
     }
-    if (neighbourIds.includes(hoveredIds[0])) {
-      material.uniforms.uBorderColor.value.set(colors.blockEdgeHover);
-      return;
-    }
-    material.uniforms.uBorderColor.value.set(colors.blockEdge);
+    // Otherwise: show regular border
+    updateBorderColor(colors.blockEdge);
+
   }, [hoveredIds, colors]);
 
   // useEffect(() => {
