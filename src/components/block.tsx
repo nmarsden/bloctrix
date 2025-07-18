@@ -29,6 +29,8 @@ export default function Block ({ id, position, neighbourIds }: BlockInfo ){
   const blockHovered = useGlobalStore((state: GlobalState) => state.blockHovered);
   const toggleHovered = useGlobalStore((state: GlobalState) => state.toggleHovered);
 
+  const isOn = useRef(onIds.includes(id));
+
   const onPointerOver = useCallback((event: ThreeEvent<PointerEvent>) => { 
     // console.log(`pointerOver: ${id}`);
     blockHovered(id, true);
@@ -66,13 +68,15 @@ export default function Block ({ id, position, neighbourIds }: BlockInfo ){
   }, []);
  
   const material: ShaderMaterial = useMemo(() => {
+    const color = onIds.includes(id) ? colors.blockOn : colors.blockOff;
+
     const shaderMaterial = new ShaderMaterial({
       vertexShader,
       fragmentShader,
       transparent: true,
       // depthWrite: false,
       uniforms: {
-        uColor: new Uniform(new Color(colors.blockOff)),
+        uColor: new Uniform(new Color(color)),
         uOpacity: new Uniform(BLOCK_SHOWN_OPACITY),
         uTargetPosition: new Uniform(BLOCK_TARGET_POSITION),
         uDistanceThreshold: new Uniform(0),
@@ -133,12 +137,37 @@ export default function Block ({ id, position, neighbourIds }: BlockInfo ){
         ease: "linear",
       }
     );
-
-  }, [colors]);
+  }, []);
 
   useEffect(() => {
-    const color = onIds.includes(id) ? colors.blockOn : colors.blockOff;
-    material.uniforms.uColor.value.set(color);
+    const newIsOn = onIds.includes(id);
+    if (newIsOn !== isOn.current) {
+      isOn.current = newIsOn;
+
+      // Animate color
+      const color = newIsOn ? colors.blockOn : colors.blockOff;
+      gsap.to(
+        material.uniforms.uColor.value,
+        {
+          r: color.r,
+          g: color.g,
+          b: color.b,
+          duration: 0.2,
+          ease: "linear",
+        }
+      );
+
+      // Animate scale
+      gsap.to(
+        block.current.scale,
+        {
+          keyframes: [
+            { x: 0.2, y: 0.2, z: 0.2, ease: 'linear', duration: 0.1 },
+            { x: 1.0, y: 1.0, z: 1.0, ease: 'bounce', duration: 0.4 }
+          ]
+        }
+      );
+    }
   }, [colors, onIds]);
 
   useEffect(() => {

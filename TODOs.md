@@ -20,7 +20,7 @@
   - [x] make it a 3x3 grid instead of 5x5
   - [x] avoid mistaking a drag for a click
   - [x] animate hover
-  - [ ] animate toggle
+  - [x] animate toggle
 
 - [x] plane tool
   - [x] enable/disable on xz plane
