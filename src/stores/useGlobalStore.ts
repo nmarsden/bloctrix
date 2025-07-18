@@ -67,6 +67,7 @@ const getNeighbourBlockIds = (id: string): string[] => {
 type Colors = {
   blockOn: Color;
   blockOff: Color;
+  blockLabel: Color;
   blockEdge: Color;
   blockEdgeHover: Color;
   planeTool: string;
@@ -78,6 +79,7 @@ type Colors = {
 const COLORS: Colors = {
   blockOn: new Color('#e63946'),
   blockOff: new Color('#457b9d'),
+  blockLabel: new Color('#1d3557'),
   blockEdge: new Color('#1d3557'),
   blockEdgeHover: new Color('#f1faee'),
   planeTool: '#76afff',

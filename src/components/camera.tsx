@@ -8,7 +8,7 @@ export default function Camera({ children } : { children?: ReactNode }) {
   const cameraControls = useRef<CameraControls>(null!);
 
   const fov = useRef(40);
-  const cameraPosition = useRef<Vector3>(new Vector3(10, 10, 10));
+  const cameraPosition = useRef<Vector3>(new Vector3(8, 8, 8));
   const cameraTarget = useRef<Vector3>(new Vector3(0, 0, 0));
 
   useEffect(() => {

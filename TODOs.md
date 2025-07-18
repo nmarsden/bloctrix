@@ -21,6 +21,13 @@
   - [x] avoid mistaking a drag for a click
   - [x] animate hover
   - [x] animate toggle
+  - [ ] show labels on block face to indicate toggle affect
+        - center square: toggle this block
+        - edge square: toggles 1 neighbour in edge direction
+        - double edge square: toggles 2 neighbours in edge direction
+  - [ ] introduce different types of toggling blocks
+        - no symbols: does nothing
+        - edge blocks only: toggles neighbours but not self
 
 - [x] plane tool
   - [x] enable/disable on xz plane
@@ -38,5 +45,3 @@
 - [x] axes
   - [x] show on pointer over
 
-- [ ] camera
-  - [ ] do not rotate camera while hovering blocks

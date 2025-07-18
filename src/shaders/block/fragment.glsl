@@ -1,4 +1,6 @@
-uniform vec3 uColor;
+uniform sampler2D uTexture;
+uniform vec3 uColorA;
+uniform vec3 uColorB;
 uniform float uOpacity;
 uniform vec3 uTargetPosition;
 uniform float uDistanceThreshold;
@@ -27,17 +29,20 @@ void main() {
     }
   }
 
+  // -- Color
+  float intensity = texture2D(uTexture, vUv).r;
+  vec3 finalColor = mix(uColorA, uColorB, intensity);
+
   // -- Border: Calculate color according distance to edge --
   float distToEdgeX = min(vUv.x, 1.0 - vUv.x);
   float distToEdgeY = min(vUv.y, 1.0 - vUv.y);
   float distToEdge = min(distToEdgeX, distToEdgeY);
-  vec3 finalColor = uColor;
 
   // Use smoothstep for anti-aliased border
   // uBorderWidth defines the *start* of the border fade
   // uBorderWidth + uBorderSmoothness defines the *end* of the border fade
   float borderMixFactor = smoothstep(uBorderWidth, uBorderWidth + uBorderSmoothness, distToEdge);
-  finalColor = mix(uBorderColor, uColor, borderMixFactor);
+  finalColor = mix(uBorderColor, finalColor, borderMixFactor);
 
   gl_FragColor = vec4(finalColor, alpha);
 

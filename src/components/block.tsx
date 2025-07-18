@@ -6,6 +6,7 @@ import fragmentShader from '../shaders/block/fragment.glsl';
 import { useControls } from "leva";
 import { ThreeEvent } from "@react-three/fiber";
 import gsap from "gsap";
+import { useTexture } from "@react-three/drei";
 
 type PointerData = {
   pos: Vector2;
@@ -22,6 +23,7 @@ const BLOCK_ALPHA_FALLOFF = BLOCK_DISTANCE_THRESHOLD * 0.5;
 export default function Block ({ id, position, neighbourIds }: BlockInfo ){
   const block = useRef<Mesh>(null!);
   const distanceThreshold = useRef(0);
+  const texture = useTexture("textures/label_01.png");
 
   const colors = useGlobalStore((state: GlobalState) => state.colors);
   const hoveredIds = useGlobalStore((state: GlobalState) => state.hoveredIds);  
@@ -76,7 +78,9 @@ export default function Block ({ id, position, neighbourIds }: BlockInfo ){
       transparent: true,
       // depthWrite: false,
       uniforms: {
-        uColor: new Uniform(new Color(color)),
+        uTexture: { value: texture },
+        uColorA: new Uniform(new Color(color)),
+        uColorB: new Uniform(new Color(colors.blockLabel)),
         uOpacity: new Uniform(BLOCK_SHOWN_OPACITY),
         uTargetPosition: new Uniform(BLOCK_TARGET_POSITION),
         uDistanceThreshold: new Uniform(0),
@@ -147,7 +151,7 @@ export default function Block ({ id, position, neighbourIds }: BlockInfo ){
       // Animate color
       const color = newIsOn ? colors.blockOn : colors.blockOff;
       gsap.to(
-        material.uniforms.uColor.value,
+        material.uniforms.uColorA.value,
         {
           r: color.r,
           g: color.g,
@@ -180,6 +184,11 @@ export default function Block ({ id, position, neighbourIds }: BlockInfo ){
     updateBorderColor(colors.blockEdge);
 
   }, [hoveredIds, colors]);
+
+  useEffect(() => {
+    // Update block label color
+    material.uniforms.uColorB.value = new Color(colors.blockLabel);
+  }, [colors.blockLabel]);
 
   // useEffect(() => {
   //   // When NO block is hovered: show block
@@ -218,3 +227,5 @@ export default function Block ({ id, position, neighbourIds }: BlockInfo ){
     </mesh>
   )
 }
+
+useTexture.preload("textures/pattern_01.png");
