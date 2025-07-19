@@ -20,10 +20,11 @@ const BLOCK_TARGET_POSITION = new Vector3(20, 20, 20);
 const BLOCK_DISTANCE_THRESHOLD = (BLOCK_SIZE * 3) + (BLOCK_GAP * 2);
 const BLOCK_ALPHA_FALLOFF = BLOCK_DISTANCE_THRESHOLD * 0.5;
 
-export default function Block ({ id, position, neighbourIds }: BlockInfo ){
+export default function Block ({ id, position, neighbourIds, toggleSelf }: BlockInfo ){
   const block = useRef<Mesh>(null!);
   const distanceThreshold = useRef(0);
-  const texture = useTexture("textures/label_01.png");
+  const blockLabel1 = useTexture("textures/block_label_01.png");
+  const blockLabel2 = useTexture("textures/block_label_02.png");
 
   const colors = useGlobalStore((state: GlobalState) => state.colors);
   const hoveredIds = useGlobalStore((state: GlobalState) => state.hoveredIds);  
@@ -71,11 +72,12 @@ export default function Block ({ id, position, neighbourIds }: BlockInfo ){
  
   const material: ShaderMaterial = useMemo(() => {
     const color = onIds.includes(id) ? colors.blockOn : colors.blockOff;
+    const texture = toggleSelf ? blockLabel1 : blockLabel2;
 
     const shaderMaterial = new ShaderMaterial({
       vertexShader,
       fragmentShader,
-      transparent: true,
+      transparent: false,
       // depthWrite: false,
       uniforms: {
         uTexture: { value: texture },
@@ -175,8 +177,10 @@ export default function Block ({ id, position, neighbourIds }: BlockInfo ){
   }, [colors, onIds]);
 
   useEffect(() => {
-    // When a block is hovered: show hovered border when block is hovered OR hovered neighbour
-    if (hoveredIds.length !== 0 && (hoveredIds.includes(id) || neighbourIds.includes(hoveredIds[0]))) {
+    // When a block is hovered: show hovered border when either...
+    // a) block is hovered and toggleSelf is true
+    // b) block is neighbour of hovered
+    if (hoveredIds.length !== 0 && ((toggleSelf && hoveredIds.includes(id)) || neighbourIds.includes(hoveredIds[0]))) {
       updateBorderColor(colors.blockEdgeHover);
       return;
     }
@@ -228,4 +232,5 @@ export default function Block ({ id, position, neighbourIds }: BlockInfo ){
   )
 }
 
-useTexture.preload("textures/pattern_01.png");
+useTexture.preload("textures/block_label_01.png");
+useTexture.preload("textures/block_label_02.png");

@@ -10,6 +10,7 @@ export type BlockInfo = {
   id: string;
   position: [number, number, number];
   neighbourIds: string[];
+  toggleSelf: boolean;
 };
 
 export const GRID_SIZE_IN_BLOCKS = 3;
@@ -47,17 +48,21 @@ for (let x = 0; x <GRID_SIZE_IN_BLOCKS; x++) {
       BLOCKS.push({ 
         id: `block-${x}-${y}-${z}`, 
         position: [xPos, yPos, zPos], 
-        neighbourIds: calcBlockNeighbourIds(x, y, z)
+        neighbourIds: calcBlockNeighbourIds(x, y, z),
+        toggleSelf: Math.random() > 0.5
       });
     }
   }
 }
 
-const getNeighbourBlockIds = (id: string): string[] => {
-  const x = parseInt(id.split('-')[1]);
-  const y = parseInt(id.split('-')[2]);
-  const z = parseInt(id.split('-')[3]);
-  return calcBlockNeighbourIds(x, y, z);
+const ID_TO_BLOCK: Map<string, BlockInfo> = new Map<string, BlockInfo>();
+for (let i=0; i<BLOCKS.length; i++) {
+  const block = BLOCKS[i];
+  ID_TO_BLOCK.set(block.id, block);
+}
+
+const getBlockInfo = (id: string): BlockInfo => {
+  return ID_TO_BLOCK.get(id) as BlockInfo;
 }
 
 // -------------------
@@ -77,7 +82,7 @@ type Colors = {
 };
 
 const COLORS: Colors = {
-  blockOn: new Color('#e63946'),
+  blockOn: new Color('#be424c'),
   blockOff: new Color('#457b9d'),
   blockLabel: new Color('#1d3557'),
   blockEdge: new Color('#1d3557'),
@@ -136,7 +141,8 @@ export const useGlobalStore = create<GlobalState>()(
         }),
 
         toggleHovered: () => set(({ hoveredIds, onIds }) => {
-          const idsToToggle = [hoveredIds[0], ...getNeighbourBlockIds(hoveredIds[0])];
+          const hoveredBlock = getBlockInfo(hoveredIds[0]);
+          const idsToToggle = hoveredBlock.toggleSelf ? [hoveredBlock.id, ...hoveredBlock.neighbourIds] : [...hoveredBlock.neighbourIds];
 
           // Toggle off
           const toggleOffIds = onIds.filter(id => idsToToggle.includes(id));

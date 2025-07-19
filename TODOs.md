@@ -26,8 +26,10 @@
         - edge square: toggles 1 neighbour in edge direction
         - double edge square: toggles 2 neighbours in edge direction
   - [ ] introduce different types of toggling blocks
-        - no symbols: does nothing
-        - edge blocks only: toggles neighbours but not self
+        [x] filled center and edge blocks: toggles self and neighbours
+        [x] filled edge blocks only: toggles neighbours but not self
+        [ ] no filled blocks: toggles nothing
+
 
 - [x] plane tool
   - [x] enable/disable on xz plane
