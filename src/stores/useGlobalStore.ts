@@ -5,7 +5,7 @@ import { persist } from 'zustand/middleware';
 // --------------
 // --- LEVELS ---
 // --------------
-type LevelBlock = 
+export type LevelBlock = 
     'O'  // toggle all - off
   | 'X'  // toggle all - on
   | 'o'  // toggle neighbours - off
@@ -17,25 +17,43 @@ type LevelBlockLayer = [LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlo
 type Level = [LevelBlockLayer, LevelBlockLayer, LevelBlockLayer];
 
 const LEVEL: Level = [
-  // top layer
   [
-    'O', 'x', 'O',  // back   - left, center, right
-    'O', 'O', 'O',  // middle
-    'o', 'X', 'O',  // front
+   'O','O','O',
+   'O','O','O',
+   'O','O','O',
   ],
-  // middle layer
   [
-    'O', 'o', 'O',
-    'O', 'O', 'O',
-    'O', 'X', 'O',
+   'O','O','X',
+   'O','O','O',
+   'X','O','X',
   ],
-  // bottom layer
   [
-    'O', 'o', 'O',
-    'O', 'O', 'O',
-    'O', 'X', 'O',
+   'O','O','O',
+   'O','O','O',
+   'O','O','O',
   ],
 ];
+
+// const LEVEL: Level = [
+//   // top layer
+//   [
+//     'O', 'x', 'O',  // back   - left, center, right
+//     'O', 'O', 'O',  // middle
+//     'o', 'X', 'O',  // front
+//   ],
+//   // middle layer
+//   [
+//     'O', 'o', 'O',
+//     'O', 'O', 'O',
+//     'O', 'X', 'O',
+//   ],
+//   // bottom layer
+//   [
+//     'O', 'o', 'O',
+//     'O', 'O', 'O',
+//     'O', 'X', 'O',
+//   ],
+// ];
 
 // --------------
 // --- BLOCKS ---
@@ -103,15 +121,14 @@ const levelToBlocks = (level: Level): BlockInfo[] => {
 
 const BLOCKS: BlockInfo[] = levelToBlocks(LEVEL);
 
-const ID_TO_BLOCK: Map<string, BlockInfo> = new Map<string, BlockInfo>();
-for (let i=0; i<BLOCKS.length; i++) {
-  const block = BLOCKS[i];
-  ID_TO_BLOCK.set(block.id, block);
-}
-
-const getBlockInfo = (id: string): BlockInfo => {
-  return ID_TO_BLOCK.get(id) as BlockInfo;
-}
+const populateIdToBlock = (blocks: BlockInfo[]): Map<string, BlockInfo> => {
+  let idToBlock: Map<string, BlockInfo> = new Map<string, BlockInfo>();
+  for (let i=0; i<blocks.length; i++) {
+    const block = blocks[i];
+    idToBlock.set(block.id, block);
+  }
+  return idToBlock;
+};
 
 // -------------------
 // --- GlobalState ---
@@ -148,16 +165,21 @@ const COLORS: Colors = {
 export type GlobalState = {
   playing: boolean;
   blocks: BlockInfo[];
+  idToBlock: Map<string, BlockInfo>;
   hoveredIds: string[];
   onIds: string[];
   activePlane: number;
   colors: Colors;
+  editMode: boolean;
 
   play: () => void;
   blockHovered: (id: string, isHovered: boolean) => void;
   toggleHovered: () => void;
   setActivePlane: (activePlane: number) => void;
   setColors: (colors: Colors) => void;
+  toggleEditMode: () => void;
+  editFill: (levelBlock: LevelBlock) => void;
+  editReset: () => void;
 };
 
 export const useGlobalStore = create<GlobalState>()(
@@ -166,10 +188,12 @@ export const useGlobalStore = create<GlobalState>()(
       return {
         playing: true,
         blocks: BLOCKS,
+        idToBlock: populateIdToBlock(BLOCKS),
         hoveredIds: [],
         onIds: BLOCKS.filter(block => block.on).map(block => block.id),
         activePlane: 2,
         colors: COLORS,
+        editMode: false,
 
         play: () => set(() => {
           return {};
@@ -188,8 +212,8 @@ export const useGlobalStore = create<GlobalState>()(
           return { hoveredIds };
         }),
 
-        toggleHovered: () => set(({ hoveredIds, onIds }) => {
-          const hoveredBlock = getBlockInfo(hoveredIds[0]);
+        toggleHovered: () => set(({ idToBlock, hoveredIds, onIds }) => {
+          const hoveredBlock = idToBlock.get(hoveredIds[0]) as BlockInfo;
           const idsToToggle = hoveredBlock.toggleSelf ? [hoveredBlock.id, ...hoveredBlock.neighbourIds] : [...hoveredBlock.neighbourIds];
 
           // Toggle off
@@ -204,7 +228,20 @@ export const useGlobalStore = create<GlobalState>()(
 
         setActivePlane: (activePlane) => set(() => ({ activePlane })),
 
-        setColors: (colors: Colors) => set(() => ({ colors: {...colors} }))
+        setColors: (colors: Colors) => set(() => ({ colors: {...colors} })),
+
+        toggleEditMode: () => set(({ editMode }) => ({ editMode: !editMode })),
+
+        editFill: (levelBlock: LevelBlock) => set(({ blocks }) => {
+          const updatedBlocks = blocks.map(block => ({...block, toggleSelf: (levelBlock === 'O')}));          
+          return { 
+            onIds: [],
+            blocks: updatedBlocks,
+            idToBlock: populateIdToBlock(updatedBlocks)
+          };
+        }),
+
+        editReset: () => set(() => ({ onIds: [] })),
       }
     },
     {

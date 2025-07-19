@@ -187,12 +187,17 @@ export default function Block ({ id, position, neighbourIds, toggleSelf }: Block
     // Otherwise: show regular border
     updateBorderColor(colors.blockEdge);
 
-  }, [hoveredIds, colors]);
+  }, [hoveredIds, colors, toggleSelf]);
 
   useEffect(() => {
     // Update block label color
     material.uniforms.uColorB.value = new Color(colors.blockLabel);
   }, [colors.blockLabel]);
+
+  useEffect((() => {
+    const texture = toggleSelf ? blockLabel1 : blockLabel2;
+    material.uniforms.uTexture.value = texture;
+  }), [toggleSelf]);
 
   // useEffect(() => {
   //   // When NO block is hovered: show block

@@ -32,6 +32,17 @@
 
 - [ ] level
   - [x] introduce Level
+  - [ ] level editor
+    - [x] 1) fill feature
+      - [ ] select block type
+      - [ ] next - sets all blocks
+    - [ ] 2) edit block type mode
+      - [ ] clicking a block toggles its block type
+      - [ ] next - switches to play mode
+    - [ ] 3) play mode
+      - [x] clicking a block toggles according to standard rules
+      - [x] reset - toggle all blocks off
+      - [x] save - output level data JS code to browser console
 
 - [x] plane tool
   - [x] enable/disable on xz plane

@@ -7,6 +7,7 @@ import Lights from "./lights.tsx";
 import Camera from "./camera.tsx";
 import Ui from './ui/ui.tsx';
 import Blocks from './blocks.tsx';
+import Editor from './editor/editor.tsx';
 // import PlaneTool from './planeTool.tsx';
 // import Axes from './axes.tsx';
 // import PlaneSwitches from './planeSwitches.tsx';
@@ -30,6 +31,7 @@ export default function App() {
         </Suspense>
       </Canvas>
       <Ui />
+      <Editor />
       <Loader containerStyles={{ background: '#0A0A0A' }}/>
     </>
   );
