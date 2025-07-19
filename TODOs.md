@@ -30,6 +30,8 @@
         [x] filled edge blocks only: toggles neighbours but not self
         [ ] no filled blocks: toggles nothing
 
+- [ ] level
+  - [x] introduce Level
 
 - [x] plane tool
   - [x] enable/disable on xz plane

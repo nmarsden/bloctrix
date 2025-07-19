@@ -2,6 +2,40 @@ import { Color } from 'three';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+// --------------
+// --- LEVELS ---
+// --------------
+type LevelBlock = 
+    'O'  // toggle all - off
+  | 'X'  // toggle all - on
+  | 'o'  // toggle neighbours - off
+  | 'x'  // toggle neighbours - on
+  | ' '  // toggle none - off
+  | '.'  // toggle none - on
+
+type LevelBlockLayer = [LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock];
+type Level = [LevelBlockLayer, LevelBlockLayer, LevelBlockLayer];
+
+const LEVEL: Level = [
+  // top layer
+  [
+    'O', 'x', 'O',  // back   - left, center, right
+    'O', 'O', 'O',  // middle
+    'o', 'X', 'O',  // front
+  ],
+  // middle layer
+  [
+    'O', 'o', 'O',
+    'O', 'O', 'O',
+    'O', 'X', 'O',
+  ],
+  // bottom layer
+  [
+    'O', 'o', 'O',
+    'O', 'O', 'O',
+    'O', 'X', 'O',
+  ],
+];
 
 // --------------
 // --- BLOCKS ---
@@ -11,6 +45,7 @@ export type BlockInfo = {
   position: [number, number, number];
   neighbourIds: string[];
   toggleSelf: boolean;
+  on: boolean;
 };
 
 export const GRID_SIZE_IN_BLOCKS = 3;
@@ -38,22 +73,35 @@ const calcBlockNeighbourIds = (x: number, y: number, z: number): string[] => {
   return neighbourIds;
 };
 
-const BLOCKS: BlockInfo[] = [];
-for (let x = 0; x <GRID_SIZE_IN_BLOCKS; x++) {
-  for (let y = 0; y <GRID_SIZE_IN_BLOCKS; y++) {
-    for (let z = 0; z <GRID_SIZE_IN_BLOCKS; z++) {
+const levelToBlocks = (level: Level): BlockInfo[] => {
+  const blocks: BlockInfo[] = [];
+
+  for (let layerIndex=0; layerIndex<level.length; layerIndex++) {
+    const layer: LevelBlockLayer = level[layerIndex];
+    for (let blockIndex=0; blockIndex< layer.length; blockIndex++) {
+      const block = layer[blockIndex];
+      const x = blockIndex % GRID_SIZE_IN_BLOCKS;
+      const y = GRID_SIZE_IN_BLOCKS - (layerIndex+1);
+      const z = Math.floor(blockIndex / 3);
+
       const xPos = MIN_POS + (x * (BLOCK_SIZE + BLOCK_GAP));
       const yPos = MIN_POS + (y * (BLOCK_SIZE + BLOCK_GAP));
       const zPos = MIN_POS + (z * (BLOCK_SIZE + BLOCK_GAP));
-      BLOCKS.push({ 
+      blocks.push({ 
         id: `block-${x}-${y}-${z}`, 
         position: [xPos, yPos, zPos], 
         neighbourIds: calcBlockNeighbourIds(x, y, z),
-        toggleSelf: Math.random() > 0.5
+        toggleSelf: (block === 'O' || block === 'X'),
+        on: (block === 'X' || block === 'x' || block === '.')
       });
+
+      // console.log(`[layer:${layerIndex}][block:${blockIndex}]=`, layer[blockIndex], `[x:${x}][y:${y}][z:${z}]`);
     }
   }
+  return blocks;
 }
+
+const BLOCKS: BlockInfo[] = levelToBlocks(LEVEL);
 
 const ID_TO_BLOCK: Map<string, BlockInfo> = new Map<string, BlockInfo>();
 for (let i=0; i<BLOCKS.length; i++) {
@@ -119,7 +167,7 @@ export const useGlobalStore = create<GlobalState>()(
         playing: true,
         blocks: BLOCKS,
         hoveredIds: [],
-        onIds: [ 'block-0-0-0', 'block-1-1-0' ],
+        onIds: BLOCKS.filter(block => block.on).map(block => block.id),
         activePlane: 2,
         colors: COLORS,
 
