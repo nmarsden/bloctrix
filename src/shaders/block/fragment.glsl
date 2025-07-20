@@ -1,3 +1,4 @@
+uniform float uUseTexture;
 uniform sampler2D uTexture;
 uniform vec3 uColorA;
 uniform vec3 uColorB;
@@ -30,8 +31,11 @@ void main() {
   }
 
   // -- Color
-  float intensity = texture2D(uTexture, vUv).r;
-  vec3 finalColor = mix(uColorA, uColorB, intensity);
+  vec3 finalColor = uColorA;
+  if (uUseTexture > 0.5) {
+      float intensity = texture2D(uTexture, vUv).r;
+      finalColor = mix(uColorA, uColorB, intensity);
+  }
 
   // -- Border: Calculate color according distance to edge --
   float distToEdgeX = min(vUv.x, 1.0 - vUv.x);

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { Color, Mesh, ShaderMaterial, Uniform, Vector2, Vector3 } from "three";
-import { BLOCK_GAP, BLOCK_SIZE, BlockInfo, GlobalState, useGlobalStore } from "../stores/useGlobalStore";
+import { Color, Mesh, ShaderMaterial, Texture, Uniform, Vector2, Vector3 } from "three";
+import { BLOCK_GAP, BLOCK_SIZE, BlockInfo, BlockType, GlobalState, useGlobalStore } from "../stores/useGlobalStore";
 import vertexShader from '../shaders/block/vertex.glsl';
 import fragmentShader from '../shaders/block/fragment.glsl';
 import { useControls } from "leva";
@@ -20,7 +20,7 @@ const BLOCK_TARGET_POSITION = new Vector3(20, 20, 20);
 const BLOCK_DISTANCE_THRESHOLD = (BLOCK_SIZE * 3) + (BLOCK_GAP * 2);
 const BLOCK_ALPHA_FALLOFF = BLOCK_DISTANCE_THRESHOLD * 0.5;
 
-export default function Block ({ id, position, neighbourIds, toggleSelf }: BlockInfo ){
+export default function Block ({ id, position, blockType, toggleIds }: BlockInfo ){
   const block = useRef<Mesh>(null!);
   const distanceThreshold = useRef(0);
   const blockLabel1 = useTexture("textures/block_label_01.png");
@@ -36,43 +36,57 @@ export default function Block ({ id, position, neighbourIds, toggleSelf }: Block
 
   const onPointerOver = useCallback((event: ThreeEvent<PointerEvent>) => { 
     // console.log(`pointerOver: ${id}`);
-    blockHovered(id, true);
+    if (toggleIds.length > 0) {
+      blockHovered(id, true);
+    }
     event.stopPropagation();
-  }, []);
+  }, [toggleIds]);
 
   const onPointerOut = useCallback((event: ThreeEvent<PointerEvent>) => {
     // console.log(`pointerOut: ${id}`);
-    blockHovered(id, false);
+    if (toggleIds.length > 0) {
+      blockHovered(id, false);
+    }
     event.stopPropagation();
-  }, []);
+  }, [toggleIds]);
 
   const pointerDownData = useRef<PointerData>({ pos: new Vector2(), time: 0 });
   const pointerUpData = useRef<PointerData>({ pos: new Vector2(), time: 10000 });
 
   const onPointerDown = useCallback((event: ThreeEvent<PointerEvent>) => {
-    pointerDownData.current.pos.setX(event.x);
-    pointerDownData.current.pos.setY(event.y);
-    pointerDownData.current.time = new Date().getTime();
-    event.stopPropagation();
-  }, []);
-  const onPointerUp = useCallback((event: ThreeEvent<PointerEvent>) => {
-    pointerUpData.current.pos.setX(event.x);
-    pointerUpData.current.pos.setY(event.y);
-    pointerUpData.current.time = new Date().getTime();
-
-    const distance = pointerDownData.current.pos.distanceTo(pointerUpData.current.pos);
-    const time = pointerUpData.current.time - pointerDownData.current.time;
-
-    // Is this a click?
-    if (time < 300 && distance < 5) {
-      toggleHovered();
+    if (toggleIds.length > 0) {
+      pointerDownData.current.pos.setX(event.x);
+      pointerDownData.current.pos.setY(event.y);
+      pointerDownData.current.time = new Date().getTime();
     }
     event.stopPropagation();
-  }, []);
+  }, [toggleIds]);
+  const onPointerUp = useCallback((event: ThreeEvent<PointerEvent>) => {
+    if (toggleIds.length > 0) {
+      pointerUpData.current.pos.setX(event.x);
+      pointerUpData.current.pos.setY(event.y);
+      pointerUpData.current.time = new Date().getTime();
+
+      const distance = pointerDownData.current.pos.distanceTo(pointerUpData.current.pos);
+      const time = pointerUpData.current.time - pointerDownData.current.time;
+
+      // Is this a click?
+      if (time < 300 && distance < 5) {
+        toggleHovered();
+      }
+    }
+    event.stopPropagation();
+  }, [toggleIds]);
  
+  const getTexture = useCallback((blockType: BlockType): Texture | null => {
+    if (blockType === 'ALL') return blockLabel1;
+    if (blockType === 'NEIGHBOURS') return blockLabel2;
+    return null;
+  }, [blockLabel1, blockLabel2]);
+  
   const material: ShaderMaterial = useMemo(() => {
     const color = onIds.includes(id) ? colors.blockOn : colors.blockOff;
-    const texture = toggleSelf ? blockLabel1 : blockLabel2;
+    const texture = getTexture(blockType);
 
     const shaderMaterial = new ShaderMaterial({
       vertexShader,
@@ -80,6 +94,7 @@ export default function Block ({ id, position, neighbourIds, toggleSelf }: Block
       transparent: false,
       // depthWrite: false,
       uniforms: {
+        uUseTexture: { value: texture ? 1.0 : 0.0 },
         uTexture: { value: texture },
         uColorA: new Uniform(new Color(color)),
         uColorB: new Uniform(new Color(colors.blockLabel)),
@@ -180,14 +195,14 @@ export default function Block ({ id, position, neighbourIds, toggleSelf }: Block
     // When a block is hovered: show hovered border when either...
     // a) block is hovered and toggleSelf is true
     // b) block is neighbour of hovered
-    if (hoveredIds.length !== 0 && ((toggleSelf && hoveredIds.includes(id)) || neighbourIds.includes(hoveredIds[0]))) {
+    if (hoveredIds.length !== 0 && (toggleIds.includes(hoveredIds[0]))) {
       updateBorderColor(colors.blockEdgeHover);
       return;
     }
     // Otherwise: show regular border
     updateBorderColor(colors.blockEdge);
 
-  }, [hoveredIds, colors, toggleSelf]);
+  }, [hoveredIds, colors, toggleIds]);
 
   useEffect(() => {
     // Update block label color
@@ -195,9 +210,10 @@ export default function Block ({ id, position, neighbourIds, toggleSelf }: Block
   }, [colors.blockLabel]);
 
   useEffect((() => {
-    const texture = toggleSelf ? blockLabel1 : blockLabel2;
+    const texture = getTexture(blockType);
+    material.uniforms.uUseTexture.value = texture ? 1.0 : 0.0;    
     material.uniforms.uTexture.value = texture;
-  }), [toggleSelf]);
+  }), [blockType]);
 
   // useEffect(() => {
   //   // When NO block is hovered: show block

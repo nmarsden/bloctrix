@@ -1,6 +1,6 @@
 import { button, useControls } from "leva";
 import { useCallback } from "react";
-import { BlockInfo, GlobalState, GRID_SIZE_IN_BLOCKS, LevelBlock, useGlobalStore } from "../../stores/useGlobalStore";
+import { BlockInfo, BlockType, GlobalState, GRID_SIZE_IN_BLOCKS, toLevelBlock, useGlobalStore } from "../../stores/useGlobalStore";
 import "./editor.css";
 
 export default function Editor (){
@@ -22,8 +22,8 @@ export default function Editor (){
     [editMode]
   );
 
-  const onFillClicked = useCallback((levelBlock: LevelBlock) => {
-    return () => editFill(levelBlock);
+  const onFillClicked = useCallback((blockType: BlockType) => {
+    return () => editFill(blockType);
   }, []);
 
   const onResetClicked = useCallback(() => {
@@ -55,8 +55,8 @@ export default function Editor (){
 
     const blockChar = (block: BlockInfo): string => {
       const isOn = onIds.includes(block.id);
-      const ch = isOn ? (block.toggleSelf ? 'X' : 'x') : (block.toggleSelf ? 'O' : 'o');
-      return `'${ch}'`
+      const levelBlock = toLevelBlock(block.blockType, isOn);
+      return `'${levelBlock}'`
     };
 
     let output: string[] = [];
@@ -88,8 +88,9 @@ export default function Editor (){
         <div className="editor-container">
           <div>
             <div>Fill with block type:</div>
-            <div className="button-light" onClick={onFillClicked('O')}>all</div>
-            <div className="button-light" onClick={onFillClicked('o')}>neighbours</div>
+            <div className="button-light" onClick={onFillClicked('ALL')}>all</div>
+            <div className="button-light" onClick={onFillClicked('NEIGHBOURS')}>neighbours</div>
+            <div className="button-light" onClick={onFillClicked('NONE')}>none</div>
           </div>
           <div className="button-light" onClick={onResetClicked}>Reset</div>
           <div className="button-light" onClick={onSaveClicked}>Save</div>

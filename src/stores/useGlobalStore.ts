@@ -5,6 +5,8 @@ import { persist } from 'zustand/middleware';
 // --------------
 // --- LEVELS ---
 // --------------
+export type BlockType = 'ALL' | 'NEIGHBOURS' | 'NONE';
+
 export type LevelBlock = 
     'O'  // toggle all - off
   | 'X'  // toggle all - on
@@ -12,6 +14,20 @@ export type LevelBlock =
   | 'x'  // toggle neighbours - on
   | ' '  // toggle none - off
   | '.'  // toggle none - on
+
+const BLOCK_INFO_LOOKUP: Map<LevelBlock, { blockType: BlockType, on: boolean }> = new Map<LevelBlock, { blockType: BlockType, on: boolean }>([
+  ['O', { blockType: 'ALL',        on: false }],
+  ['X', { blockType: 'ALL',        on: true  }],
+  ['o', { blockType: 'NEIGHBOURS', on: false }],
+  ['x', { blockType: 'NEIGHBOURS', on: true  }],
+  [' ', { blockType: 'NONE',       on: false }],
+  ['.', { blockType: 'NONE',       on: true  }],
+]);
+
+export const toLevelBlock = (blockType: BlockType, on: boolean): LevelBlock => {
+  const matchingEntries = [...BLOCK_INFO_LOOKUP.entries()].filter(([_, value]) => value.blockType === blockType && value.on === on);
+  return matchingEntries[0][0];
+};
 
 type LevelBlockLayer = [LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock];
 type Level = [LevelBlockLayer, LevelBlockLayer, LevelBlockLayer];
@@ -61,8 +77,8 @@ const LEVEL: Level = [
 export type BlockInfo = {
   id: string;
   position: [number, number, number];
-  neighbourIds: string[];
-  toggleSelf: boolean;
+  toggleIds: string[];
+  blockType: BlockType;
   on: boolean;
 };
 
@@ -73,22 +89,43 @@ export const GRID_WIDTH = ((GRID_SIZE_IN_BLOCKS * BLOCK_SIZE) + ((GRID_SIZE_IN_B
 export const MAX_POS = (GRID_WIDTH - BLOCK_SIZE) * 0.5;
 export const MIN_POS = -MAX_POS;
 
-const calcBlockNeighbourIds = (x: number, y: number, z: number): string[] => {
+const calcBlockId = (x: number, y: number, z: number): string => {
+  return `block-${x}-${y}-${z}`;
+}
+
+const calcBlockNeighbourIds = (blockId: string): string[] => {
   const neighbourIds: string[] = [];
 
+  const x = parseInt(blockId.split('-')[1]);
+  const y = parseInt(blockId.split('-')[2]);
+  const z = parseInt(blockId.split('-')[3]);
+
   // neighbor above & below
-  if (y + 1 < GRID_SIZE_IN_BLOCKS) neighbourIds.push(`block-${x}-${y + 1}-${z}`);
-  if (y - 1 >= 0) neighbourIds.push(`block-${x}-${y - 1}-${z}`);
+  if (y + 1 < GRID_SIZE_IN_BLOCKS) neighbourIds.push(calcBlockId(x, y + 1, z));
+  if (y - 1 >= 0) neighbourIds.push(calcBlockId(x, y - 1, z));
 
   // neighbor right & left
-  if (x + 1 < GRID_SIZE_IN_BLOCKS) neighbourIds.push(`block-${x + 1}-${y}-${z}`);
-  if (x - 1 >= 0) neighbourIds.push(`block-${x - 1}-${y}-${z}`);
+  if (x + 1 < GRID_SIZE_IN_BLOCKS) neighbourIds.push(calcBlockId(x + 1, y, z));
+  if (x - 1 >= 0) neighbourIds.push(calcBlockId(x - 1, y, z));
 
   // neighbor forward & back
-  if (z + 1 < GRID_SIZE_IN_BLOCKS) neighbourIds.push(`block-${x}-${y}-${z + 1}`);
-  if (z - 1 >= 0) neighbourIds.push(`block-${x}-${y}-${z - 1}`);
+  if (z + 1 < GRID_SIZE_IN_BLOCKS) neighbourIds.push(calcBlockId(x, y, z + 1));
+  if (z - 1 >= 0) neighbourIds.push(calcBlockId(x, y, z - 1));
 
   return neighbourIds;
+};
+
+const calcToggleIds = (blockType: BlockType, blockId: string): string[] => {
+  if (blockType === 'ALL') {
+    return [blockId, ...calcBlockNeighbourIds(blockId)];
+  }
+  if (blockType === 'NEIGHBOURS') {
+    return [...calcBlockNeighbourIds(blockId)];
+  }
+  if (blockType === 'NONE') {
+    return [];
+  }
+  return [];
 };
 
 const levelToBlocks = (level: Level): BlockInfo[] => {
@@ -105,12 +142,15 @@ const levelToBlocks = (level: Level): BlockInfo[] => {
       const xPos = MIN_POS + (x * (BLOCK_SIZE + BLOCK_GAP));
       const yPos = MIN_POS + (y * (BLOCK_SIZE + BLOCK_GAP));
       const zPos = MIN_POS + (z * (BLOCK_SIZE + BLOCK_GAP));
+
+      const extraInfo = BLOCK_INFO_LOOKUP.get(block) as { blockType: BlockType, on: false };
+      const id = calcBlockId(x, y, z);
       blocks.push({ 
-        id: `block-${x}-${y}-${z}`, 
+        id, 
         position: [xPos, yPos, zPos], 
-        neighbourIds: calcBlockNeighbourIds(x, y, z),
-        toggleSelf: (block === 'O' || block === 'X'),
-        on: (block === 'X' || block === 'x' || block === '.')
+        toggleIds: calcToggleIds(extraInfo.blockType, id),
+        blockType: extraInfo.blockType,
+        on: extraInfo.on
       });
 
       // console.log(`[layer:${layerIndex}][block:${blockIndex}]=`, layer[blockIndex], `[x:${x}][y:${y}][z:${z}]`);
@@ -178,7 +218,7 @@ export type GlobalState = {
   setActivePlane: (activePlane: number) => void;
   setColors: (colors: Colors) => void;
   toggleEditMode: () => void;
-  editFill: (levelBlock: LevelBlock) => void;
+  editFill: (blockType: BlockType) => void;
   editReset: () => void;
 };
 
@@ -214,7 +254,7 @@ export const useGlobalStore = create<GlobalState>()(
 
         toggleHovered: () => set(({ idToBlock, hoveredIds, onIds }) => {
           const hoveredBlock = idToBlock.get(hoveredIds[0]) as BlockInfo;
-          const idsToToggle = hoveredBlock.toggleSelf ? [hoveredBlock.id, ...hoveredBlock.neighbourIds] : [...hoveredBlock.neighbourIds];
+          const idsToToggle = hoveredBlock.toggleIds;
 
           // Toggle off
           const toggleOffIds = onIds.filter(id => idsToToggle.includes(id));
@@ -232,8 +272,14 @@ export const useGlobalStore = create<GlobalState>()(
 
         toggleEditMode: () => set(({ editMode }) => ({ editMode: !editMode })),
 
-        editFill: (levelBlock: LevelBlock) => set(({ blocks }) => {
-          const updatedBlocks = blocks.map(block => ({...block, toggleSelf: (levelBlock === 'O')}));          
+        editFill: (blockType: BlockType) => set(({ blocks }) => {
+          const updatedBlocks = blocks.map(block => ({
+            ...block, 
+            blockType, 
+            toggleIds: calcToggleIds(blockType, block.id), 
+            on: false
+          }));
+
           return { 
             onIds: [],
             blocks: updatedBlocks,
