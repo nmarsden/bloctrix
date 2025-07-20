@@ -29,24 +29,32 @@ export const toLevelBlock = (blockType: BlockType, on: boolean): LevelBlock => {
   return matchingEntries[0][0];
 };
 
+const nextBlockType = (blockType: BlockType): BlockType => {
+  switch (blockType) {
+    case 'ALL': return 'NEIGHBOURS';
+    case 'NEIGHBOURS': return 'NONE';
+    case 'NONE': return 'ALL';
+  }
+};
+
 type LevelBlockLayer = [LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock];
 type Level = [LevelBlockLayer, LevelBlockLayer, LevelBlockLayer];
 
 const LEVEL: Level = [
   [
-   'O','O','O',
-   'O','O','O',
-   'O','O','O',
+   ' ','x',' ',
+   ' ',' ','x',
+   'x',' ',' ',
   ],
   [
-   'O','O','X',
-   'O','O','O',
-   'X','O','X',
+   '.','X',' ',
+   '.',' ','X',
+   'X','.','.',
   ],
   [
-   'O','O','O',
-   'O','O','O',
-   'O','O','O',
+   ' ','x',' ',
+   ' ',' ','x',
+   'x',' ',' ',
   ],
 ];
 
@@ -115,15 +123,20 @@ const calcBlockNeighbourIds = (blockId: string): string[] => {
   return neighbourIds;
 };
 
-const calcToggleIds = (blockType: BlockType, blockId: string): string[] => {
-  if (blockType === 'ALL') {
-    return [blockId, ...calcBlockNeighbourIds(blockId)];
+const calcToggleIds = (blockType: BlockType, blockId: string, toggleMode: ToggleMode): string[] => {
+  if (toggleMode === 'TOGGLE_ON') {
+    if (blockType === 'ALL') {
+      return [blockId, ...calcBlockNeighbourIds(blockId)];
+    }
+    if (blockType === 'NEIGHBOURS') {
+      return [...calcBlockNeighbourIds(blockId)];
+    }
+    if (blockType === 'NONE') {
+      return [];
+    }
   }
-  if (blockType === 'NEIGHBOURS') {
-    return [...calcBlockNeighbourIds(blockId)];
-  }
-  if (blockType === 'NONE') {
-    return [];
+  if (toggleMode === 'TOGGLE_BLOCK_TYPE') {
+    return [blockId];
   }
   return [];
 };
@@ -148,7 +161,7 @@ const levelToBlocks = (level: Level): BlockInfo[] => {
       blocks.push({ 
         id, 
         position: [xPos, yPos, zPos], 
-        toggleIds: calcToggleIds(extraInfo.blockType, id),
+        toggleIds: calcToggleIds(extraInfo.blockType, id, 'TOGGLE_ON'),
         blockType: extraInfo.blockType,
         on: extraInfo.on
       });
@@ -202,6 +215,8 @@ const COLORS: Colors = {
 // --- GlobalState ---
 // -------------------
 
+export type ToggleMode = 'TOGGLE_ON' | 'TOGGLE_BLOCK_TYPE';
+
 export type GlobalState = {
   playing: boolean;
   blocks: BlockInfo[];
@@ -210,14 +225,16 @@ export type GlobalState = {
   onIds: string[];
   activePlane: number;
   colors: Colors;
-  editMode: boolean;
+  showEditor: boolean;
+  toggleMode: ToggleMode;
 
   play: () => void;
   blockHovered: (id: string, isHovered: boolean) => void;
   toggleHovered: () => void;
   setActivePlane: (activePlane: number) => void;
   setColors: (colors: Colors) => void;
-  toggleEditMode: () => void;
+  toggleShowEditor: () => void;
+  setToggleMode: (toggleMode: ToggleMode) => void;
   editFill: (blockType: BlockType) => void;
   editReset: () => void;
 };
@@ -233,7 +250,8 @@ export const useGlobalStore = create<GlobalState>()(
         onIds: BLOCKS.filter(block => block.on).map(block => block.id),
         activePlane: 2,
         colors: COLORS,
-        editMode: false,
+        showEditor: false,
+        toggleMode: 'TOGGLE_ON',
 
         play: () => set(() => {
           return {};
@@ -252,31 +270,64 @@ export const useGlobalStore = create<GlobalState>()(
           return { hoveredIds };
         }),
 
-        toggleHovered: () => set(({ idToBlock, hoveredIds, onIds }) => {
+        toggleHovered: () => set(({ idToBlock, hoveredIds, onIds, toggleMode, blocks }) => {
           const hoveredBlock = idToBlock.get(hoveredIds[0]) as BlockInfo;
-          const idsToToggle = hoveredBlock.toggleIds;
 
-          // Toggle off
-          const toggleOffIds = onIds.filter(id => idsToToggle.includes(id));
-          let newOnIds = onIds.filter(id => !toggleOffIds.includes(id));
-          // Toggle on
-          const toggleOnIds = idsToToggle.filter(id => !toggleOffIds.includes(id));
-          newOnIds = [...newOnIds, ...toggleOnIds];
+          if (toggleMode === 'TOGGLE_ON') {
+            const idsToToggle = hoveredBlock.toggleIds;
 
-          return { onIds: newOnIds };
+            // Toggle off
+            const toggleOffIds = onIds.filter(id => idsToToggle.includes(id));
+            let newOnIds = onIds.filter(id => !toggleOffIds.includes(id));
+            // Toggle on
+            const toggleOnIds = idsToToggle.filter(id => !toggleOffIds.includes(id));
+            newOnIds = [...newOnIds, ...toggleOnIds];
+
+            return { onIds: newOnIds };
+          }
+          if (toggleMode === 'TOGGLE_BLOCK_TYPE') {
+            const blockType = hoveredBlock.blockType;
+            const newBlockType = nextBlockType(blockType);
+
+            const updatedBlocks = blocks.map(block => ({
+              ...block, 
+              blockType: (block.id === hoveredBlock.id ? newBlockType : block.blockType), 
+            }));
+
+            return { 
+              onIds: [],
+              blocks: updatedBlocks,
+              idToBlock: populateIdToBlock(updatedBlocks)
+            };            
+          }
+          return {};
         }),
 
         setActivePlane: (activePlane) => set(() => ({ activePlane })),
 
         setColors: (colors: Colors) => set(() => ({ colors: {...colors} })),
 
-        toggleEditMode: () => set(({ editMode }) => ({ editMode: !editMode })),
+        toggleShowEditor: () => set(({ showEditor }) => ({ showEditor: !showEditor })),
+
+        setToggleMode: (toggleMode: ToggleMode) => set(({ blocks }) => {
+          // Recalculate Toggle IDs 
+          const updatedBlocks = blocks.map(block => ({
+            ...block, 
+            toggleIds: calcToggleIds(block.blockType, block.id, toggleMode)
+          }));
+
+          return { 
+            blocks: updatedBlocks,
+            idToBlock: populateIdToBlock(updatedBlocks),
+            toggleMode 
+          }
+        }),
 
         editFill: (blockType: BlockType) => set(({ blocks }) => {
           const updatedBlocks = blocks.map(block => ({
             ...block, 
             blockType, 
-            toggleIds: calcToggleIds(blockType, block.id), 
+            toggleIds: calcToggleIds(blockType, block.id, 'TOGGLE_BLOCK_TYPE'), 
             on: false
           }));
 

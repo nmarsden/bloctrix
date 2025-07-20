@@ -4,5 +4,43 @@
   left: 0;
   width: 300px;
   height: 100%;
-  border: 1px solid black;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  pointer-events: none;
+  font-size: 16px;
+}
+
+.editor-heading {
+  text-transform: uppercase;
+  font-size: 20px;
+}
+
+.editor-buttonGroup {
+  display: flex;
+  gap: 10px;  
+}
+
+.editor-all-button {
+  background-image: url('textures/block_label_01.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.editor-neighbours-button {
+  background-image: url('textures/block_label_02.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.editor-none-button {
+  background: black;
+}
+
+.editor-instructions {
+  padding: 10px;
+  border: 2px dashed rgba(var(--dark-color), 0.6);
+  border-radius: 10px;
+  margin-top: 20px;
 }

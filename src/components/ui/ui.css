@@ -91,6 +91,22 @@
   animation-delay: 2s;
 }
 
+.button-dark.button-tab,
+.button-dark.button-tab:hover {
+  border: none;
+  outline: none;
+  border-radius: unset;
+  padding: 0px;
+}
+
+.button-dark.button-tab.button-selected {
+  border-bottom: 4px solid rgba(var(--dark-color), 0.6);
+}
+
+.button-dark.button-tab.button-not-selected {
+  color: rgba(var(--dark-color), 0.4);
+}
+
 .button-badge {
   font-size: 18px;
 }

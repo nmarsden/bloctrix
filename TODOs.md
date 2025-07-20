@@ -44,6 +44,25 @@
       - [x] reset - toggle all blocks off
       - [x] save - output level data JS code to browser console
 
+
+Edit Mode
+
+Fill: [All] [Neighbours] [None]
+
+Note: Click a block to change block type
+
+Play Mode
+
+[Reset] [Save]
+
+
+Editor Tools
+
+Edit | Play
+
+
+
+
 - [x] plane tool
   - [x] enable/disable on xz plane
   - [x] only pointer over when on the plane

@@ -31,6 +31,8 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   const onIds = useGlobalStore((state: GlobalState) => state.onIds);  
   const blockHovered = useGlobalStore((state: GlobalState) => state.blockHovered);
   const toggleHovered = useGlobalStore((state: GlobalState) => state.toggleHovered);
+  const toggleMode = useGlobalStore((state: GlobalState) => state.toggleMode);
+  const idToBlock = useGlobalStore((state: GlobalState) => state.idToBlock);
 
   const isOn = useRef(onIds.includes(id));
 
@@ -192,17 +194,26 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   }, [colors, onIds]);
 
   useEffect(() => {
-    // When a block is hovered: show hovered border when either...
-    // a) block is hovered and toggleSelf is true
-    // b) block is neighbour of hovered
-    if (hoveredIds.length !== 0 && (toggleIds.includes(hoveredIds[0]))) {
-      updateBorderColor(colors.blockEdgeHover);
-      return;
+    // Handle hoveredIds change
+    if (toggleMode === 'TOGGLE_ON') {
+      // 'TOGGLE_ON' Toggle Mode: Show hovered border when hovered block contains this block's ID in toggleIds
+      if (hoveredIds.length !== 0 && idToBlock.get(hoveredIds[0])?.toggleIds.includes(id)) {
+        updateBorderColor(colors.blockEdgeHover);
+        return;
+      }
     }
+    if (toggleMode === 'TOGGLE_BLOCK_TYPE') {
+      // 'TOGGLE_BLOCK_TYPE' Toggle Mode: Show hovered border when hovered block ID matches this block's ID
+      if (hoveredIds.length !== 0 && (id === hoveredIds[0])) {
+        updateBorderColor(colors.blockEdgeHover);
+        return;
+      }
+    }
+
     // Otherwise: show regular border
     updateBorderColor(colors.blockEdge);
 
-  }, [hoveredIds, colors, toggleIds]);
+  }, [hoveredIds, colors, toggleIds, toggleMode]);
 
   useEffect(() => {
     // Update block label color
