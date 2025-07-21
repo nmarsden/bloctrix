@@ -21,47 +21,34 @@
   - [x] avoid mistaking a drag for a click
   - [x] animate hover
   - [x] animate toggle
-  - [ ] show labels on block face to indicate toggle affect
+  - [x] show labels on block face to indicate toggle affect
         - center square: toggle this block
         - edge square: toggles 1 neighbour in edge direction
         - double edge square: toggles 2 neighbours in edge direction
-  - [ ] introduce different types of toggling blocks
-        [x] filled center and edge blocks: toggles self and neighbours
-        [x] filled edge blocks only: toggles neighbours but not self
-        [ ] no filled blocks: toggles nothing
+  - [x] introduce different types of toggling blocks
+        [x] filled center and edge blocks: toggles self and edge blocks
+        [x] filled edge blocks only: toggles edge blocks only
+        [x] no filled blocks: toggles nothing
+        [x] filled center, edge, and corners: toggles self, corner, and edge blocks
+        [ ] filled edge and corners: toggles corner and edge blocks
 
 - [ ] level
   - [x] introduce Level
-  - [ ] level editor
-    - [x] 1) fill feature
-      - [ ] select block type
-      - [ ] next - sets all blocks
-    - [ ] 2) edit block type mode
-      - [ ] clicking a block toggles its block type
-      - [ ] next - switches to play mode
-    - [ ] 3) play mode
-      - [x] clicking a block toggles according to standard rules
+  - [x] level editor
+    - [x] edit mode
+      - [x] fill
+        - [x] block type: all
+        - [x] block type: neighbours
+        - [x] block type: none
+      - [x] clicking a block toggles block type
+    - [x] play mode
+      - [x] clicking a block toggles on/off according to standard rules
       - [x] reset - toggle all blocks off
       - [x] save - output level data JS code to browser console
+  - [ ] level completed
 
-
-Edit Mode
-
-Fill: [All] [Neighbours] [None]
-
-Note: Click a block to change block type
-
-Play Mode
-
-[Reset] [Save]
-
-
-Editor Tools
-
-Edit | Play
-
-
-
+  - [ ] ui
+    - [ ] 
 
 - [x] plane tool
   - [x] enable/disable on xz plane

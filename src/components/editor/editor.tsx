@@ -41,21 +41,21 @@ export default function Editor (){
     // const LEVEL: Level = [
     //   // top layer
     //   [
-    //     'O', 'x', 'O',  // back   - left, center, right
-    //     'O', 'O', 'O',  // middle
-    //     'o', 'X', 'O',  // front
+    //     'p', 'E', 'p',  // back   - left, center, right
+    //     'p', 'p', 'p',  // middle
+    //     'e', 'P', 'p',  // front
     //   ],
     //   // middle layer
     //   [
-    //     'O', 'o', 'O',
-    //     'O', 'O', 'O',
-    //     'O', 'X', 'O',
+    //     'p', 'e', 'p',
+    //     'p', 'p', 'p',
+    //     'p', 'P', 'p',
     //   ],
     //   // bottom layer
     //   [
-    //     'O', 'o', 'O',
-    //     'O', 'O', 'O',
-    //     'O', 'X', 'O',
+    //     'p', 'e', 'p',
+    //     'p', 'p', 'p',
+    //     'p', 'P', 'p',
     //   ],
     // ];
 
@@ -115,7 +115,8 @@ export default function Editor (){
               <div>Fill with block type:</div>
               <div className="editor-buttonGroup">
                 <div className="button-dark editor-all-button" onClick={onFillClicked('ALL')}></div>
-                <div className="button-dark editor-neighbours-button" onClick={onFillClicked('NEIGHBOURS')}></div>
+                <div className="button-dark editor-self-and-edges-button" onClick={onFillClicked('SELF_AND_EDGES')}></div>
+                <div className="button-dark editor-edges-button" onClick={onFillClicked('EDGES')}></div>
                 <div className="button-dark editor-none-button" onClick={onFillClicked('NONE')}></div>
               </div>
               <div className="editor-instructions">Click a block to change its block type or change all blocks using the fill options above</div>

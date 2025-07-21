@@ -5,23 +5,27 @@ import { persist } from 'zustand/middleware';
 // --------------
 // --- LEVELS ---
 // --------------
-export type BlockType = 'ALL' | 'NEIGHBOURS' | 'NONE';
+export type BlockType = 'SELF_AND_EDGES' | 'EDGES' | 'NONE' | 'ALL';
 
 export type LevelBlock = 
-    'O'  // toggle all - off
-  | 'X'  // toggle all - on
-  | 'o'  // toggle neighbours - off
-  | 'x'  // toggle neighbours - on
+    'a'  // toggle all - off
+  | 'A'  // toggle all - on
+  | 'p'  // toggle self & edges - off. Note: 'p' is short for plus sign, ie. +
+  | 'P'  // toggle self & edges - on
+  | 'e'  // toggle edges - off
+  | 'E'  // toggle edges - on
   | ' '  // toggle none - off
   | '.'  // toggle none - on
 
 const BLOCK_INFO_LOOKUP: Map<LevelBlock, { blockType: BlockType, on: boolean }> = new Map<LevelBlock, { blockType: BlockType, on: boolean }>([
-  ['O', { blockType: 'ALL',        on: false }],
-  ['X', { blockType: 'ALL',        on: true  }],
-  ['o', { blockType: 'NEIGHBOURS', on: false }],
-  ['x', { blockType: 'NEIGHBOURS', on: true  }],
-  [' ', { blockType: 'NONE',       on: false }],
-  ['.', { blockType: 'NONE',       on: true  }],
+  ['a', { blockType: 'ALL',             on: false }],
+  ['A', { blockType: 'ALL',             on: true }],
+  ['p', { blockType: 'SELF_AND_EDGES',  on: false }],
+  ['P', { blockType: 'SELF_AND_EDGES',  on: true  }],
+  ['e', { blockType: 'EDGES',           on: false }],
+  ['E', { blockType: 'EDGES',           on: true  }],
+  [' ', { blockType: 'NONE',            on: false }],
+  ['.', { blockType: 'NONE',            on: true  }],
 ]);
 
 export const toLevelBlock = (blockType: BlockType, on: boolean): LevelBlock => {
@@ -31,9 +35,10 @@ export const toLevelBlock = (blockType: BlockType, on: boolean): LevelBlock => {
 
 const nextBlockType = (blockType: BlockType): BlockType => {
   switch (blockType) {
-    case 'ALL': return 'NEIGHBOURS';
-    case 'NEIGHBOURS': return 'NONE';
-    case 'NONE': return 'ALL';
+    case 'SELF_AND_EDGES': return 'EDGES';
+    case 'EDGES':          return 'NONE';
+    case 'NONE':           return 'ALL';
+    case 'ALL':            return 'SELF_AND_EDGES';
   }
 };
 
@@ -42,40 +47,40 @@ type Level = [LevelBlockLayer, LevelBlockLayer, LevelBlockLayer];
 
 const LEVEL: Level = [
   [
-   ' ','x',' ',
-   ' ',' ','x',
-   'x',' ',' ',
+   ' ','.',' ',
+   '.','P',' ',
+   '.',' ','.',
   ],
   [
-   '.','X',' ',
-   '.',' ','X',
-   'X','.','.',
+   ' ',' ','.',
+   ' ','.','e',
+   '.','A',' ',
   ],
   [
-   ' ','x',' ',
-   ' ',' ','x',
-   'x',' ',' ',
+   ' ',' ',' ',
+   ' ',' ','.',
+   '.','.','.',
   ],
 ];
 
 // const LEVEL: Level = [
 //   // top layer
 //   [
-//     'O', 'x', 'O',  // back   - left, center, right
-//     'O', 'O', 'O',  // middle
-//     'o', 'X', 'O',  // front
+//     'p', 'E', 'p',  // back   - left, center, right
+//     'p', 'p', 'p',  // middle
+//     'e', 'P', 'p',  // front
 //   ],
 //   // middle layer
 //   [
-//     'O', 'o', 'O',
-//     'O', 'O', 'O',
-//     'O', 'X', 'O',
+//     'p', 'e', 'p',
+//     'p', 'p', 'p',
+//     'p', 'P', 'p',
 //   ],
 //   // bottom layer
 //   [
-//     'O', 'o', 'O',
-//     'O', 'O', 'O',
-//     'O', 'X', 'O',
+//     'p', 'e', 'p',
+//     'p', 'p', 'p',
+//     'p', 'P', 'p',
 //   ],
 // ];
 
@@ -101,38 +106,96 @@ const calcBlockId = (x: number, y: number, z: number): string => {
   return `block-${x}-${y}-${z}`;
 }
 
-const calcBlockNeighbourIds = (blockId: string): string[] => {
-  const neighbourIds: string[] = [];
+const calcBlockEdgeAndCornerIds = (blockId: string): string[] => {
+  const ids: string[] = [];
 
   const x = parseInt(blockId.split('-')[1]);
   const y = parseInt(blockId.split('-')[2]);
   const z = parseInt(blockId.split('-')[3]);
 
-  // neighbor above & below
-  if (y + 1 < GRID_SIZE_IN_BLOCKS) neighbourIds.push(calcBlockId(x, y + 1, z));
-  if (y - 1 >= 0) neighbourIds.push(calcBlockId(x, y - 1, z));
+  if ((x === 0 || x === 2) && y === 1 && z === 1) {
+    // -- block edges and corners for block (0, 1, 1) or (2, 1, 1) --
+    ids.push(calcBlockId(x, 0, 0));
+    ids.push(calcBlockId(x, 0, 2));
+    ids.push(calcBlockId(x, 2, 0));
+    ids.push(calcBlockId(x, 2, 2));
+    return [...ids, ...calcBlockEdgeIds(blockId)];
+  }
+  if (x === 1 && (y === 0 || y === 2) && z === 1) {
+    // -- block edges and corners for block (1, 0, 1) or (1, 2, 1) --
+    ids.push(calcBlockId(0, y, 0));
+    ids.push(calcBlockId(0, y, 2));
+    ids.push(calcBlockId(2, y, 0));
+    ids.push(calcBlockId(2, y, 2));
+    return [...ids, ...calcBlockEdgeIds(blockId)];
+  }
+  if (x === 1 && y === 1 && (z === 0 || z === 2)) {
+    // -- block edges and corners for block (1, 1, 0) or (1, 1, 2) --
+    ids.push(calcBlockId(0, 0, z));
+    ids.push(calcBlockId(0, 2, z));
+    ids.push(calcBlockId(2, 0, z));
+    ids.push(calcBlockId(2, 2, z));
+    return [...ids, ...calcBlockEdgeIds(blockId)];
+  }
 
-  // neighbor right & left
-  if (x + 1 < GRID_SIZE_IN_BLOCKS) neighbourIds.push(calcBlockId(x + 1, y, z));
-  if (x - 1 >= 0) neighbourIds.push(calcBlockId(x - 1, y, z));
+  // block above & right
+  if ((y + 1 < GRID_SIZE_IN_BLOCKS) && (x + 1 < GRID_SIZE_IN_BLOCKS)) ids.push(calcBlockId(x + 1, y + 1, z));
+  // block above & left
+  if ((y + 1 < GRID_SIZE_IN_BLOCKS) && (x - 1 >= 0)) ids.push(calcBlockId(x - 1, y + 1, z));
+  // block below & right
+  if ((y - 1 >= 0) && (x + 1 < GRID_SIZE_IN_BLOCKS)) ids.push(calcBlockId(x + 1, y - 1, z));
+  // block below & left
+  if ((y - 1 >= 0) && (x - 1 >= 0)) ids.push(calcBlockId(x - 1, y - 1, z));
+  // block forward & above
+  if ((z + 1 < GRID_SIZE_IN_BLOCKS) && (y + 1 < GRID_SIZE_IN_BLOCKS)) ids.push(calcBlockId(x, y + 1, z + 1));
+  // block forward & below
+  if ((z + 1 < GRID_SIZE_IN_BLOCKS) && (y - 1 >= 0)) ids.push(calcBlockId(x, y - 1, z + 1));
+  // block forward & left
+  if ((z + 1 < GRID_SIZE_IN_BLOCKS) && (x + 1 < GRID_SIZE_IN_BLOCKS)) ids.push(calcBlockId(x + 1, y, z + 1));
+  // block forward & right
+  if ((z + 1 < GRID_SIZE_IN_BLOCKS) && (x - 1 >= 0)) ids.push(calcBlockId(x - 1, y, z + 1));
+  // block back & above
+  if ((z - 1 >= 0) && (y + 1 < GRID_SIZE_IN_BLOCKS)) ids.push(calcBlockId(x, y + 1, z - 1));
+  // block back & below
+  if ((z - 1 >= 0) && (y - 1 >= 0)) ids.push(calcBlockId(x, y - 1, z - 1));
+  // block back & left
+  if ((z - 1 >= 0) && (x - 1 >= 0)) ids.push(calcBlockId(x - 1, y, z - 1));
+  // block back & right
+  if ((z - 1 >= 0) && (x + 1 < GRID_SIZE_IN_BLOCKS)) ids.push(calcBlockId(x + 1, y, z - 1));
 
-  // neighbor forward & back
-  if (z + 1 < GRID_SIZE_IN_BLOCKS) neighbourIds.push(calcBlockId(x, y, z + 1));
-  if (z - 1 >= 0) neighbourIds.push(calcBlockId(x, y, z - 1));
+  return [...ids, ...calcBlockEdgeIds(blockId)];
+};
 
-  return neighbourIds;
+const calcBlockEdgeIds = (blockId: string): string[] => {
+  const ids: string[] = [];
+
+  const x = parseInt(blockId.split('-')[1]);
+  const y = parseInt(blockId.split('-')[2]);
+  const z = parseInt(blockId.split('-')[3]);
+
+  // block above
+  if (y + 1 < GRID_SIZE_IN_BLOCKS) ids.push(calcBlockId(x, y + 1, z));
+  // block below
+  if (y - 1 >= 0) ids.push(calcBlockId(x, y - 1, z));
+  // block right
+  if (x + 1 < GRID_SIZE_IN_BLOCKS) ids.push(calcBlockId(x + 1, y, z));
+  // block left
+  if (x - 1 >= 0) ids.push(calcBlockId(x - 1, y, z));
+  // block forward
+  if (z + 1 < GRID_SIZE_IN_BLOCKS) ids.push(calcBlockId(x, y, z + 1));
+  // block back
+  if (z - 1 >= 0) ids.push(calcBlockId(x, y, z - 1));
+
+  return ids;
 };
 
 const calcToggleIds = (blockType: BlockType, blockId: string, toggleMode: ToggleMode): string[] => {
   if (toggleMode === 'TOGGLE_ON') {
-    if (blockType === 'ALL') {
-      return [blockId, ...calcBlockNeighbourIds(blockId)];
-    }
-    if (blockType === 'NEIGHBOURS') {
-      return [...calcBlockNeighbourIds(blockId)];
-    }
-    if (blockType === 'NONE') {
-      return [];
+    switch (blockType) {
+      case 'ALL':            return [blockId, ...calcBlockEdgeAndCornerIds(blockId)];
+      case 'SELF_AND_EDGES': return [blockId, ...calcBlockEdgeIds(blockId)];
+      case 'EDGES':          return [...calcBlockEdgeIds(blockId)];
+      case 'NONE':           return [];
     }
   }
   if (toggleMode === 'TOGGLE_BLOCK_TYPE') {

@@ -23,13 +23,19 @@
 }
 
 .editor-all-button {
-  background-image: url('textures/block_label_01.png');
+  background-image: url('textures/block_label_all.png');
   background-size: contain;
   background-repeat: no-repeat;
 }
 
-.editor-neighbours-button {
-  background-image: url('textures/block_label_02.png');
+.editor-self-and-edges-button {
+  background-image: url('textures/block_label_self_and_edges.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.editor-edges-button {
+  background-image: url('textures/block_label_edges.png');
   background-size: contain;
   background-repeat: no-repeat;
 }

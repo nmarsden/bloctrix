@@ -23,8 +23,9 @@ const BLOCK_ALPHA_FALLOFF = BLOCK_DISTANCE_THRESHOLD * 0.5;
 export default function Block ({ id, position, blockType, toggleIds }: BlockInfo ){
   const block = useRef<Mesh>(null!);
   const distanceThreshold = useRef(0);
-  const blockLabel1 = useTexture("textures/block_label_01.png");
-  const blockLabel2 = useTexture("textures/block_label_02.png");
+  const blockLabelAll = useTexture("textures/block_label_all.png");
+  const blockLabelSelfAndEdges = useTexture("textures/block_label_self_and_edges.png");
+  const blockLabelEdges = useTexture("textures/block_label_edges.png");
 
   const colors = useGlobalStore((state: GlobalState) => state.colors);
   const hoveredIds = useGlobalStore((state: GlobalState) => state.hoveredIds);  
@@ -81,10 +82,13 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   }, [toggleIds]);
  
   const getTexture = useCallback((blockType: BlockType): Texture | null => {
-    if (blockType === 'ALL') return blockLabel1;
-    if (blockType === 'NEIGHBOURS') return blockLabel2;
-    return null;
-  }, [blockLabel1, blockLabel2]);
+    switch(blockType) {
+      case 'ALL': return blockLabelAll;
+      case 'SELF_AND_EDGES': return blockLabelSelfAndEdges;
+      case 'EDGES': return blockLabelEdges;
+      default: return null;
+    }
+  }, [blockLabelAll, blockLabelSelfAndEdges, blockLabelEdges]);
   
   const material: ShaderMaterial = useMemo(() => {
     const color = onIds.includes(id) ? colors.blockOn : colors.blockOff;
@@ -226,26 +230,6 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
     material.uniforms.uTexture.value = texture;
   }), [blockType]);
 
-  // useEffect(() => {
-  //   // When NO block is hovered: show block
-  //   if (hoveredIds.length === 0) {
-  //     material.uniforms.uDistanceThreshold.value = 0;
-  //     return;
-  //   }
-  //   // When a block is hovered: only show block which is hovered OR hovered neighbour
-  //   if (hoveredIds.includes(id)) {
-  //     material.uniforms.uDistanceThreshold.value = 0;
-  //     return;
-  //   }
-  //   if (neighbourIds.includes(hoveredIds[0])) {
-  //     material.uniforms.uDistanceThreshold.value = 0;
-  //     return;
-  //   }
-  //   material.uniforms.uDistanceThreshold.value = distanceThreshold.current;
-  //   material.uniforms.uTargetPosition.value = idToPosition(hoveredIds[0]);
-
-  // }, [hoveredIds, activePlane]);
-  
   return (
     <mesh
       ref={block}
@@ -264,5 +248,6 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   )
 }
 
-useTexture.preload("textures/block_label_01.png");
-useTexture.preload("textures/block_label_02.png");
+useTexture.preload("textures/block_label_all.png");
+useTexture.preload("textures/block_label_self_and_edges.png");
+useTexture.preload("textures/block_label_edges.png");
