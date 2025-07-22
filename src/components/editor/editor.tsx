@@ -1,16 +1,16 @@
 import { button, useControls } from "leva";
 import { useCallback, useEffect } from "react";
-import { BlockInfo, BlockType, GlobalState, GRID_SIZE_IN_BLOCKS, ToggleMode, toLevelBlock, useGlobalStore } from "../../stores/useGlobalStore";
+import { BlockType, GlobalState, ToggleMode, useGlobalStore } from "../../stores/useGlobalStore";
 import "./editor.css";
 
 export default function Editor (){
   const showEditor = useGlobalStore((state: GlobalState) => state.showEditor);
   const toggleMode = useGlobalStore((state: GlobalState) => state.toggleMode);
   const toggleShowEditor = useGlobalStore((state: GlobalState) => state.toggleShowEditor);
-  const blocks = useGlobalStore((state: GlobalState) => state.blocks);
-  const onIds = useGlobalStore((state: GlobalState) => state.onIds);
+  const editGridSize = useGlobalStore((state: GlobalState) => state.editGridSize);
   const editFill = useGlobalStore((state: GlobalState) => state.editFill);
   const editReset = useGlobalStore((state: GlobalState) => state.editReset);
+  const editSave = useGlobalStore((state: GlobalState) => state.editSave);
   const setToggleMode = useGlobalStore((state: GlobalState) => state.setToggleMode);
 
   useControls(
@@ -28,6 +28,10 @@ export default function Editor (){
     return () => setToggleMode(toggleMode);
   }, [toggleMode]);
 
+  const onGridSizeClicked = useCallback((gridSize: number) => {
+    return () => editGridSize(gridSize);
+  }, []);
+
   const onFillClicked = useCallback((blockType: BlockType) => {
     return () => editFill(blockType);
   }, []);
@@ -37,56 +41,8 @@ export default function Editor (){
   }, []);
 
   const onSaveClicked = useCallback(() => {
-
-    // const LEVEL: Level = [
-    //   // top layer
-    //   [
-    //     'p', 'E', 'p',  // back   - left, center, right
-    //     'p', 'p', 'p',  // middle
-    //     'e', 'P', 'p',  // front
-    //   ],
-    //   // middle layer
-    //   [
-    //     'p', 'e', 'p',
-    //     'p', 'p', 'p',
-    //     'p', 'P', 'p',
-    //   ],
-    //   // bottom layer
-    //   [
-    //     'p', 'e', 'p',
-    //     'p', 'p', 'p',
-    //     'p', 'P', 'p',
-    //   ],
-    // ];
-
-    const blockChar = (block: BlockInfo): string => {
-      const isOn = onIds.includes(block.id);
-      const levelBlock = toLevelBlock(block.blockType, isOn);
-      return `'${levelBlock}'`
-    };
-
-    let output: string[] = [];
-    output.push('// Level Data');
-    output.push('const LEVEL: Level = [');
-
-    let blockIndex = 0;
-    for (let layer=0; layer<GRID_SIZE_IN_BLOCKS; layer++) {
-      output.push('  [');
-      let rowOutput: string[] = [];
-      for (let row=0; row<GRID_SIZE_IN_BLOCKS; row++, blockIndex += GRID_SIZE_IN_BLOCKS) {
-        rowOutput.push(blockChar(blocks[blockIndex]));
-        rowOutput.push(blockChar(blocks[blockIndex + 1]));
-        rowOutput.push(blockChar(blocks[blockIndex + 2]));
-
-        output.push('   ' + rowOutput.join(',') + ',');
-        rowOutput = [];
-      }
-      output.push('  ],');
-    }
-    output.push('];');
-
-    console.log(output.join('\n'));
-  }, [blocks,onIds]);
+    editSave();
+  }, []);
 
   useEffect(() => {
     if (showEditor) {
@@ -112,6 +68,12 @@ export default function Editor (){
               </div>
           {toggleMode === 'TOGGLE_BLOCK_TYPE' ? (
             <>
+              <div>Grid size:</div>
+              <div className="editor-buttonGroup">
+                <div className="button-dark" onClick={onGridSizeClicked(3)}>3x3</div>
+                <div className="button-dark" onClick={onGridSizeClicked(4)}>4x4</div>
+                <div className="button-dark" onClick={onGridSizeClicked(5)}>5x5</div>
+              </div>
               <div>Fill with block type:</div>
               <div className="editor-buttonGroup">
                 <div className="button-dark editor-all-button" onClick={onFillClicked('ALL')}></div>

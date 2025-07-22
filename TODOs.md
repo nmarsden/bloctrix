@@ -36,6 +36,10 @@
   - [x] introduce Level
   - [x] level editor
     - [x] edit mode
+      - [x] grid size
+        - [x] 3 x 3
+        - [x] 4 x 4
+        - [x] 5 x 5
       - [x] fill
         - [x] block type: all
         - [x] block type: neighbours

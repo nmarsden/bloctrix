@@ -42,47 +42,43 @@ const nextBlockType = (blockType: BlockType): BlockType => {
   }
 };
 
-type LevelBlockLayer = [LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock, LevelBlock];
-type Level = [LevelBlockLayer, LevelBlockLayer, LevelBlockLayer];
-
-const LEVEL: Level = [
-  [
-   ' ','.',' ',
-   '.','P',' ',
-   '.',' ','.',
-  ],
-  [
-   ' ',' ','.',
-   ' ','.','e',
-   '.','A',' ',
-  ],
-  [
-   ' ',' ',' ',
-   ' ',' ','.',
-   '.','.','.',
-  ],
-];
-
-// const LEVEL: Level = [
-//   // top layer
-//   [
-//     'p', 'E', 'p',  // back   - left, center, right
-//     'p', 'p', 'p',  // middle
-//     'e', 'P', 'p',  // front
-//   ],
-//   // middle layer
-//   [
-//     'p', 'e', 'p',
-//     'p', 'p', 'p',
-//     'p', 'P', 'p',
-//   ],
-//   // bottom layer
-//   [
-//     'p', 'e', 'p',
-//     'p', 'p', 'p',
-//     'p', 'P', 'p',
-//   ],
+// const LEVEL: LevelBlock[] = [
+//   // layer 1
+//   'e','a','A','A',
+//   'a','a','A','A',
+//   'a','a','a','a',
+//   'p','a','a',' ',
+//   // layer 2
+//   'a','a','A','A',
+//   'a','a','a','A',
+//   'a','a','a','a',
+//   'a','a','a','a',
+//   // layer 3
+//   'a','a','a','a',
+//   'a','a','a','a',
+//   'a','a','a','a',
+//   'a','a','a','a',
+//   // layer 4
+//   'a','a','a','a',
+//   'a','a','a','a',
+//   'a','a','a','a',
+//   'a','a','a','a',
 // ];
+
+const LEVEL: LevelBlock[] = [
+  // top layer
+  ' ','.',' ',
+  '.','P',' ',
+  '.',' ','.',
+  // middle layer
+  ' ',' ','.',
+  ' ','.','e',
+  '.','A',' ',
+  // bottom layer
+  ' ',' ',' ',
+  ' ',' ','.',
+  '.','.','.',
+];
 
 // --------------
 // --- BLOCKS ---
@@ -95,78 +91,75 @@ export type BlockInfo = {
   on: boolean;
 };
 
-export const GRID_SIZE_IN_BLOCKS = 3;
 export const BLOCK_SIZE = 1;
 export const BLOCK_GAP = 0.1;
-export const GRID_WIDTH = ((GRID_SIZE_IN_BLOCKS * BLOCK_SIZE) + ((GRID_SIZE_IN_BLOCKS - 1) * BLOCK_GAP));
-export const MAX_POS = (GRID_WIDTH - BLOCK_SIZE) * 0.5;
-export const MIN_POS = -MAX_POS;
 
 const calcBlockId = (x: number, y: number, z: number): string => {
   return `block-${x}-${y}-${z}`;
 }
 
-const calcBlockEdgeAndCornerIds = (blockId: string): string[] => {
+const calcBlockEdgeAndCornerIds = (blockId: string, gridSize: number): string[] => {
   const ids: string[] = [];
 
   const x = parseInt(blockId.split('-')[1]);
   const y = parseInt(blockId.split('-')[2]);
   const z = parseInt(blockId.split('-')[3]);
 
-  if ((x === 0 || x === 2) && y === 1 && z === 1) {
-    // -- block edges and corners for block (0, 1, 1) or (2, 1, 1) --
-    ids.push(calcBlockId(x, 0, 0));
-    ids.push(calcBlockId(x, 0, 2));
-    ids.push(calcBlockId(x, 2, 0));
-    ids.push(calcBlockId(x, 2, 2));
-    return [...ids, ...calcBlockEdgeIds(blockId)];
+  // Handle block on face (ie. not edge or corner)
+  if ((x === 0 || x === (gridSize - 1)) && y !== 0 && y !== (gridSize - 1) && z !== 0 && z !== (gridSize - 1)) {
+    // blocks on x face
+    ids.push(calcBlockId(x, y - 1, z - 1));
+    ids.push(calcBlockId(x, y - 1, z + 1));
+    ids.push(calcBlockId(x, y + 1, z - 1));
+    ids.push(calcBlockId(x, y + 1, z + 1));
+    return [...ids, ...calcBlockEdgeIds(blockId, gridSize)];
   }
-  if (x === 1 && (y === 0 || y === 2) && z === 1) {
-    // -- block edges and corners for block (1, 0, 1) or (1, 2, 1) --
-    ids.push(calcBlockId(0, y, 0));
-    ids.push(calcBlockId(0, y, 2));
-    ids.push(calcBlockId(2, y, 0));
-    ids.push(calcBlockId(2, y, 2));
-    return [...ids, ...calcBlockEdgeIds(blockId)];
+  if (x !== 0 && x !== (gridSize - 1) && (y === 0 || y === (gridSize - 1)) && z !== 0 && z !== (gridSize - 1)) {
+    // blocks on y face
+    ids.push(calcBlockId(x - 1, y, z - 1));
+    ids.push(calcBlockId(x - 1, y, z + 1));
+    ids.push(calcBlockId(x + 1, y, z - 1));
+    ids.push(calcBlockId(x + 1, y, z + 1));
+    return [...ids, ...calcBlockEdgeIds(blockId, gridSize)];
   }
-  if (x === 1 && y === 1 && (z === 0 || z === 2)) {
-    // -- block edges and corners for block (1, 1, 0) or (1, 1, 2) --
-    ids.push(calcBlockId(0, 0, z));
-    ids.push(calcBlockId(0, 2, z));
-    ids.push(calcBlockId(2, 0, z));
-    ids.push(calcBlockId(2, 2, z));
-    return [...ids, ...calcBlockEdgeIds(blockId)];
+  if (x !== 0 && x !== (gridSize - 1) && y !== 0 && y !== (gridSize - 1) && (z === 0 || z === (gridSize - 1))) {
+    // blocks on z face
+    ids.push(calcBlockId(x - 1, y - 1, z));
+    ids.push(calcBlockId(x - 1, y + 1, z));
+    ids.push(calcBlockId(x + 1, y - 1, z));
+    ids.push(calcBlockId(x + 1, y + 1, z));
+    return [...ids, ...calcBlockEdgeIds(blockId, gridSize)];
   }
 
   // block above & right
-  if ((y + 1 < GRID_SIZE_IN_BLOCKS) && (x + 1 < GRID_SIZE_IN_BLOCKS)) ids.push(calcBlockId(x + 1, y + 1, z));
+  if ((y + 1 < gridSize) && (x + 1 < gridSize)) ids.push(calcBlockId(x + 1, y + 1, z));
   // block above & left
-  if ((y + 1 < GRID_SIZE_IN_BLOCKS) && (x - 1 >= 0)) ids.push(calcBlockId(x - 1, y + 1, z));
+  if ((y + 1 < gridSize) && (x - 1 >= 0)) ids.push(calcBlockId(x - 1, y + 1, z));
   // block below & right
-  if ((y - 1 >= 0) && (x + 1 < GRID_SIZE_IN_BLOCKS)) ids.push(calcBlockId(x + 1, y - 1, z));
+  if ((y - 1 >= 0) && (x + 1 < gridSize)) ids.push(calcBlockId(x + 1, y - 1, z));
   // block below & left
   if ((y - 1 >= 0) && (x - 1 >= 0)) ids.push(calcBlockId(x - 1, y - 1, z));
   // block forward & above
-  if ((z + 1 < GRID_SIZE_IN_BLOCKS) && (y + 1 < GRID_SIZE_IN_BLOCKS)) ids.push(calcBlockId(x, y + 1, z + 1));
+  if ((z + 1 < gridSize) && (y + 1 < gridSize)) ids.push(calcBlockId(x, y + 1, z + 1));
   // block forward & below
-  if ((z + 1 < GRID_SIZE_IN_BLOCKS) && (y - 1 >= 0)) ids.push(calcBlockId(x, y - 1, z + 1));
+  if ((z + 1 < gridSize) && (y - 1 >= 0)) ids.push(calcBlockId(x, y - 1, z + 1));
   // block forward & left
-  if ((z + 1 < GRID_SIZE_IN_BLOCKS) && (x + 1 < GRID_SIZE_IN_BLOCKS)) ids.push(calcBlockId(x + 1, y, z + 1));
+  if ((z + 1 < gridSize) && (x + 1 < gridSize)) ids.push(calcBlockId(x + 1, y, z + 1));
   // block forward & right
-  if ((z + 1 < GRID_SIZE_IN_BLOCKS) && (x - 1 >= 0)) ids.push(calcBlockId(x - 1, y, z + 1));
+  if ((z + 1 < gridSize) && (x - 1 >= 0)) ids.push(calcBlockId(x - 1, y, z + 1));
   // block back & above
-  if ((z - 1 >= 0) && (y + 1 < GRID_SIZE_IN_BLOCKS)) ids.push(calcBlockId(x, y + 1, z - 1));
+  if ((z - 1 >= 0) && (y + 1 < gridSize)) ids.push(calcBlockId(x, y + 1, z - 1));
   // block back & below
   if ((z - 1 >= 0) && (y - 1 >= 0)) ids.push(calcBlockId(x, y - 1, z - 1));
   // block back & left
   if ((z - 1 >= 0) && (x - 1 >= 0)) ids.push(calcBlockId(x - 1, y, z - 1));
   // block back & right
-  if ((z - 1 >= 0) && (x + 1 < GRID_SIZE_IN_BLOCKS)) ids.push(calcBlockId(x + 1, y, z - 1));
+  if ((z - 1 >= 0) && (x + 1 < gridSize)) ids.push(calcBlockId(x + 1, y, z - 1));
 
-  return [...ids, ...calcBlockEdgeIds(blockId)];
+  return [...ids, ...calcBlockEdgeIds(blockId, gridSize)];
 };
 
-const calcBlockEdgeIds = (blockId: string): string[] => {
+const calcBlockEdgeIds = (blockId: string, gridSize: number): string[] => {
   const ids: string[] = [];
 
   const x = parseInt(blockId.split('-')[1]);
@@ -174,27 +167,27 @@ const calcBlockEdgeIds = (blockId: string): string[] => {
   const z = parseInt(blockId.split('-')[3]);
 
   // block above
-  if (y + 1 < GRID_SIZE_IN_BLOCKS) ids.push(calcBlockId(x, y + 1, z));
+  if (y + 1 < gridSize) ids.push(calcBlockId(x, y + 1, z));
   // block below
   if (y - 1 >= 0) ids.push(calcBlockId(x, y - 1, z));
   // block right
-  if (x + 1 < GRID_SIZE_IN_BLOCKS) ids.push(calcBlockId(x + 1, y, z));
+  if (x + 1 < gridSize) ids.push(calcBlockId(x + 1, y, z));
   // block left
   if (x - 1 >= 0) ids.push(calcBlockId(x - 1, y, z));
   // block forward
-  if (z + 1 < GRID_SIZE_IN_BLOCKS) ids.push(calcBlockId(x, y, z + 1));
+  if (z + 1 < gridSize) ids.push(calcBlockId(x, y, z + 1));
   // block back
   if (z - 1 >= 0) ids.push(calcBlockId(x, y, z - 1));
 
   return ids;
 };
 
-const calcToggleIds = (blockType: BlockType, blockId: string, toggleMode: ToggleMode): string[] => {
+const calcToggleIds = (blockType: BlockType, blockId: string, toggleMode: ToggleMode, gridSize: number): string[] => {
   if (toggleMode === 'TOGGLE_ON') {
     switch (blockType) {
-      case 'ALL':            return [blockId, ...calcBlockEdgeAndCornerIds(blockId)];
-      case 'SELF_AND_EDGES': return [blockId, ...calcBlockEdgeIds(blockId)];
-      case 'EDGES':          return [...calcBlockEdgeIds(blockId)];
+      case 'ALL':            return [blockId, ...calcBlockEdgeAndCornerIds(blockId, gridSize)];
+      case 'SELF_AND_EDGES': return [blockId, ...calcBlockEdgeIds(blockId, gridSize)];
+      case 'EDGES':          return [...calcBlockEdgeIds(blockId, gridSize)];
       case 'NONE':           return [];
     }
   }
@@ -204,27 +197,31 @@ const calcToggleIds = (blockType: BlockType, blockId: string, toggleMode: Toggle
   return [];
 };
 
-const levelToBlocks = (level: Level): BlockInfo[] => {
+const levelToBlocks = (levelBlocks: LevelBlock[]): BlockInfo[] => {
   const blocks: BlockInfo[] = [];
 
-  for (let layerIndex=0; layerIndex<level.length; layerIndex++) {
-    const layer: LevelBlockLayer = level[layerIndex];
-    for (let blockIndex=0; blockIndex< layer.length; blockIndex++) {
-      const block = layer[blockIndex];
-      const x = blockIndex % GRID_SIZE_IN_BLOCKS;
-      const y = GRID_SIZE_IN_BLOCKS - (layerIndex+1);
-      const z = Math.floor(blockIndex / 3);
+  const gridSize = Math.round(Math.pow(levelBlocks.length, 1 / 3));
+  const gridWidth = ((gridSize * BLOCK_SIZE) + ((gridSize - 1) * BLOCK_GAP));
+  const maxPos = (gridWidth - BLOCK_SIZE) * 0.5;
+  const minPos = -maxPos;
 
-      const xPos = MIN_POS + (x * (BLOCK_SIZE + BLOCK_GAP));
-      const yPos = MIN_POS + (y * (BLOCK_SIZE + BLOCK_GAP));
-      const zPos = MIN_POS + (z * (BLOCK_SIZE + BLOCK_GAP));
+  for (let layerIndex=0; layerIndex<gridSize; layerIndex++) {
+    for (let blockIndex=0; blockIndex< gridSize*gridSize; blockIndex++) {
+      const block = levelBlocks[(layerIndex * gridSize * gridSize) + blockIndex];
+      const x = blockIndex % gridSize;
+      const y = gridSize - (layerIndex+1);
+      const z = Math.floor(blockIndex / gridSize);
+
+      const xPos = minPos + (x * (BLOCK_SIZE + BLOCK_GAP));
+      const yPos = minPos + (y * (BLOCK_SIZE + BLOCK_GAP));
+      const zPos = minPos + (z * (BLOCK_SIZE + BLOCK_GAP));
 
       const extraInfo = BLOCK_INFO_LOOKUP.get(block) as { blockType: BlockType, on: false };
       const id = calcBlockId(x, y, z);
       blocks.push({ 
         id, 
         position: [xPos, yPos, zPos], 
-        toggleIds: calcToggleIds(extraInfo.blockType, id, 'TOGGLE_ON'),
+        toggleIds: calcToggleIds(extraInfo.blockType, id, 'TOGGLE_ON', gridSize),
         blockType: extraInfo.blockType,
         on: extraInfo.on
       });
@@ -245,6 +242,48 @@ const populateIdToBlock = (blocks: BlockInfo[]): Map<string, BlockInfo> => {
   }
   return idToBlock;
 };
+
+const outputLevelToConsole = (blocks: BlockInfo[], onIds: string[]) => {
+  // const LEVEL: LevelBlock[] = [
+  //   // layer 1
+  //   ' ','.',' ',
+  //   '.','P',' ',
+  //   '.',' ','.',
+  //   // layer 2
+  //   ' ',' ','.',
+  //   ' ','.','e',
+  //   '.','A',' ',
+  //   // layer 3
+  //   ' ',' ',' ',
+  //   ' ',' ','.',
+  //   '.','.','.',
+  // ];
+  const blockChar = (block: BlockInfo): string => {
+    const isOn = onIds.includes(block.id);
+    const levelBlock = toLevelBlock(block.blockType, isOn);
+    return `'${levelBlock}'`
+  };
+
+  let output: string[] = [];
+  output.push('const LEVEL: LevelBlock[] = [');
+
+  const gridSize = Math.round(Math.pow(blocks.length, 1 / 3));
+  let blockIndex = 0;
+  for (let layer=0; layer<gridSize; layer++) {
+    output.push(`  // layer ${layer + 1}`);
+    let rowOutput: string[] = [];
+    for (let row=0; row<gridSize; row++, blockIndex += gridSize) {
+      for (let col=0; col<gridSize; col++) {
+        rowOutput.push(blockChar(blocks[blockIndex + col]));
+      }
+      output.push('  ' + rowOutput.join(',') + ',');
+      rowOutput = [];
+    }
+  }
+  output.push('];');
+
+  console.log(output.join('\n'));
+}
 
 // -------------------
 // --- GlobalState ---
@@ -298,8 +337,10 @@ export type GlobalState = {
   setColors: (colors: Colors) => void;
   toggleShowEditor: () => void;
   setToggleMode: (toggleMode: ToggleMode) => void;
+  editGridSize: (gridSize: number) => void;
   editFill: (blockType: BlockType) => void;
   editReset: () => void;
+  editSave: () => void;
 };
 
 export const useGlobalStore = create<GlobalState>()(
@@ -374,9 +415,10 @@ export const useGlobalStore = create<GlobalState>()(
 
         setToggleMode: (toggleMode: ToggleMode) => set(({ blocks }) => {
           // Recalculate Toggle IDs 
+          const gridSize = Math.round(Math.pow(blocks.length, 1 / 3));
           const updatedBlocks = blocks.map(block => ({
             ...block, 
-            toggleIds: calcToggleIds(block.blockType, block.id, toggleMode)
+            toggleIds: calcToggleIds(block.blockType, block.id, toggleMode, gridSize)
           }));
 
           return { 
@@ -386,11 +428,23 @@ export const useGlobalStore = create<GlobalState>()(
           }
         }),
 
+        editGridSize: (gridSize: number) => set(() => {
+          const levelBlocks: LevelBlock[] = new Array(gridSize * gridSize * gridSize).fill('a');
+          const blocks: BlockInfo[] = levelToBlocks(levelBlocks);
+
+          return { 
+            onIds: [],
+            blocks,
+            idToBlock: populateIdToBlock(blocks)
+          };
+        }),
+
         editFill: (blockType: BlockType) => set(({ blocks }) => {
+          const gridSize = Math.round(Math.pow(blocks.length, 1 / 3));
           const updatedBlocks = blocks.map(block => ({
             ...block, 
             blockType, 
-            toggleIds: calcToggleIds(blockType, block.id, 'TOGGLE_BLOCK_TYPE'), 
+            toggleIds: calcToggleIds(blockType, block.id, 'TOGGLE_BLOCK_TYPE', gridSize), 
             on: false
           }));
 
@@ -402,6 +456,11 @@ export const useGlobalStore = create<GlobalState>()(
         }),
 
         editReset: () => set(() => ({ onIds: [] })),
+
+        editSave: () => set(({ blocks, onIds }) => {
+          outputLevelToConsole(blocks, onIds)
+          return {};
+        }),
       }
     },
     {
