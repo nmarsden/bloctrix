@@ -31,10 +31,12 @@
         [x] no filled blocks: toggles nothing
         [x] filled center, edge, and corners: toggles self, corner, and edge blocks
         [ ] filled edge and corners: toggles corner and edge blocks
+  - [ ] remove blocks that are not on the cubes surface      
 
 - [ ] level
   - [x] introduce Level
   - [x] level editor
+    - [x] press 'e' to enable/disable the editor
     - [x] edit mode
       - [x] grid size
         - [x] 3 x 3
@@ -49,6 +51,7 @@
       - [x] clicking a block toggles on/off according to standard rules
       - [x] reset - toggle all blocks off
       - [x] save - output level data JS code to browser console
+        - [ ] add solution, eg. solve: ['block-0-0-1', 'block-1-2-0']
   - [ ] level completed
 
   - [ ] ui
