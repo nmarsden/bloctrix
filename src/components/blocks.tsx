@@ -14,7 +14,7 @@ export default function Blocks (){
 
   return (
     <>
-      {blocks.map(block => (
+      {blocks.filter(block => block.blockType !== 'EMPTY').map(block => (
         <Block
           key={block.id}
           {...block}

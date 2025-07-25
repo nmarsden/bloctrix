@@ -31,7 +31,7 @@
         [x] no filled blocks: toggles nothing
         [x] filled center, edge, and corners: toggles self, corner, and edge blocks
         [ ] filled edge and corners: toggles corner and edge blocks
-  - [ ] remove blocks that are not on the cubes surface      
+  - [x] only show blocks that are on the cubes surface
 
 - [ ] level
   - [x] introduce Level
