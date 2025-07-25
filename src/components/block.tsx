@@ -24,8 +24,11 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   const block = useRef<Mesh>(null!);
   const distanceThreshold = useRef(0);
   const blockLabelAll = useTexture("textures/block_label_all.png");
+  const blockLabelEdgesAndCorners = useTexture("textures/block_label_edges_and_corners.png");
   const blockLabelSelfAndEdges = useTexture("textures/block_label_self_and_edges.png");
   const blockLabelEdges = useTexture("textures/block_label_edges.png");
+  const blockLabelSelfAndCorners = useTexture("textures/block_label_self_and_corners.png");
+  const blockLabelCorners = useTexture("textures/block_label_corners.png");
 
   const colors = useGlobalStore((state: GlobalState) => state.colors);
   const hoveredIds = useGlobalStore((state: GlobalState) => state.hoveredIds);  
@@ -84,11 +87,14 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   const getTexture = useCallback((blockType: BlockType): Texture | null => {
     switch(blockType) {
       case 'ALL': return blockLabelAll;
+      case 'EDGES_AND_CORNERS': return blockLabelEdgesAndCorners;
       case 'SELF_AND_EDGES': return blockLabelSelfAndEdges;
       case 'EDGES': return blockLabelEdges;
+      case 'SELF_AND_CORNERS': return blockLabelSelfAndCorners;
+      case 'CORNERS': return blockLabelCorners;
       default: return null;
     }
-  }, [blockLabelAll, blockLabelSelfAndEdges, blockLabelEdges]);
+  }, [blockLabelAll, blockLabelEdgesAndCorners, blockLabelSelfAndEdges, blockLabelEdges, blockLabelSelfAndCorners, blockLabelCorners]);
   
   const material: ShaderMaterial = useMemo(() => {
     const color = onIds.includes(id) ? colors.blockOn : colors.blockOff;
@@ -249,5 +255,8 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
 }
 
 useTexture.preload("textures/block_label_all.png");
+useTexture.preload("textures/block_label_edges_and_corners.png");
 useTexture.preload("textures/block_label_self_and_edges.png");
 useTexture.preload("textures/block_label_edges.png");
+useTexture.preload("textures/block_label_self_and_corners.png");
+useTexture.preload("textures/block_label_corners.png");

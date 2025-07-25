@@ -28,6 +28,12 @@
   background-repeat: no-repeat;
 }
 
+.editor-edges-and-corners-button {
+  background-image: url('textures/block_label_edges_and_corners.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
 .editor-self-and-edges-button {
   background-image: url('textures/block_label_self_and_edges.png');
   background-size: contain;
@@ -36,6 +42,18 @@
 
 .editor-edges-button {
   background-image: url('textures/block_label_edges.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.editor-self-and-corners-button {
+  background-image: url('textures/block_label_self_and_corners.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.editor-corners-button {
+  background-image: url('textures/block_label_corners.png');
   background-size: contain;
   background-repeat: no-repeat;
 }

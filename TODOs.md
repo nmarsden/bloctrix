@@ -26,11 +26,13 @@
         - edge square: toggles 1 neighbour in edge direction
         - double edge square: toggles 2 neighbours in edge direction
   - [x] introduce different types of toggling blocks
-        [x] filled center and edge blocks: toggles self and edge blocks
-        [x] filled edge blocks only: toggles edge blocks only
-        [x] no filled blocks: toggles nothing
-        [x] filled center, edge, and corners: toggles self, corner, and edge blocks
-        [ ] filled edge and corners: toggles corner and edge blocks
+        [x] toggles all (self, corner, and edge blocks)
+        [x] toggles corner and edge blocks only
+        [x] toggles self and edge blocks
+        [x] toggles edge blocks only
+        [x] toggles self and corner blocks
+        [x] toggles corner blocks only
+        [x] toggles nothing
   - [x] only show blocks that are on the cubes surface
 
 - [ ] level

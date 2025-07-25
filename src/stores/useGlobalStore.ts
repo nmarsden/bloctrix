@@ -5,29 +5,41 @@ import { persist } from 'zustand/middleware';
 // --------------
 // --- LEVELS ---
 // --------------
-export type BlockType = 'SELF_AND_EDGES' | 'EDGES' | 'NONE' | 'ALL' | 'EMPTY';
+export type BlockType = 'ALL' | 'EDGES_AND_CORNERS' | 'SELF_AND_EDGES' | 'EDGES' | 'SELF_AND_CORNERS' | 'CORNERS' | 'NONE' | 'EMPTY';
 
 export type LevelBlock = 
     'a'  // toggle all - off
   | 'A'  // toggle all - on
-  | 'p'  // toggle self & edges - off. Note: 'p' is short for plus sign, ie. +
+  | 'o'  // toggle edges & corners - off
+  | 'O'  // toggle edges & corners - on
+  | 'p'  // toggle self & edges - off. Note: 'p' is short for plus sign (+) which is the shape of the toggle blocks
   | 'P'  // toggle self & edges - on
   | 'e'  // toggle edges - off
   | 'E'  // toggle edges - on
+  | 'x'  // toggle self and corners - off
+  | 'X'  // toggle self and corners - on
+  | 'c'  // toggle corners - off
+  | 'C'  // toggle corners - on
   | 'n'  // toggle none - off
   | 'N'  // toggle none - on
   | ' '  // empty
 
 const BLOCK_INFO_LOOKUP: Map<LevelBlock, { blockType: BlockType, on: boolean }> = new Map<LevelBlock, { blockType: BlockType, on: boolean }>([
-  ['a', { blockType: 'ALL',             on: false }],
-  ['A', { blockType: 'ALL',             on: true  }],
-  ['p', { blockType: 'SELF_AND_EDGES',  on: false }],
-  ['P', { blockType: 'SELF_AND_EDGES',  on: true  }],
-  ['e', { blockType: 'EDGES',           on: false }],
-  ['E', { blockType: 'EDGES',           on: true  }],
-  ['n', { blockType: 'NONE',            on: false }],
-  ['N', { blockType: 'NONE',            on: true  }],
-  [' ', { blockType: 'EMPTY',           on: false }],
+  ['a', { blockType: 'ALL',               on: false }],
+  ['A', { blockType: 'ALL',               on: true  }],
+  ['o', { blockType: 'EDGES_AND_CORNERS', on: false }],
+  ['O', { blockType: 'EDGES_AND_CORNERS', on: true  }],
+  ['p', { blockType: 'SELF_AND_EDGES',    on: false }],
+  ['P', { blockType: 'SELF_AND_EDGES',    on: true  }],
+  ['e', { blockType: 'EDGES',             on: false }],
+  ['E', { blockType: 'EDGES',             on: true  }],
+  ['x', { blockType: 'SELF_AND_CORNERS',  on: true  }],
+  ['X', { blockType: 'SELF_AND_CORNERS',  on: false }],
+  ['c', { blockType: 'CORNERS',           on: true  }],
+  ['C', { blockType: 'CORNERS',           on: false }],
+  ['n', { blockType: 'NONE',              on: false }],
+  ['N', { blockType: 'NONE',              on: true  }],
+  [' ', { blockType: 'EMPTY',             on: false }],
 ]);
 
 export const toLevelBlock = (blockType: BlockType, on: boolean): LevelBlock => {
@@ -39,10 +51,13 @@ const nextBlockType = (blockType: BlockType): BlockType => {
   if (blockType === 'EMPTY') return blockType;
 
   switch (blockType) {
-    case 'SELF_AND_EDGES': return 'EDGES';
-    case 'EDGES':          return 'NONE';
-    case 'NONE':           return 'ALL';
-    case 'ALL':            return 'SELF_AND_EDGES';
+    case 'ALL':               return 'EDGES_AND_CORNERS';
+    case 'EDGES_AND_CORNERS': return 'SELF_AND_EDGES';
+    case 'SELF_AND_EDGES':    return 'EDGES';
+    case 'EDGES':             return 'SELF_AND_CORNERS';
+    case 'SELF_AND_CORNERS':  return 'CORNERS';
+    case 'CORNERS':           return 'NONE';
+    case 'NONE':              return 'ALL';
   }
 };
 
@@ -181,7 +196,7 @@ const calcBlockId = (x: number, y: number, z: number): string => {
   return `block-${x}-${y}-${z}`;
 }
 
-const calcBlockEdgeAndCornerIds = (blockId: string, gridSize: number): string[] => {
+const calcBlockCornerIds = (blockId: string, gridSize: number): string[] => {
   const x = parseInt(blockId.split('-')[1]);
   const y = parseInt(blockId.split('-')[2]);
   const z = parseInt(blockId.split('-')[3]);
@@ -244,9 +259,7 @@ const calcBlockEdgeAndCornerIds = (blockId: string, gridSize: number): string[] 
     )}
   );
 
-  const ids: string[] = cornerBlockXYZs.map(point => calcBlockId(point[0], point[1], point[2]));
-
-  return [...ids, ...calcBlockEdgeIds(blockId, gridSize)];
+  return cornerBlockXYZs.map(point => calcBlockId(point[0], point[1], point[2]));
 };
 
 const calcBlockEdgeIds = (blockId: string, gridSize: number): string[] => {
@@ -284,11 +297,14 @@ const calcBlockEdgeIds = (blockId: string, gridSize: number): string[] => {
 const calcToggleIds = (blockType: BlockType, blockId: string, toggleMode: ToggleMode, gridSize: number): string[] => {
   if (toggleMode === 'TOGGLE_ON') {
     switch (blockType) {
-      case 'ALL':            return [blockId, ...calcBlockEdgeAndCornerIds(blockId, gridSize)];
-      case 'SELF_AND_EDGES': return [blockId, ...calcBlockEdgeIds(blockId, gridSize)];
-      case 'EDGES':          return [...calcBlockEdgeIds(blockId, gridSize)];
-      case 'NONE':           return [];
-      case 'EMPTY':          return [];
+      case 'ALL':               return [blockId, ...calcBlockEdgeIds(blockId, gridSize), ...calcBlockCornerIds(blockId, gridSize)];
+      case 'EDGES_AND_CORNERS': return [...calcBlockEdgeIds(blockId, gridSize), ...calcBlockCornerIds(blockId, gridSize)];
+      case 'SELF_AND_EDGES':    return [blockId, ...calcBlockEdgeIds(blockId, gridSize)];
+      case 'EDGES':             return [...calcBlockEdgeIds(blockId, gridSize)];
+      case 'SELF_AND_CORNERS':  return [blockId, ...calcBlockCornerIds(blockId, gridSize)];
+      case 'CORNERS':           return [...calcBlockCornerIds(blockId, gridSize)];
+      case 'NONE':              return [];
+      case 'EMPTY':             return [];
     }
   }
   if (toggleMode === 'TOGGLE_BLOCK_TYPE') {

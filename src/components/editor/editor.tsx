@@ -77,8 +77,11 @@ export default function Editor (){
               <div>Fill with block type:</div>
               <div className="editor-buttonGroup">
                 <div className="button-dark editor-all-button" onClick={onFillClicked('ALL')}></div>
+                <div className="button-dark editor-edges-and-corners-button" onClick={onFillClicked('EDGES_AND_CORNERS')}></div>
                 <div className="button-dark editor-self-and-edges-button" onClick={onFillClicked('SELF_AND_EDGES')}></div>
                 <div className="button-dark editor-edges-button" onClick={onFillClicked('EDGES')}></div>
+                <div className="button-dark editor-self-and-corners-button" onClick={onFillClicked('SELF_AND_CORNERS')}></div>
+                <div className="button-dark editor-corners-button" onClick={onFillClicked('CORNERS')}></div>
                 <div className="button-dark editor-none-button" onClick={onFillClicked('NONE')}></div>
               </div>
               <div className="editor-instructions">Click a block to change its block type or change all blocks using the fill options above</div>
