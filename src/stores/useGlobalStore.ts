@@ -84,20 +84,28 @@ const nextBlockType = (blockType: BlockType): BlockType => {
 //   'a','a','a','a',
 // ];
 
-const LEVEL: LevelBlock[] = [
-  // top layer
-  'n','N','n',
-  'N','P','n',
-  'N','n','N',
-  // middle layer
-  'n','n','N',
-  'n',' ','e',
-  'N','A','n',
-  // bottom layer
-  'n','n','n',
-  'n','n','N',
-  'N','N','N',
-];
+type Level = {
+  name: string;
+  blocks: LevelBlock[];
+};
+
+const LEVEL: Level = {
+  name: 'Sample 01',
+  blocks: [
+    // layer 1
+    'n','N','n',
+    'N','P','n',
+    'N','n','N',
+    // layer 2
+    'n','n','N',
+    'n',' ','e',
+    'N','A','n',
+    // layer 3
+    'n','n','n',
+    'n','n','N',
+    'N','N','N',
+  ]
+};
 
 const GRID_3x3x3: LevelBlock[] = [
   // top layer
@@ -170,7 +178,7 @@ const GRID_5x5x5: LevelBlock[] = [
   'a','a','a','a','a',
 ];
 
-const initLevel = (gridSize: number): LevelBlock[] => {
+const initLevelBlocks = (gridSize: number): LevelBlock[] => {
   switch(gridSize) {
     case 3: return GRID_3x3x3;
     case 4: return GRID_4x4x4;
@@ -313,7 +321,7 @@ const calcToggleIds = (blockType: BlockType, blockId: string, toggleMode: Toggle
   return [];
 };
 
-const levelToBlocks = (levelBlocks: LevelBlock[]): BlockInfo[] => {
+const levelBlocksToBlocks = (levelBlocks: LevelBlock[]): BlockInfo[] => {
   const blocks: BlockInfo[] = [];
 
   const gridSize = Math.round(Math.pow(levelBlocks.length, 1 / 3));
@@ -348,7 +356,7 @@ const levelToBlocks = (levelBlocks: LevelBlock[]): BlockInfo[] => {
   return blocks;
 }
 
-const BLOCKS: BlockInfo[] = levelToBlocks(LEVEL);
+const BLOCKS: BlockInfo[] = levelBlocksToBlocks(LEVEL.blocks);
 
 const populateIdToBlock = (blocks: BlockInfo[]): Map<string, BlockInfo> => {
   let idToBlock: Map<string, BlockInfo> = new Map<string, BlockInfo>();
@@ -359,21 +367,25 @@ const populateIdToBlock = (blocks: BlockInfo[]): Map<string, BlockInfo> => {
   return idToBlock;
 };
 
-const outputLevelToConsole = (blocks: BlockInfo[], onIds: string[]) => {
-  // const LEVEL: LevelBlock[] = [
-  //   // layer 1
-  //   'n','N','n',
-  //   'N','P','n',
-  //   'N','n','N',
-  //   // layer 2
-  //   'n','n','N',
-  //   'n',' ','e',
-  //   'N','A','n',
-  //   // layer 3
-  //   'n','n','n',
-  //   'n','n','N',
-  //   'N','N','N',
-  // ];
+const outputLevelToConsole = (levelName: string, blocks: BlockInfo[], onIds: string[]) => {
+  // const LEVEL: Level = {
+  //   name: 'Sample 01',
+  //   blocks: [
+  //     // top layer
+  //     'n','N','n',
+  //     'N','P','n',
+  //     'N','n','N',
+  //     // middle layer
+  //     'n','n','N',
+  //     'n',' ','e',
+  //     'N','A','n',
+  //     // bottom layer
+  //     'n','n','n',
+  //     'n','n','N',
+  //     'N','N','N',
+  //   ]
+  // };  
+
   const blockChar = (block: BlockInfo): string => {
     const isOn = onIds.includes(block.id);
     const levelBlock = toLevelBlock(block.blockType, isOn);
@@ -381,22 +393,26 @@ const outputLevelToConsole = (blocks: BlockInfo[], onIds: string[]) => {
   };
 
   let output: string[] = [];
-  output.push('const LEVEL: LevelBlock[] = [');
+  output.push('const LEVEL: Level = {');
 
+  output.push(`  name: '${levelName}',`);
+
+  output.push('  blocks: [');
   const gridSize = Math.round(Math.pow(blocks.length, 1 / 3));
   let blockIndex = 0;
   for (let layer=0; layer<gridSize; layer++) {
-    output.push(`  // layer ${layer + 1}`);
+    output.push(`    // layer ${layer + 1}`);
     let rowOutput: string[] = [];
     for (let row=0; row<gridSize; row++, blockIndex += gridSize) {
       for (let col=0; col<gridSize; col++) {
         rowOutput.push(blockChar(blocks[blockIndex + col]));
       }
-      output.push('  ' + rowOutput.join(',') + ',');
+      output.push('    ' + rowOutput.join(',') + ',');
       rowOutput = [];
     }
   }
-  output.push('];');
+  output.push('  ]');
+  output.push('};');
 
   console.log(output.join('\n'));
 }
@@ -437,6 +453,7 @@ export type ToggleMode = 'TOGGLE_ON' | 'TOGGLE_BLOCK_TYPE';
 
 export type GlobalState = {
   playing: boolean;
+  levelName: string;
   blocks: BlockInfo[];
   idToBlock: Map<string, BlockInfo>;
   hoveredIds: string[];
@@ -453,6 +470,7 @@ export type GlobalState = {
   setColors: (colors: Colors) => void;
   toggleShowEditor: () => void;
   setToggleMode: (toggleMode: ToggleMode) => void;
+  editLevelName: (levelName: string) => void;
   editGridSize: (gridSize: number) => void;
   editFill: (blockType: BlockType) => void;
   editReset: () => void;
@@ -464,6 +482,7 @@ export const useGlobalStore = create<GlobalState>()(
     (set) => {
       return {
         playing: true,
+        levelName: LEVEL.name,
         blocks: BLOCKS,
         idToBlock: populateIdToBlock(BLOCKS),
         hoveredIds: [],
@@ -544,9 +563,13 @@ export const useGlobalStore = create<GlobalState>()(
           }
         }),
 
+        editLevelName: (levelName: string) => set(() => {
+          return { levelName };
+        }),
+
         editGridSize: (gridSize: number) => set(() => {
-          const levelBlocks: LevelBlock[] = initLevel(gridSize);
-          const blocks: BlockInfo[] = levelToBlocks(levelBlocks);
+          const levelBlocks: LevelBlock[] = initLevelBlocks(gridSize);
+          const blocks: BlockInfo[] = levelBlocksToBlocks(levelBlocks);
 
           return { 
             onIds: [],
@@ -573,8 +596,8 @@ export const useGlobalStore = create<GlobalState>()(
 
         editReset: () => set(() => ({ onIds: [] })),
 
-        editSave: () => set(({ blocks, onIds }) => {
-          outputLevelToConsole(blocks, onIds)
+        editSave: () => set(({ levelName, blocks, onIds }) => {
+          outputLevelToConsole(levelName, blocks, onIds);
           return {};
         }),
       }

@@ -40,6 +40,7 @@
   - [x] level editor
     - [x] press 'e' to enable/disable the editor
     - [x] edit mode
+      - [x] name
       - [x] grid size
         - [x] 3 x 3
         - [x] 4 x 4
@@ -54,6 +55,20 @@
       - [x] reset - toggle all blocks off
       - [x] save - output level data JS code to browser console
         - [ ] add solution, eg. solve: ['block-0-0-1', 'block-1-2-0']
+        - [ ] save to local storage
+
+  - [ ] custom levels
+    - [ ] new level - open level editor
+    - [ ] list custom levels loaded from local storage
+      - [ ] show columns: checkbox, name, updated (timestamp), grid size, block types, moves
+      - [ ] options
+        - [ ] play
+        - [ ] edit
+        - [ ] copy
+        - [ ] delete
+        - [ ] export
+      - [ ] export - exports selected levels (or all if none selected)
+      - [ ] import  
   - [ ] level completed
 
   - [ ] ui

@@ -17,6 +17,10 @@
   font-size: 20px;
 }
 
+.editor-nameInput {
+  pointer-events: all;
+}
+
 .editor-buttonGroup {
   display: flex;
   gap: 10px;  

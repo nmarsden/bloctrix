@@ -1,5 +1,5 @@
 import { button, useControls } from "leva";
-import { useCallback, useEffect } from "react";
+import { ChangeEvent, useCallback, useEffect } from "react";
 import { BlockType, GlobalState, ToggleMode, useGlobalStore } from "../../stores/useGlobalStore";
 import "./editor.css";
 
@@ -7,6 +7,8 @@ export default function Editor (){
   const showEditor = useGlobalStore((state: GlobalState) => state.showEditor);
   const toggleMode = useGlobalStore((state: GlobalState) => state.toggleMode);
   const toggleShowEditor = useGlobalStore((state: GlobalState) => state.toggleShowEditor);
+  const levelName = useGlobalStore((state: GlobalState) => state.levelName);
+  const editLevelName = useGlobalStore((state: GlobalState) => state.editLevelName);
   const editGridSize = useGlobalStore((state: GlobalState) => state.editGridSize);
   const editFill = useGlobalStore((state: GlobalState) => state.editFill);
   const editReset = useGlobalStore((state: GlobalState) => state.editReset);
@@ -23,6 +25,10 @@ export default function Editor (){
     },
     [showEditor]
   );
+
+  const onLevelNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    editLevelName(event.target.value);
+  }, []);
 
   const onToggleModeClicked = useCallback((toggleMode: ToggleMode) => {
     return () => setToggleMode(toggleMode);
@@ -68,11 +74,20 @@ export default function Editor (){
               </div>
           {toggleMode === 'TOGGLE_BLOCK_TYPE' ? (
             <>
+              <div>Level Name:</div>
+              <input 
+                className="editor-nameInput"
+                type="text"
+                value={levelName}
+                onChange={onLevelNameChange}
+                onKeyDown={event => event.stopPropagation()}
+                maxLength={20}
+              />
               <div>Grid size:</div>
               <div className="editor-buttonGroup">
-                <div className="button-dark" onClick={onGridSizeClicked(3)}>3x3</div>
-                <div className="button-dark" onClick={onGridSizeClicked(4)}>4x4</div>
-                <div className="button-dark" onClick={onGridSizeClicked(5)}>5x5</div>
+                <div className="button-dark" onClick={onGridSizeClicked(3)}>3</div>
+                <div className="button-dark" onClick={onGridSizeClicked(4)}>4</div>
+                <div className="button-dark" onClick={onGridSizeClicked(5)}>5</div>
               </div>
               <div>Fill with block type:</div>
               <div className="editor-buttonGroup">
