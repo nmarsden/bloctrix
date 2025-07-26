@@ -62,27 +62,31 @@ export default function Editor (){
     <>
       {showEditor ? 
         <div className="editor-container">
-              <div className="editor-buttonGroup">
-                <div className="editor-heading">Editor Tools</div>
-                <div>
-                  <div>Mode</div>
-                  <div className="editor-buttonGroup">
-                    <div className={`button-dark button-tab ${toggleMode === 'TOGGLE_BLOCK_TYPE' ? 'button-selected' : 'button-not-selected'}`} onClick={onToggleModeClicked('TOGGLE_BLOCK_TYPE')}>EDIT</div>
-                    <div className={`button-dark button-tab ${toggleMode === 'TOGGLE_ON' ? 'button-selected' : 'button-not-selected'}`} onClick={onToggleModeClicked('TOGGLE_ON')}>PLAY</div>
-                  </div>
-                </div>
-              </div>
+          <div className="editor-heading">Editor Tools</div>
+          <div>Level Name:</div>
+          <input 
+            className="editor-nameInput"
+            type="text"
+            value={levelName}
+            onChange={onLevelNameChange}
+            onKeyDown={event => event.stopPropagation()}
+            maxLength={20}
+          />
+          <div className="editor-buttonGroup">
+            <div className="button-dark" onClick={onSaveClicked}>Save</div>
+          </div>
+
+          <div>
+            <div>Toggle Mode</div>
+            <div className="editor-buttonGroup">
+              <div className={`button-dark button-tab ${toggleMode === 'TOGGLE_BLOCK_TYPE' ? 'button-selected' : 'button-not-selected'}`} onClick={onToggleModeClicked('TOGGLE_BLOCK_TYPE')}>BLOCK TYPE</div>
+              <div className={`button-dark button-tab ${toggleMode === 'TOGGLE_ON' ? 'button-selected' : 'button-not-selected'}`} onClick={onToggleModeClicked('TOGGLE_ON')}>ON / OFF</div>
+            </div>
+          </div>
+
           {toggleMode === 'TOGGLE_BLOCK_TYPE' ? (
             <>
-              <div>Level Name:</div>
-              <input 
-                className="editor-nameInput"
-                type="text"
-                value={levelName}
-                onChange={onLevelNameChange}
-                onKeyDown={event => event.stopPropagation()}
-                maxLength={20}
-              />
+              <div className="editor-instructions">Click a block to change its block type or change all blocks using the fill options above</div>
               <div>Grid size:</div>
               <div className="editor-buttonGroup">
                 <div className="button-dark" onClick={onGridSizeClicked(3)}>3</div>
@@ -99,15 +103,13 @@ export default function Editor (){
                 <div className="button-dark editor-corners-button" onClick={onFillClicked('CORNERS')}></div>
                 <div className="button-dark editor-none-button" onClick={onFillClicked('NONE')}></div>
               </div>
-              <div className="editor-instructions">Click a block to change its block type or change all blocks using the fill options above</div>
             </>
           ) : (
             <>
+              <div className="editor-instructions">Click blocks to toggle on/off according to block type. Choose 'Reset' to toggle all to off.</div>
               <div className="editor-buttonGroup">
                 <div className="button-dark" onClick={onResetClicked}>Reset</div>
-                <div className="button-dark" onClick={onSaveClicked}>Save</div>
               </div>
-              <div className="editor-instructions">Click blocks to toggle on/off according to block type. Choose 'Reset' to toggle all to off. Choose 'Save' to output the level data to the browser console.</div>
             </>
           )}
         </div>

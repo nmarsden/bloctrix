@@ -97,6 +97,8 @@
   outline: none;
   border-radius: unset;
   padding: 0px;
+  width: 50%;
+  text-wrap: nowrap;
 }
 
 .button-dark.button-tab.button-selected {
