@@ -54,15 +54,14 @@
       - [x] clicking a block toggles on/off according to standard rules
       - [x] reset - toggle all blocks off
       - [x] save - output level data JS code to browser console
-        - [ ] add solution, eg. solve: ['block-0-0-1', 'block-1-2-0']
-          - [ ] change save format...
-                * type LevelBlock = 'A' | 'O' | '+' | 'E' | 'X' | 'C' | 'N' | ' ';
+        - [x] add moves, eg. moves: ['block-0-0-1', 'block-1-2-0']
+          - [x] change save format...
+                * type LevelBlock = 'a' | 'o' | 'p' | 'e' | 'x' | 'c' | 'n' | ' ';
                 * type Level = {
                     name: string;
                     blocks: LevelBlock[];
-                    toggleIds: string[];
+                    moves: string[];
                   };
-
 
         - [ ] save to local storage
 

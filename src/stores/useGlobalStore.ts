@@ -8,42 +8,28 @@ import { persist } from 'zustand/middleware';
 export type BlockType = 'ALL' | 'EDGES_AND_CORNERS' | 'SELF_AND_EDGES' | 'EDGES' | 'SELF_AND_CORNERS' | 'CORNERS' | 'NONE' | 'EMPTY';
 
 export type LevelBlock = 
-    'a'  // toggle all - off
-  | 'A'  // toggle all - on
-  | 'o'  // toggle edges & corners - off
-  | 'O'  // toggle edges & corners - on
-  | 'p'  // toggle self & edges - off. Note: 'p' is short for plus sign (+) which is the shape of the toggle blocks
-  | 'P'  // toggle self & edges - on
-  | 'e'  // toggle edges - off
-  | 'E'  // toggle edges - on
-  | 'x'  // toggle self and corners - off
-  | 'X'  // toggle self and corners - on
-  | 'c'  // toggle corners - off
-  | 'C'  // toggle corners - on
-  | 'n'  // toggle none - off
-  | 'N'  // toggle none - on
+    'a'  // toggle all
+  | 'o'  // toggle edges & corners
+  | 'p'  // toggle self & edges. Note: 'p' is short for plus sign (+) which is the shape of the toggle blocks
+  | 'e'  // toggle edges
+  | 'x'  // toggle self and corners
+  | 'c'  // toggle corners
+  | 'n'  // toggle none
   | ' '  // empty
 
-const BLOCK_INFO_LOOKUP: Map<LevelBlock, { blockType: BlockType, on: boolean }> = new Map<LevelBlock, { blockType: BlockType, on: boolean }>([
-  ['a', { blockType: 'ALL',               on: false }],
-  ['A', { blockType: 'ALL',               on: true  }],
-  ['o', { blockType: 'EDGES_AND_CORNERS', on: false }],
-  ['O', { blockType: 'EDGES_AND_CORNERS', on: true  }],
-  ['p', { blockType: 'SELF_AND_EDGES',    on: false }],
-  ['P', { blockType: 'SELF_AND_EDGES',    on: true  }],
-  ['e', { blockType: 'EDGES',             on: false }],
-  ['E', { blockType: 'EDGES',             on: true  }],
-  ['x', { blockType: 'SELF_AND_CORNERS',  on: true  }],
-  ['X', { blockType: 'SELF_AND_CORNERS',  on: false }],
-  ['c', { blockType: 'CORNERS',           on: true  }],
-  ['C', { blockType: 'CORNERS',           on: false }],
-  ['n', { blockType: 'NONE',              on: false }],
-  ['N', { blockType: 'NONE',              on: true  }],
-  [' ', { blockType: 'EMPTY',             on: false }],
+const BLOCK_TYPE_LOOKUP: Map<LevelBlock, BlockType> = new Map<LevelBlock, BlockType>([
+  ['a', 'ALL'              ],
+  ['o', 'EDGES_AND_CORNERS'],
+  ['p', 'SELF_AND_EDGES'   ],
+  ['e', 'EDGES'            ],
+  ['x', 'SELF_AND_CORNERS' ],
+  ['c', 'CORNERS'          ],
+  ['n', 'NONE'             ],
+  [' ', 'EMPTY'            ],
 ]);
 
-export const toLevelBlock = (blockType: BlockType, on: boolean): LevelBlock => {
-  const matchingEntries = [...BLOCK_INFO_LOOKUP.entries()].filter(([_, value]) => value.blockType === blockType && value.on === on);
+export const toLevelBlock = (blockType: BlockType): LevelBlock => {
+  const matchingEntries = [...BLOCK_TYPE_LOOKUP.entries()].filter(([_, value]) => value === blockType);
   return matchingEntries[0][0];
 };
 
@@ -87,23 +73,29 @@ const nextBlockType = (blockType: BlockType): BlockType => {
 type Level = {
   name: string;
   blocks: LevelBlock[];
+  moves: string[];
 };
 
 const LEVEL: Level = {
   name: 'Sample 01',
   blocks: [
     // layer 1
-    'n','N','n',
-    'N','P','n',
-    'N','n','N',
+    'n','n','n',
+    'n','p','n',
+    'n','n','n',
     // layer 2
-    'n','n','N',
+    'n','n','n',
     'n',' ','e',
-    'N','A','n',
+    'n','a','n',
     // layer 3
     'n','n','n',
-    'n','n','N',
-    'N','N','N',
+    'n','n','n',
+    'n','n','n',
+  ],
+  moves: [
+    'block-1-1-2',
+    'block-2-1-1',
+    'block-1-2-1',
   ]
 };
 
@@ -321,8 +313,17 @@ const calcToggleIds = (blockType: BlockType, blockId: string, toggleMode: Toggle
   return [];
 };
 
-const levelBlocksToBlocks = (levelBlocks: LevelBlock[]): BlockInfo[] => {
-  const blocks: BlockInfo[] = [];
+const updateOnIds = (onIds: string[], idsToToggle: string[]): string[] => {
+  // Toggle off
+  const toggleOffIds = onIds.filter(id => idsToToggle.includes(id));
+  let newOnIds = onIds.filter(id => !toggleOffIds.includes(id));
+  // Toggle on
+  const toggleOnIds = idsToToggle.filter(id => !toggleOffIds.includes(id));
+  return [...newOnIds, ...toggleOnIds];
+}
+
+const levelBlocksToBlocks = (levelBlocks: LevelBlock[], moves?: string[]): BlockInfo[] => {
+  let blocks: BlockInfo[] = [];
 
   const gridSize = Math.round(Math.pow(levelBlocks.length, 1 / 3));
   const gridWidth = ((gridSize * BLOCK_SIZE) + ((gridSize - 1) * BLOCK_GAP));
@@ -340,23 +341,34 @@ const levelBlocksToBlocks = (levelBlocks: LevelBlock[]): BlockInfo[] => {
       const yPos = minPos + (y * (BLOCK_SIZE + BLOCK_GAP));
       const zPos = minPos + (z * (BLOCK_SIZE + BLOCK_GAP));
 
-      const extraInfo = BLOCK_INFO_LOOKUP.get(block) as { blockType: BlockType, on: boolean };
+      const blockType = BLOCK_TYPE_LOOKUP.get(block) as BlockType;
       const id = calcBlockId(x, y, z);
       blocks.push({ 
         id, 
         position: [xPos, yPos, zPos], 
-        toggleIds: calcToggleIds(extraInfo.blockType, id, 'TOGGLE_ON', gridSize),
-        blockType: extraInfo.blockType,
-        on: extraInfo.on
+        toggleIds: calcToggleIds(blockType, id, 'TOGGLE_ON', gridSize),
+        blockType: blockType,
+        on: false
       });
 
       // console.log(`[layer:${layerIndex}][block:${blockIndex}]=`, layer[blockIndex], `[x:${x}][y:${y}][z:${z}]`);
     }
   }
+
+  // Populate onIds according to moves
+  let onIds: string[] = [];
+  moves?.forEach(move => {
+    const idsToToggle = (blocks.filter(block => block.id === move))[0].toggleIds;
+    onIds = updateOnIds(onIds, idsToToggle);
+  });
+
+  // Update 'on' in blocks according to onIds
+  blocks = blocks.map(block => ({ ...block, on: onIds.includes(block.id) }));
+
   return blocks;
 }
 
-const BLOCKS: BlockInfo[] = levelBlocksToBlocks(LEVEL.blocks);
+const BLOCKS: BlockInfo[] = levelBlocksToBlocks(LEVEL.blocks, LEVEL.moves);
 
 const populateIdToBlock = (blocks: BlockInfo[]): Map<string, BlockInfo> => {
   let idToBlock: Map<string, BlockInfo> = new Map<string, BlockInfo>();
@@ -367,28 +379,32 @@ const populateIdToBlock = (blocks: BlockInfo[]): Map<string, BlockInfo> => {
   return idToBlock;
 };
 
-const outputLevelToConsole = (levelName: string, blocks: BlockInfo[], onIds: string[]) => {
+const outputLevelToConsole = (levelName: string, blocks: BlockInfo[], moves: string[]) => {
   // const LEVEL: Level = {
   //   name: 'Sample 01',
   //   blocks: [
   //     // top layer
-  //     'n','N','n',
-  //     'N','P','n',
-  //     'N','n','N',
+  //     'n','n','n',
+  //     'N','p','n',
+  //     'n','n','n',
   //     // middle layer
-  //     'n','n','N',
+  //     'n','n','n',
   //     'n',' ','e',
-  //     'N','A','n',
+  //     'n','a','n',
   //     // bottom layer
   //     'n','n','n',
-  //     'n','n','N',
-  //     'N','N','N',
-  //   ]
+  //     'n','n','n',
+  //     'n','n','n',
+  //   ],
+  //   moves: [ 
+  //     'block-1-1-2', 
+  //     'block-2-1-1', 
+  //     'block-1-2-1' 
+  //   ]  
   // };  
 
   const blockChar = (block: BlockInfo): string => {
-    const isOn = onIds.includes(block.id);
-    const levelBlock = toLevelBlock(block.blockType, isOn);
+    const levelBlock = toLevelBlock(block.blockType);
     return `'${levelBlock}'`
   };
 
@@ -411,7 +427,14 @@ const outputLevelToConsole = (levelName: string, blocks: BlockInfo[], onIds: str
       rowOutput = [];
     }
   }
+  output.push('  ],');
+
+  output.push('  moves: [');
+  moves.forEach(move => {
+    output.push(`    '${move}',`);
+  })
   output.push('  ]');
+
   output.push('};');
 
   console.log(output.join('\n'));
@@ -455,6 +478,7 @@ export type GlobalState = {
   playing: boolean;
   levelName: string;
   blocks: BlockInfo[];
+  moves: string[];
   idToBlock: Map<string, BlockInfo>;
   hoveredIds: string[];
   onIds: string[];
@@ -484,6 +508,7 @@ export const useGlobalStore = create<GlobalState>()(
         playing: true,
         levelName: LEVEL.name,
         blocks: BLOCKS,
+        moves: LEVEL.moves,
         idToBlock: populateIdToBlock(BLOCKS),
         hoveredIds: [],
         onIds: BLOCKS.filter(block => block.on).map(block => block.id),
@@ -509,20 +534,14 @@ export const useGlobalStore = create<GlobalState>()(
           return { hoveredIds };
         }),
 
-        toggleHovered: () => set(({ idToBlock, hoveredIds, onIds, toggleMode, blocks }) => {
+        toggleHovered: () => set(({ idToBlock, hoveredIds, moves, onIds, toggleMode, blocks }) => {
           const hoveredBlock = idToBlock.get(hoveredIds[0]) as BlockInfo;
 
           if (toggleMode === 'TOGGLE_ON') {
-            const idsToToggle = hoveredBlock.toggleIds;
+            const newMoves = moves.includes(hoveredBlock.id) ? moves.filter(id => id !== hoveredBlock.id) : [...moves, hoveredBlock.id];
+            const newOnIds = updateOnIds(onIds, hoveredBlock.toggleIds);
 
-            // Toggle off
-            const toggleOffIds = onIds.filter(id => idsToToggle.includes(id));
-            let newOnIds = onIds.filter(id => !toggleOffIds.includes(id));
-            // Toggle on
-            const toggleOnIds = idsToToggle.filter(id => !toggleOffIds.includes(id));
-            newOnIds = [...newOnIds, ...toggleOnIds];
-
-            return { onIds: newOnIds };
+            return { moves: newMoves, onIds: newOnIds };
           }
           if (toggleMode === 'TOGGLE_BLOCK_TYPE') {
             const blockType = hoveredBlock.blockType;
@@ -536,6 +555,7 @@ export const useGlobalStore = create<GlobalState>()(
             return { 
               onIds: [],
               blocks: updatedBlocks,
+              moves: [],
               idToBlock: populateIdToBlock(updatedBlocks)
             };            
           }
@@ -574,6 +594,7 @@ export const useGlobalStore = create<GlobalState>()(
           return { 
             onIds: [],
             blocks,
+            moves: [],
             idToBlock: populateIdToBlock(blocks)
           };
         }),
@@ -590,14 +611,15 @@ export const useGlobalStore = create<GlobalState>()(
           return { 
             onIds: [],
             blocks: updatedBlocks,
+            moves: [],
             idToBlock: populateIdToBlock(updatedBlocks)
           };
         }),
 
-        editReset: () => set(() => ({ onIds: [] })),
+        editReset: () => set(() => ({ onIds: [], moves: [] })),
 
-        editSave: () => set(({ levelName, blocks, onIds }) => {
-          outputLevelToConsole(levelName, blocks, onIds);
+        editSave: () => set(({ levelName, blocks, moves }) => {
+          outputLevelToConsole(levelName, blocks, moves);
           return {};
         }),
       }
