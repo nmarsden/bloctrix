@@ -7,8 +7,12 @@
   padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   pointer-events: none;
+  font-size: 16px;
+}
+
+.editor-container .button-dark {
   font-size: 16px;
 }
 
@@ -70,5 +74,4 @@
   padding: 10px;
   border: 2px dashed rgba(var(--dark-color), 0.6);
   border-radius: 10px;
-  margin-top: 20px;
 }

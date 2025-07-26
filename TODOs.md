@@ -55,6 +55,15 @@
       - [x] reset - toggle all blocks off
       - [x] save - output level data JS code to browser console
         - [ ] add solution, eg. solve: ['block-0-0-1', 'block-1-2-0']
+          - [ ] change save format...
+                * type LevelBlock = 'A' | 'O' | '+' | 'E' | 'X' | 'C' | 'N' | ' ';
+                * type Level = {
+                    name: string;
+                    blocks: LevelBlock[];
+                    toggleIds: string[];
+                  };
+
+
         - [ ] save to local storage
 
   - [ ] custom levels

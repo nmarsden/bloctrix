@@ -86,7 +86,7 @@ export default function Editor (){
 
           {toggleMode === 'TOGGLE_BLOCK_TYPE' ? (
             <>
-              <div className="editor-instructions">Click a block to change its block type or change all blocks using the fill options above</div>
+              <div className="editor-instructions">Choose a grid size. Use the fill options to change all block types. Click an individual block to change its block type.</div>
               <div>Grid size:</div>
               <div className="editor-buttonGroup">
                 <div className="button-dark" onClick={onGridSizeClicked(3)}>3</div>
@@ -106,7 +106,7 @@ export default function Editor (){
             </>
           ) : (
             <>
-              <div className="editor-instructions">Click blocks to toggle on/off according to block type. Choose 'Reset' to toggle all to off.</div>
+              <div className="editor-instructions">Click a block to toggle on/off according to block type. Choose 'Reset' to toggle all to off.</div>
               <div className="editor-buttonGroup">
                 <div className="button-dark" onClick={onResetClicked}>Reset</div>
               </div>

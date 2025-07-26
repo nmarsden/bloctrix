@@ -340,7 +340,7 @@ const levelBlocksToBlocks = (levelBlocks: LevelBlock[]): BlockInfo[] => {
       const yPos = minPos + (y * (BLOCK_SIZE + BLOCK_GAP));
       const zPos = minPos + (z * (BLOCK_SIZE + BLOCK_GAP));
 
-      const extraInfo = BLOCK_INFO_LOOKUP.get(block) as { blockType: BlockType, on: false };
+      const extraInfo = BLOCK_INFO_LOOKUP.get(block) as { blockType: BlockType, on: boolean };
       const id = calcBlockId(x, y, z);
       blocks.push({ 
         id, 
