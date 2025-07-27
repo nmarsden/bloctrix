@@ -8,8 +8,7 @@ export default function Ui() {
     <>
       <div className={`overlay ${playing ? 'hide' : 'show'}`}>
         <div className="overlayHeading">
-          <div>VOXEL</div>
-          <div>VOID</div>
+          <div>BLOCTRIX</div>
         </div>
       </div>
     </>

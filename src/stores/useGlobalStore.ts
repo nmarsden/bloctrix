@@ -472,7 +472,7 @@ const COLORS: Colors = {
 // --- GlobalState ---
 // -------------------
 
-export type ToggleMode = 'TOGGLE_ON' | 'TOGGLE_BLOCK_TYPE';
+export type ToggleMode = 'TOGGLE_ON' | 'TOGGLE_BLOCK_TYPE'; 
 
 export type GlobalState = {
   playing: boolean;
@@ -625,7 +625,7 @@ export const useGlobalStore = create<GlobalState>()(
       }
     },
     {
-      name: 'voxel-void',
+      name: 'bloctrix',
       partialize: () => ({ 
       }),
     }

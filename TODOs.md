@@ -80,7 +80,6 @@
   - [ ] level completed
 
   - [ ] ui
-    - [ ] 
 
 - [x] plane tool
   - [x] enable/disable on xz plane
@@ -98,3 +97,4 @@
 - [x] axes
   - [x] show on pointer over
 
+- [x] rename game to bloctrix

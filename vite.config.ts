@@ -4,7 +4,7 @@ import glsl from 'vite-plugin-glsl';
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/voxel-void/',
+  base: '/bloctrix/',
   plugins: [
     react(),
     glsl()

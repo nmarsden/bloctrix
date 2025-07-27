@@ -1,4 +1,4 @@
-# Voxel Void
+# Bloctrix
 
 Built with React, TypeScript, & Vite.
 
