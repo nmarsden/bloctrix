@@ -6,7 +6,6 @@ import { Color } from "three";
 export default function Debug (){
   const colors = useGlobalStore((state: GlobalState) => state.colors);
   const setColors = useGlobalStore((state: GlobalState) => state.setColors);
-  const toggleShowEditor = useGlobalStore((state: GlobalState) => state.toggleShowEditor);
 
   const [hidden, setHidden] = useState(true);
 
@@ -17,10 +16,6 @@ export default function Debug (){
     window.addEventListener('keydown', (event: KeyboardEvent) => {
       if (event.key === 'd') {
         setHidden(hidden => !hidden);
-      // } else if (event.key === 'p') {
-      //   setPaused(paused => !paused);
-      } else if (event.key === 'e') {
-        toggleShowEditor();
       }
     });
   }, []);
