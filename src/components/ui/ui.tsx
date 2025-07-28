@@ -5,6 +5,7 @@ import './ui.css';
 export default function Ui() {
   const playing = useGlobalStore((state: GlobalState) => state.playing);
   const levelType = useGlobalStore((state: GlobalState) => state.levelType);
+  const currentLevel = useGlobalStore((state: GlobalState) => state.currentLevel);
   const levelName = useGlobalStore((state: GlobalState) => state.levelName);
   const levels = useGlobalStore((state: GlobalState) => state.levels);
   const showLevels = useGlobalStore((state: GlobalState) => state.showLevels);
@@ -18,6 +19,10 @@ export default function Ui() {
   const onSelectLevel = useCallback((level: Level) => {
     return () => playLevel(level);
   }, []);
+
+  const onSelectReset = useCallback(() => {
+    playLevel(currentLevel);
+  }, [currentLevel]);
 
   const onSelectQuit = useCallback(() => {
     showMainMenu();
@@ -65,7 +70,10 @@ export default function Ui() {
         </div>
         <div className="hudMain"></div>
         <div className="hudFooter">
-          <div className="button-dark" onClick={onSelectQuit}>QUIT</div>
+          <div className="buttonGroup">
+            <div className="button-dark" onClick={onSelectReset}>RESET</div>
+            <div className="button-dark" onClick={onSelectQuit}>QUIT</div>
+          </div>
         </div>
       </div>
     </>

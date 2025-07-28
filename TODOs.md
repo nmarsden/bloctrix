@@ -81,6 +81,11 @@
 
   - [ ] ui
     - [ ] main menu
+    - [ ] level menu
+    - [ ] hud
+      - [ ] moves
+      - [ ] reset
+      - [ ] quit
 
 - [x] plane tool
   - [x] enable/disable on xz plane

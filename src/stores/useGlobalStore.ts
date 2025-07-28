@@ -478,6 +478,7 @@ export type ToggleMode = 'TOGGLE_ON' | 'TOGGLE_BLOCK_TYPE';
 
 export type GlobalState = {
   levelType: LevelType;
+  currentLevel: Level;
   levels: Level[];
   playing: boolean;
   levelName: string;
@@ -512,6 +513,7 @@ export const useGlobalStore = create<GlobalState>()(
     (set) => {
       return {
         levelType: 'NONE',
+        currentLevel: LEVEL,
         levels: [],
         playing: false,
         levelName: LEVEL.name,
@@ -541,6 +543,7 @@ export const useGlobalStore = create<GlobalState>()(
 
           return {
             playing: true,
+            currentLevel: level,
             levelName: level.name,
             blocks,
             moves,
