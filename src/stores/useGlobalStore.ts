@@ -2,6 +2,8 @@ import { Color } from 'three';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type GameMode = 'MAIN_MENU' | 'LEVEL_MENU' | 'EDITING' | 'PLAYING';
+
 // --------------
 // --- LEVELS ---
 // --------------
@@ -76,6 +78,25 @@ export type Level = {
   name: string;
   blocks: LevelBlock[];
   moves: string[];
+};
+
+export const NEW_LEVEL: Level = {
+  name: 'New Level',
+  blocks: [
+    // layer 1
+    'n','n','n',
+    'n','n','n',
+    'n','n','n',
+    // layer 2
+    'n','n','n',
+    'n',' ','n',
+    'n','n','n',
+    // layer 3
+    'n','n','n',
+    'n','n','n',
+    'n','n','n',
+  ],
+  moves: []
 };
 
 const LEVEL: Level = {
@@ -477,11 +498,11 @@ const COLORS: Colors = {
 export type ToggleMode = 'TOGGLE_ON' | 'TOGGLE_BLOCK_TYPE'; 
 
 export type GlobalState = {
+  gameMode: GameMode;
   levelType: LevelType;
   currentLevel: Level;
   moveCount: number;
   levels: Level[];
-  playing: boolean;
   levelName: string;
   blocks: BlockInfo[];
   moves: string[];
@@ -490,34 +511,34 @@ export type GlobalState = {
   onIds: string[];
   activePlane: number;
   colors: Colors;
-  showEditor: boolean;
   toggleMode: ToggleMode;
 
   showLevels: (levelType: LevelType) => void;
+  editLevel: (level: Level) => void;
   playLevel: (level: Level) => void;
   showMainMenu: () => void;
   blockHovered: (id: string, isHovered: boolean) => void;
   toggleHovered: () => void;
   setActivePlane: (activePlane: number) => void;
   setColors: (colors: Colors) => void;
-  toggleShowEditor: () => void;
   setToggleMode: (toggleMode: ToggleMode) => void;
   editLevelName: (levelName: string) => void;
   editGridSize: (gridSize: number) => void;
   editFill: (blockType: BlockType) => void;
   editReset: () => void;
   editSave: () => void;
+  editBack: () => void;
 };
 
 export const useGlobalStore = create<GlobalState>()(
   persist(  
     (set) => {
       return {
+        gameMode: 'MAIN_MENU',
         levelType: 'NONE',
         currentLevel: LEVEL,
         moveCount: 0,
         levels: [],
-        playing: false,
         levelName: LEVEL.name,
         blocks: BLOCKS,
         moves: LEVEL.moves,
@@ -526,15 +547,32 @@ export const useGlobalStore = create<GlobalState>()(
         onIds: BLOCKS.filter(block => block.on).map(block => block.id),
         activePlane: 2,
         colors: COLORS,
-        showEditor: false,
         toggleMode: 'TOGGLE_ON',
 
         showLevels: (levelType: LevelType) => set(() => {
-          if (levelType === 'NONE') {
-            return { levelType, levels: [] }
-          } else {
-            return { levelType, levels: [LEVEL] };
+          return {
+            gameMode: 'LEVEL_MENU',
+            levelType,
+            levels: levelType === 'NONE' ? [] : [LEVEL],
           }
+        }),
+
+        editLevel: (level: Level) => set(() => {
+          const blocks = levelBlocksToBlocks(level.blocks, level.moves);
+          const moves = [...level.moves];
+          const idToBlock = populateIdToBlock(blocks);
+          const onIds = blocks.filter(block => block.on).map(block => block.id);
+          
+          return {
+            gameMode: 'EDITING',
+            levelName: level.name,
+            currentLevel: level,
+            moveCount: 0,
+            blocks,
+            moves,
+            idToBlock,
+            onIds
+          };
         }),
 
         playLevel: (level: Level) => set(() => {
@@ -544,7 +582,7 @@ export const useGlobalStore = create<GlobalState>()(
           const onIds = blocks.filter(block => block.on).map(block => block.id);
 
           return {
-            playing: true,
+            gameMode: 'PLAYING',
             currentLevel: level,
             moveCount: 0,
             levelName: level.name,
@@ -557,7 +595,7 @@ export const useGlobalStore = create<GlobalState>()(
 
         showMainMenu: () => set(() => {
           return { 
-            playing: false,
+            gameMode: 'MAIN_MENU',
             levelType: 'NONE'
           };
         }),
@@ -606,8 +644,6 @@ export const useGlobalStore = create<GlobalState>()(
         setActivePlane: (activePlane) => set(() => ({ activePlane })),
 
         setColors: (colors: Colors) => set(() => ({ colors: {...colors} })),
-
-        toggleShowEditor: () => set(({ showEditor }) => ({ showEditor: !showEditor })),
 
         setToggleMode: (toggleMode: ToggleMode) => set(({ blocks }) => {
           // Recalculate Toggle IDs 
@@ -662,6 +698,12 @@ export const useGlobalStore = create<GlobalState>()(
         editSave: () => set(({ levelName, blocks, moves }) => {
           outputLevelToConsole(levelName, blocks, moves);
           return {};
+        }),
+
+        editBack: () => set(() => {
+          return {
+            gameMode: 'LEVEL_MENU'
+          };
         }),
       }
     },

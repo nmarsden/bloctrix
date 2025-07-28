@@ -1,30 +1,18 @@
-import { button, useControls } from "leva";
 import { ChangeEvent, useCallback, useEffect } from "react";
 import { BlockType, GlobalState, ToggleMode, useGlobalStore } from "../../stores/useGlobalStore";
 import "./editor.css";
 
 export default function Editor (){
-  const showEditor = useGlobalStore((state: GlobalState) => state.showEditor);
+  const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
   const toggleMode = useGlobalStore((state: GlobalState) => state.toggleMode);
-  const toggleShowEditor = useGlobalStore((state: GlobalState) => state.toggleShowEditor);
   const levelName = useGlobalStore((state: GlobalState) => state.levelName);
   const editLevelName = useGlobalStore((state: GlobalState) => state.editLevelName);
   const editGridSize = useGlobalStore((state: GlobalState) => state.editGridSize);
   const editFill = useGlobalStore((state: GlobalState) => state.editFill);
   const editReset = useGlobalStore((state: GlobalState) => state.editReset);
   const editSave = useGlobalStore((state: GlobalState) => state.editSave);
+  const editBack = useGlobalStore((state: GlobalState) => state.editBack);
   const setToggleMode = useGlobalStore((state: GlobalState) => state.setToggleMode);
-
-  useControls(
-    'Editor',
-    {
-      [showEditor ? "hide": "show"]: button(() => toggleShowEditor()),
-    },
-    {
-      collapsed: true
-    },
-    [showEditor]
-  );
 
   const onLevelNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     editLevelName(event.target.value);
@@ -50,17 +38,21 @@ export default function Editor (){
     editSave();
   }, []);
 
+  const onBackClicked = useCallback(() => {
+    editBack();
+  }, []);
+
   useEffect(() => {
-    if (showEditor) {
+    if (gameMode === 'EDITING') {
       setToggleMode('TOGGLE_BLOCK_TYPE');
     } else {
       setToggleMode('TOGGLE_ON');
     }
-  }, [showEditor]);
+  }, [gameMode]);
   
   return (
     <>
-      {showEditor ? 
+      {gameMode === 'EDITING' ? 
         <div className="editor-container">
           <div className="editor-heading">Editor Tools</div>
           <div>Level Name:</div>
@@ -74,6 +66,7 @@ export default function Editor (){
           />
           <div className="editor-buttonGroup">
             <div className="button-dark" onClick={onSaveClicked}>Save</div>
+            <div className="button-dark" onClick={onBackClicked}>Back</div>
           </div>
 
           <div>
