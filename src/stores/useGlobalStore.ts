@@ -5,6 +5,8 @@ import { persist } from 'zustand/middleware';
 // --------------
 // --- LEVELS ---
 // --------------
+export type LevelType = 'EASY' | 'MEDIUM' | 'HARD' | 'CUSTOM' | 'NONE';
+
 export type BlockType = 'ALL' | 'EDGES_AND_CORNERS' | 'SELF_AND_EDGES' | 'EDGES' | 'SELF_AND_CORNERS' | 'CORNERS' | 'NONE' | 'EMPTY';
 
 export type LevelBlock = 
@@ -70,7 +72,7 @@ const nextBlockType = (blockType: BlockType): BlockType => {
 //   'a','a','a','a',
 // ];
 
-type Level = {
+export type Level = {
   name: string;
   blocks: LevelBlock[];
   moves: string[];
@@ -475,6 +477,8 @@ const COLORS: Colors = {
 export type ToggleMode = 'TOGGLE_ON' | 'TOGGLE_BLOCK_TYPE'; 
 
 export type GlobalState = {
+  levelType: LevelType;
+  levels: Level[];
   playing: boolean;
   levelName: string;
   blocks: BlockInfo[];
@@ -487,7 +491,9 @@ export type GlobalState = {
   showEditor: boolean;
   toggleMode: ToggleMode;
 
-  play: () => void;
+  showLevels: (levelType: LevelType) => void;
+  playLevel: (level: Level) => void;
+  showMainMenu: () => void;
   blockHovered: (id: string, isHovered: boolean) => void;
   toggleHovered: () => void;
   setActivePlane: (activePlane: number) => void;
@@ -505,7 +511,9 @@ export const useGlobalStore = create<GlobalState>()(
   persist(  
     (set) => {
       return {
-        playing: true,
+        levelType: 'NONE',
+        levels: [],
+        playing: false,
         levelName: LEVEL.name,
         blocks: BLOCKS,
         moves: LEVEL.moves,
@@ -517,8 +525,35 @@ export const useGlobalStore = create<GlobalState>()(
         showEditor: false,
         toggleMode: 'TOGGLE_ON',
 
-        play: () => set(() => {
-          return {};
+        showLevels: (levelType: LevelType) => set(() => {
+          if (levelType === 'NONE') {
+            return { levelType, levels: [] }
+          } else {
+            return { levelType, levels: [LEVEL] };
+          }
+        }),
+
+        playLevel: (level: Level) => set(() => {
+          const blocks = levelBlocksToBlocks(level.blocks, level.moves);
+          const moves = [...level.moves];
+          const idToBlock = populateIdToBlock(blocks);
+          const onIds = blocks.filter(block => block.on).map(block => block.id);
+
+          return {
+            playing: true,
+            levelName: level.name,
+            blocks,
+            moves,
+            idToBlock,
+            onIds
+          };
+        }),
+
+        showMainMenu: () => set(() => {
+          return { 
+            playing: false,
+            levelType: 'NONE'
+          };
         }),
 
         blockHovered: (id: string, isHovered: boolean) => set(({ hoveredIds }) => {

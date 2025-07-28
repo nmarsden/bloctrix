@@ -37,6 +37,11 @@
   gap: 10px;
 }
 
+.subHeading {
+  font-size: 20px;
+  padding-block: 20px;
+}
+
 .button-light {
   font-size: 24px;
   line-height: 24px;
@@ -44,7 +49,7 @@
   color: rgba(var(--light-color), 1.0);
   border: 2px solid rgba(var(--light-color), 1.0);
   border-radius: 4px;
-  min-width: 50px;
+  min-width: 90px;
   min-height: 50px;
   display: flex;
   justify-content: center;
@@ -182,8 +187,12 @@
 
 .buttonGroup {
   display: flex;
-  margin-top: 50px;
   gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.buttonGroup-column {
+  flex-direction: column;
 }
 
 .controlsSection {
@@ -280,4 +289,43 @@
 .infoCreditLabel {
   min-width: 70px;
   text-align: left;
+}
+
+.hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* width: 100%;
+  height: 100%; */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+	z-index: 11;
+  pointer-events: none;
+}
+
+.hud.show {
+  display: flex;
+}
+
+.hud.hide {
+  display: none;
+}
+
+.hudHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.hudMain {
+  flex-grow: 1;
+}
+
+.hudFooter {
 }
