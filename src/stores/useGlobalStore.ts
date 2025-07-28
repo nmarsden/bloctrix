@@ -479,6 +479,7 @@ export type ToggleMode = 'TOGGLE_ON' | 'TOGGLE_BLOCK_TYPE';
 export type GlobalState = {
   levelType: LevelType;
   currentLevel: Level;
+  moveCount: number;
   levels: Level[];
   playing: boolean;
   levelName: string;
@@ -514,6 +515,7 @@ export const useGlobalStore = create<GlobalState>()(
       return {
         levelType: 'NONE',
         currentLevel: LEVEL,
+        moveCount: 0,
         levels: [],
         playing: false,
         levelName: LEVEL.name,
@@ -544,6 +546,7 @@ export const useGlobalStore = create<GlobalState>()(
           return {
             playing: true,
             currentLevel: level,
+            moveCount: 0,
             levelName: level.name,
             blocks,
             moves,
@@ -572,14 +575,14 @@ export const useGlobalStore = create<GlobalState>()(
           return { hoveredIds };
         }),
 
-        toggleHovered: () => set(({ idToBlock, hoveredIds, moves, onIds, toggleMode, blocks }) => {
+        toggleHovered: () => set(({ idToBlock, hoveredIds, moves, onIds, toggleMode, blocks, moveCount }) => {
           const hoveredBlock = idToBlock.get(hoveredIds[0]) as BlockInfo;
 
           if (toggleMode === 'TOGGLE_ON') {
             const newMoves = moves.includes(hoveredBlock.id) ? moves.filter(id => id !== hoveredBlock.id) : [...moves, hoveredBlock.id];
             const newOnIds = updateOnIds(onIds, hoveredBlock.toggleIds);
 
-            return { moves: newMoves, onIds: newOnIds };
+            return { moves: newMoves, onIds: newOnIds, moveCount: moveCount + 1 };
           }
           if (toggleMode === 'TOGGLE_BLOCK_TYPE') {
             const blockType = hoveredBlock.blockType;
