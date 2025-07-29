@@ -512,6 +512,7 @@ export type GlobalState = {
   activePlane: number;
   colors: Colors;
   toggleMode: ToggleMode;
+  customLevels: Level[];
 
   showLevels: (levelType: LevelType) => void;
   editLevel: (level: Level) => void;
@@ -548,12 +549,20 @@ export const useGlobalStore = create<GlobalState>()(
         activePlane: 2,
         colors: COLORS,
         toggleMode: 'TOGGLE_ON',
+        customLevels: [],
 
-        showLevels: (levelType: LevelType) => set(() => {
+        showLevels: (levelType: LevelType) => set(({ customLevels }) => {
+          let levels: Level[] = [];
+          switch(levelType) {
+            case 'EASY': levels = [LEVEL]; break;
+            case 'MEDIUM': levels = [LEVEL]; break;
+            case 'HARD': levels = [LEVEL]; break;
+            case 'CUSTOM': levels = [...customLevels]; break;
+          }
           return {
             gameMode: 'LEVEL_MENU',
             levelType,
-            levels: levelType === 'NONE' ? [] : [LEVEL],
+            levels
           }
         }),
 
@@ -695,21 +704,30 @@ export const useGlobalStore = create<GlobalState>()(
 
         editReset: () => set(() => ({ onIds: [], moves: [] })),
 
-        editSave: () => set(({ levelName, blocks, moves }) => {
+        editSave: () => set(({ levelName, blocks, moves, customLevels }) => {
           outputLevelToConsole(levelName, blocks, moves);
-          return {};
+
+          const newLevel: Level = { 
+            name: levelName, 
+            blocks: blocks.map(block => toLevelBlock(block.blockType)), 
+            moves 
+          };
+
+          return { 
+            customLevels: [...customLevels, newLevel]
+          };
         }),
 
-        editBack: () => set(() => {
-          return {
-            gameMode: 'LEVEL_MENU'
-          };
+        editBack: () => set(({ showLevels }) => {
+          showLevels('CUSTOM');
+          return {};
         }),
       }
     },
     {
       name: 'bloctrix',
-      partialize: () => ({ 
+      partialize: (state) => ({ 
+        customLevels: state.customLevels
       }),
     }
   )
