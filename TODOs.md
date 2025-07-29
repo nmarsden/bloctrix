@@ -62,10 +62,10 @@
                     blocks: LevelBlock[];
                     moves: string[];
                   };
-        - [ ] save to local storage
-          - [ ] compress data using https://github.com/pieroxy/lz-string
-        - [ ] load from local storage
-          - [ ] uncompress data using https://github.com/pieroxy/lz-string
+        - [x] save to local storage
+          - [x] compress data using https://github.com/pieroxy/lz-string
+        - [x] load from local storage
+          - [x] uncompress data using https://github.com/pieroxy/lz-string
     - [ ] mobile support
     - [ ] share
       - [ ] write URL with encoded level data

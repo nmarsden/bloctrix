@@ -1,6 +1,7 @@
 import { Color } from 'three';
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, StateStorage, createJSONStorage } from 'zustand/middleware';
+import * as lz from 'lz-string';
 
 export type GameMode = 'MAIN_MENU' | 'LEVEL_MENU' | 'EDITING' | 'PLAYING';
 
@@ -531,6 +532,39 @@ export type GlobalState = {
   editBack: () => void;
 };
 
+const customLzStorage: StateStorage = {
+  getItem: (name: string): string | null => {
+    try {
+      const storedValue = localStorage.getItem(name);
+      if (storedValue) {
+        // Decompress the string using lz-string
+        const decompressed = lz.decompressFromUTF16(storedValue);
+        // console.log(`customLzStorage: getItem(${name}):`, decompressed);
+        return decompressed;
+      }
+    } catch (error) {
+      console.error('Error getting item from custom storage:', error);
+    }
+    return null;
+  },
+  setItem: (name: string, value: string): void => {
+    try {
+      // Compress the string using lz-string
+      const compressed = lz.compressToUTF16(value);
+      localStorage.setItem(name, compressed);
+    } catch (error) {
+      console.error('Error setting item to custom storage:', error);
+    }
+  },
+  removeItem: (name: string): void => {
+    try {
+      localStorage.removeItem(name);
+    } catch (error) {
+      console.error('Error removing item from custom storage:', error);
+    }
+  },
+};
+
 export const useGlobalStore = create<GlobalState>()(
   persist(  
     (set) => {
@@ -729,6 +763,7 @@ export const useGlobalStore = create<GlobalState>()(
       partialize: (state) => ({ 
         customLevels: state.customLevels
       }),
+      storage: createJSONStorage(() => customLzStorage)
     }
   )
 );
