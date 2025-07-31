@@ -78,6 +78,7 @@
         - [x] decode level data
         - [x] add level to customLevels
         - [x] starting playing level
+      - [x] improve the share button - use a link icon   
 
   - [ ] custom levels
     - [ ] new level - open level editor

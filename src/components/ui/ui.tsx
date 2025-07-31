@@ -91,7 +91,7 @@ export default function Ui() {
         <div className={`hud ${gameMode === 'PLAYING' ? 'show' : 'hide'}`}>
           <div className="hudHeader">
             <div>{levelType}</div>
-            <div>{levelName}</div>
+            <div>{levelName}{canShare ?<i className="shareLink fa-solid fa-link" onClick={onSelectShare}></i> : null}</div>
           </div>
           <div className="hudMain"></div>
           <div className="hudFooter">
@@ -99,7 +99,6 @@ export default function Ui() {
             <div className="buttonGroup">
               <div className="button-dark" onClick={onSelectReset}>RESET</div>
               <div className="button-dark" onClick={onSelectQuit}>QUIT</div>
-              {canShare ? <div className="button-dark" onClick={onSelectShare}>SHARE</div> : null}
             </div>
           </div>
         </div>
