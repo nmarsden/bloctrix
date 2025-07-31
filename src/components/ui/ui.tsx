@@ -39,8 +39,8 @@ export default function Ui() {
   }, [currentLevel, levelType]);
 
   const onSelectQuit = useCallback(() => {
-    showMainMenu();
-  }, []);
+    showLevels(levelType);
+  }, [levelType]);
 
   const onSelectShare = useCallback(async () => {
     await shareCustomLevel();
@@ -76,12 +76,12 @@ export default function Ui() {
             <div className="subHeading">{levelType} LEVELS</div>
             <div className="buttonGroup buttonGroup-column">
               {levelType === 'CUSTOM' ? (
-                <div className="button-light" onClick={onSelectNewLevel}>NEW</div>
+                <div className="button-light button-new-level" onClick={onSelectNewLevel}><i className="fa-solid fa-plus"></i></div>
               ) : null}
               {levels.map((level, index) => (
-                <div className="button-light" key={`level-${index}`} onClick={onSelectLevel(level)}>{level.name}</div>
+                <div className="button-light button-level" key={`level-${index}`} onClick={onSelectLevel(level)}>{level.name}</div>
               ))}
-              <div className="button-light" onClick={onSelectBack}>BACK</div>
+              <div className="button-light" onClick={onSelectBack} title="Back"><i className="fa-solid fa-left-long"></i></div>
             </div>
           </>
         ) : null}
@@ -97,8 +97,8 @@ export default function Ui() {
           <div className="hudFooter">
             <div>Moves: {moveCount}</div>
             <div className="buttonGroup">
-              <div className="button-dark" onClick={onSelectReset}>RESET</div>
-              <div className="button-dark" onClick={onSelectQuit}>QUIT</div>
+              <div className="button-dark" onClick={onSelectQuit} title="Back"><i className="fa-solid fa-left-long"></i></div>
+              <div className="button-dark" onClick={onSelectReset} title="Reset"><i className="fa-solid fa-rotate"></i></div>
             </div>
           </div>
         </div>

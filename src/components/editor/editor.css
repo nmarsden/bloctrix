@@ -2,27 +2,22 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 380px;
+  width: 100%;
   height: 100%;
   padding: 10px;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 16px;
   pointer-events: none;
   font-size: 16px;
 }
 
-.editor-container .button-dark {
-  font-size: 16px;
-}
-
-.editor-heading {
-  text-transform: uppercase;
-  font-size: 20px;
-}
-
 .editor-nameInput {
   pointer-events: all;
+  width: 16ch;
+  margin-top: 20px;
+  padding: 10px;
 }
 
 .editor-buttonGroup {
@@ -74,4 +69,38 @@
   padding: 10px;
   border: 2px dashed rgba(var(--dark-color), 0.6);
   border-radius: 10px;
+}
+
+.editor-modal {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  bottom: 0;
+  padding: 20px;
+  margin-bottom: 20px;
+  min-width: 250px;
+  border: 2px solid rgba(var(--dark-color), 0.6);
+  left: 50%;
+  z-index: 1000;
+  background: var(--background-colour);
+  transform: translateX(-50%) translateY(240px);
+  transition: transform 300ms;
+}
+
+.editor-modal.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+.editor-modal-header {
+  padding-bottom: 10px;
+}
+
+.editor-modal-close-button {
+  position: absolute;
+  top: 5px;
+  right: 7px;
+  color: rgba(var(--dark-color), 0.6);
+  pointer-events: all;
+  cursor: pointer;  
 }

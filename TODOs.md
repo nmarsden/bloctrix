@@ -100,8 +100,8 @@
       - [ ] new custom
     - [ ] hud
       - [ ] moves
-      - [ ] reset
-      - [ ] quit
+      - [x] reset - use icon
+      - [x] quit - use icon
 
 - [x] plane tool
   - [x] enable/disable on xz plane
