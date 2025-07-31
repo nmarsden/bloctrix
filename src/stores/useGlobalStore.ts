@@ -464,6 +464,81 @@ const outputLevelToConsole = (levelName: string, blocks: BlockInfo[], moves: str
   console.log(output.join('\n'));
 }
 
+const levelToEncodedURI = (level: Level): string => {
+  return lz.compressToEncodedURIComponent(JSON.stringify(level));
+}
+
+const encodedURIToLevel = (encodedURIComponent: string): Level => {
+  return JSON.parse(lz.decompressFromEncodedURIComponent(encodedURIComponent));
+}
+
+const toCustomLevelURL = (level: Level): string => {
+  const encodedURIComponent = levelToEncodedURI(level);
+  return window.location.protocol + window.location.host + window.location.pathname + '#cl=' + encodedURIComponent;
+}
+
+const hashToCustomLevel = (hash: string): Level => {
+  return encodedURIToLevel(hash.substring('#cl='.length));
+}
+
+const arraysAreEqual = (arr1: string[], arr2: string[]) => {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return false;
+    }
+  }
+  return true;
+};
+
+const isNotExistingLevel = (level: Level, existingLevels: Level[]): boolean => {
+  return !existingLevels.some(lvl => (
+    lvl.name === level.name &&
+    arraysAreEqual(lvl.blocks, level.blocks) &&
+    arraysAreEqual(lvl.moves, level.moves)
+  ));
+}
+
+const copyToClipboard = (text: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        if (typeof navigator !== "undefined" && typeof navigator.clipboard !== "undefined") {
+            const type = "text/plain";
+            const blob = new Blob([text], { type });
+            const data = [new ClipboardItem({ [type]: blob })];
+            navigator.clipboard.write(data).then(resolve, reject).catch(reject);
+        }
+        else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+            var textarea = document.createElement("textarea");
+            textarea.textContent = text;
+            textarea.style.position = "fixed";
+            textarea.style.width = '2em';
+            textarea.style.height = '2em';
+            textarea.style.padding = '0';
+            textarea.style.border = 'none';
+            textarea.style.outline = 'none';
+            textarea.style.boxShadow = 'none';
+            textarea.style.background = 'transparent';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            try {
+                document.execCommand("copy");
+                document.body.removeChild(textarea);
+                resolve();
+            }
+            catch (e) {
+                document.body.removeChild(textarea);
+                reject(e);
+            }
+        }
+        else {
+            reject(new Error("None of copying methods are supported by this browser!"));
+        }
+    });
+}
+
 // -------------------
 // --- GlobalState ---
 // -------------------
@@ -514,10 +589,13 @@ export type GlobalState = {
   colors: Colors;
   toggleMode: ToggleMode;
   customLevels: Level[];
+  canShare: boolean;
 
+  shareCustomLevel: () => Promise<void>;
+  openCustomLevel: (hash: string) => void;
   showLevels: (levelType: LevelType) => void;
   editLevel: (level: Level) => void;
-  playLevel: (level: Level) => void;
+  playLevel: (level: Level, levelType: LevelType) => void;
   showMainMenu: () => void;
   blockHovered: (id: string, isHovered: boolean) => void;
   toggleHovered: () => void;
@@ -567,7 +645,7 @@ const customLzStorage: StateStorage = {
 
 export const useGlobalStore = create<GlobalState>()(
   persist(  
-    (set) => {
+    (set, get) => {
       return {
         gameMode: 'MAIN_MENU',
         levelType: 'NONE',
@@ -584,6 +662,26 @@ export const useGlobalStore = create<GlobalState>()(
         colors: COLORS,
         toggleMode: 'TOGGLE_ON',
         customLevels: [],
+        canShare: false,
+
+        shareCustomLevel: async () => {
+          // Copy link to clipboard
+          const customLevelURL = toCustomLevelURL(get().currentLevel);
+          return await copyToClipboard(customLevelURL);
+        },
+
+        openCustomLevel: (hash: string) => set(({ playLevel, customLevels }) => {
+          const level = hashToCustomLevel(hash);
+
+          // Store custom level
+          if (isNotExistingLevel(level, customLevels)) {
+            customLevels = [...customLevels, level];
+          }
+
+          playLevel(level, 'CUSTOM');
+
+          return { customLevels };
+        }),
 
         showLevels: (levelType: LevelType) => set(({ customLevels }) => {
           let levels: Level[] = [];
@@ -618,21 +716,24 @@ export const useGlobalStore = create<GlobalState>()(
           };
         }),
 
-        playLevel: (level: Level) => set(() => {
+        playLevel: (level: Level, levelType: LevelType) => set(() => {
           const blocks = levelBlocksToBlocks(level.blocks, level.moves);
           const moves = [...level.moves];
           const idToBlock = populateIdToBlock(blocks);
           const onIds = blocks.filter(block => block.on).map(block => block.id);
+          const canShare = (levelType === 'CUSTOM');
 
           return {
             gameMode: 'PLAYING',
             currentLevel: level,
             moveCount: 0,
+            levelType,
             levelName: level.name,
             blocks,
             moves,
             idToBlock,
-            onIds
+            onIds,
+            canShare
           };
         }),
 

@@ -1,8 +1,10 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { GlobalState, LevelType, Level, useGlobalStore, NEW_LEVEL } from '../../stores/useGlobalStore';
 import './ui.css';
 
 export default function Ui() {
+  const [showToast, setShowToast] = useState(false);
+  
   const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
   const levelType = useGlobalStore((state: GlobalState) => state.levelType);
   const currentLevel = useGlobalStore((state: GlobalState) => state.currentLevel);
@@ -13,6 +15,8 @@ export default function Ui() {
   const editLevel = useGlobalStore((state: GlobalState) => state.editLevel);
   const playLevel = useGlobalStore((state: GlobalState) => state.playLevel);
   const showMainMenu = useGlobalStore((state: GlobalState) => state.showMainMenu);
+  const canShare = useGlobalStore((state: GlobalState) => state.canShare);
+  const shareCustomLevel = useGlobalStore((state: GlobalState) => state.shareCustomLevel);
 
   const onSelectLevelType = useCallback((levelType: LevelType) => {
     return () => showLevels(levelType);
@@ -23,19 +27,25 @@ export default function Ui() {
   }, []);
 
   const onSelectLevel = useCallback((level: Level) => {
-    return () => playLevel(level);
-  }, []);
+    return () => playLevel(level, levelType);
+  }, [levelType]);
 
   const onSelectBack = useCallback(() => {
     showMainMenu();
   }, []);
 
   const onSelectReset = useCallback(() => {
-    playLevel(currentLevel);
-  }, [currentLevel]);
+    playLevel(currentLevel, levelType);
+  }, [currentLevel, levelType]);
 
   const onSelectQuit = useCallback(() => {
     showMainMenu();
+  }, []);
+
+  const onSelectShare = useCallback(async () => {
+    await shareCustomLevel();
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2000);
   }, []);
   
   return (
@@ -89,10 +99,13 @@ export default function Ui() {
             <div className="buttonGroup">
               <div className="button-dark" onClick={onSelectReset}>RESET</div>
               <div className="button-dark" onClick={onSelectQuit}>QUIT</div>
+              {canShare ? <div className="button-dark" onClick={onSelectShare}>SHARE</div> : null}
             </div>
           </div>
         </div>
       ) : null}
+      {/* TOAST */}
+      <div className={`toast ${showToast ? 'show' : ''}`}>Link copied to clipboard!</div>
     </>
   )
 }

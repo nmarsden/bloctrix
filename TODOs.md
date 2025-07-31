@@ -67,9 +67,17 @@
         - [x] load from local storage
           - [x] uncompress data using https://github.com/pieroxy/lz-string
     - [ ] mobile support
-    - [ ] share
-      - [ ] write URL with encoded level data
-      - [ ] read URL with encoded level data
+    - [x] share
+      - [x] write...
+        - [x] share button to trigger sharing
+        - [x] create URL with encoded level data eg. <hostname>/bloctrix#cl=[ENCODED_DATA]
+        - [x] copy URL to clipboard
+        - [x] show toast message: Link copied to clipboard!
+      - [x] read...
+        - [x] react to URL hash starting with 'cl='
+        - [x] decode level data
+        - [x] add level to customLevels
+        - [x] starting playing level
 
   - [ ] custom levels
     - [ ] new level - open level editor
