@@ -66,6 +66,9 @@
           - [x] compress data using https://github.com/pieroxy/lz-string
         - [x] load from local storage
           - [x] uncompress data using https://github.com/pieroxy/lz-string
+      - [ ] show toast message on save  
+      - [ ] indicate when unsaved changes
+      
     - [ ] mobile support
     - [x] share
       - [x] write...

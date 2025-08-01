@@ -52,29 +52,6 @@ const nextBlockType = (blockType: BlockType): BlockType => {
   }
 };
 
-// const LEVEL: LevelBlock[] = [
-//   // layer 1
-//   'e','a','A','A',
-//   'a','a','A','A',
-//   'a','a','a','a',
-//   'p','a','a','n',
-//   // layer 2
-//   'a','a','A','A',
-//   'a','a','a','A',
-//   'a','a','a','a',
-//   'a','a','a','a',
-//   // layer 3
-//   'a','a','a','a',
-//   'a','a','a','a',
-//   'a','a','a','a',
-//   'a','a','a','a',
-//   // layer 4
-//   'a','a','a','a',
-//   'a','a','a','a',
-//   'a','a','a','a',
-//   'a','a','a','a',
-// ];
-
 export type Level = {
   name: string;
   blocks: LevelBlock[];
@@ -85,17 +62,17 @@ export const NEW_LEVEL: Level = {
   name: 'New Level',
   blocks: [
     // layer 1
-    'n','n','n',
-    'n','n','n',
-    'n','n','n',
+    'a','a','a',
+    'a','a','a',
+    'a','a','a',
     // layer 2
-    'n','n','n',
-    'n',' ','n',
-    'n','n','n',
+    'a','a','a',
+    'a',' ','a',
+    'a','a','a',
     // layer 3
-    'n','n','n',
-    'n','n','n',
-    'n','n','n',
+    'a','a','a',
+    'a','a','a',
+    'a','a','a',
   ],
   moves: []
 };
@@ -820,12 +797,12 @@ export const useGlobalStore = create<GlobalState>()(
           };
         }),
 
-        editFill: (blockType: BlockType) => set(({ blocks }) => {
+        editFill: (blockType: BlockType) => set(({ blocks, toggleMode }) => {
           const gridSize = Math.round(Math.pow(blocks.length, 1 / 3));
           const updatedBlocks = blocks.map(block => ({
             ...block, 
             blockType: block.blockType === 'EMPTY' ? 'EMPTY' : blockType,
-            toggleIds: calcToggleIds(blockType, block.id, 'TOGGLE_BLOCK_TYPE', gridSize), 
+            toggleIds: calcToggleIds(blockType, block.id, toggleMode, gridSize), 
             on: false
           }));
 
