@@ -2,6 +2,7 @@ import { Color } from 'three';
 import { create } from 'zustand';
 import { persist, StateStorage, createJSONStorage } from 'zustand/middleware';
 import * as lz from 'lz-string';
+import { v4 as uuidv4 } from 'uuid';
 
 export type GameMode = 'MAIN_MENU' | 'LEVEL_MENU' | 'EDITING' | 'PLAYING';
 
@@ -53,12 +54,14 @@ const nextBlockType = (blockType: BlockType): BlockType => {
 };
 
 export type Level = {
+  id: string;
   name: string;
   blocks: LevelBlock[];
   moves: string[];
 };
 
-export const NEW_LEVEL: Level = {
+const NEW_LEVEL: Level = {
+  id: '',
   name: 'New Level',
   blocks: [
     // layer 1
@@ -78,6 +81,7 @@ export const NEW_LEVEL: Level = {
 };
 
 const LEVEL: Level = {
+  id: 'd9045321-b9ca-425a-804b-690b484fbc10',
   name: 'Sample 01',
   blocks: [
     // layer 1
@@ -380,8 +384,9 @@ const populateIdToBlock = (blocks: BlockInfo[]): Map<string, BlockInfo> => {
   return idToBlock;
 };
 
-const outputLevelToConsole = (levelName: string, blocks: BlockInfo[], moves: string[]) => {
+const outputLevelToConsole = (levelId: string, levelName: string, blocks: BlockInfo[], moves: string[]) => {
   // const LEVEL: Level = {
+  //   id: '',
   //   name: 'Sample 01',
   //   blocks: [
   //     // top layer
@@ -411,6 +416,8 @@ const outputLevelToConsole = (levelName: string, blocks: BlockInfo[], moves: str
 
   let output: string[] = [];
   output.push('const LEVEL: Level = {');
+
+  output.push(`  id: '${levelId}',`);
 
   output.push(`  name: '${levelName}',`);
 
@@ -567,10 +574,12 @@ export type GlobalState = {
   toggleMode: ToggleMode;
   customLevels: Level[];
   canShare: boolean;
+  editingLevelId: string;
 
   shareCustomLevel: () => Promise<void>;
   openCustomLevel: (hash: string) => void;
   showLevels: (levelType: LevelType) => void;
+  newLevel: () => void;
   editLevel: (level: Level) => void;
   playLevel: (level: Level, levelType: LevelType) => void;
   showMainMenu: () => void;
@@ -583,6 +592,7 @@ export type GlobalState = {
   editGridSize: (gridSize: number) => void;
   editFill: (blockType: BlockType) => void;
   editReset: () => void;
+  editDelete: () => void;
   editSave: () => void;
   editBack: () => void;
 };
@@ -640,6 +650,7 @@ export const useGlobalStore = create<GlobalState>()(
         toggleMode: 'TOGGLE_ON',
         customLevels: [],
         canShare: false,
+        editingLevelId: '',
 
         shareCustomLevel: async () => {
           // Copy link to clipboard
@@ -675,6 +686,12 @@ export const useGlobalStore = create<GlobalState>()(
           }
         }),
 
+        newLevel: () => set(({ editLevel }) => {
+          const level = {...NEW_LEVEL, id: uuidv4()};
+          editLevel(level);
+          return {};
+        }),
+
         editLevel: (level: Level) => set(() => {
           const blocks = levelBlocksToBlocks(level.blocks, level.moves);
           const moves = [...level.moves];
@@ -689,7 +706,8 @@ export const useGlobalStore = create<GlobalState>()(
             blocks,
             moves,
             idToBlock,
-            onIds
+            onIds,
+            editingLevelId: level.id
           };
         }),
 
@@ -816,19 +834,34 @@ export const useGlobalStore = create<GlobalState>()(
 
         editReset: () => set(() => ({ onIds: [], moves: [] })),
 
-        editSave: () => set(({ levelName, blocks, moves, customLevels }) => {
-          outputLevelToConsole(levelName, blocks, moves);
+        editDelete: () => {
+          const { editingLevelId, customLevels, editBack } = get();
+          const newCustomLevels = customLevels.filter(level => level.id !== editingLevelId);
+          set({ customLevels: newCustomLevels });
+          editBack();
+        },
 
-          const newLevel: Level = { 
+        editSave: () => {
+          const { editingLevelId, levelName, blocks, moves, customLevels } = get();
+          outputLevelToConsole(editingLevelId, levelName, blocks, moves);
+
+          const saveLevel: Level = {
+            id: editingLevelId,
             name: levelName, 
             blocks: blocks.map(block => toLevelBlock(block.blockType)), 
             moves 
           };
 
-          return { 
-            customLevels: [...customLevels, newLevel]
-          };
-        }),
+          const levelIndex = customLevels.findIndex(level => level.id === editingLevelId);
+          if (levelIndex === -1) {
+            // Save new level
+            set({ customLevels: [saveLevel, ...customLevels] });
+          } else {
+            // Update existing level
+            customLevels[levelIndex] = saveLevel;
+            set({ customLevels: [...customLevels] });
+          }
+        },
 
         editBack: () => set(({ showLevels }) => {
           showLevels('CUSTOM');

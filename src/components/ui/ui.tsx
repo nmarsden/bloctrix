@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { GlobalState, LevelType, Level, useGlobalStore, NEW_LEVEL } from '../../stores/useGlobalStore';
+import { GlobalState, LevelType, Level, useGlobalStore } from '../../stores/useGlobalStore';
 import './ui.css';
 
 export default function Ui() {
@@ -12,6 +12,7 @@ export default function Ui() {
   const levelName = useGlobalStore((state: GlobalState) => state.levelName);
   const levels = useGlobalStore((state: GlobalState) => state.levels);
   const showLevels = useGlobalStore((state: GlobalState) => state.showLevels);
+  const newLevel = useGlobalStore((state: GlobalState) => state.newLevel);
   const editLevel = useGlobalStore((state: GlobalState) => state.editLevel);
   const playLevel = useGlobalStore((state: GlobalState) => state.playLevel);
   const showMainMenu = useGlobalStore((state: GlobalState) => state.showMainMenu);
@@ -23,12 +24,16 @@ export default function Ui() {
   }, []);
 
   const onSelectNewLevel = useCallback(() => {
-    editLevel(NEW_LEVEL);
+    newLevel();
   }, []);
 
   const onSelectLevel = useCallback((level: Level) => {
     return () => playLevel(level, levelType);
   }, [levelType]);
+
+  const onEditLevel = useCallback((level: Level) => {
+    return () => editLevel(level);
+  }, []);
 
   const onSelectBack = useCallback(() => {
     showMainMenu();
@@ -79,7 +84,12 @@ export default function Ui() {
                 <div className="button-light button-new-level" onClick={onSelectNewLevel}><i className="fa-solid fa-plus"></i></div>
               ) : null}
               {levels.map((level, index) => (
-                <div className="button-light button-level" key={`level-${index}`} onClick={onSelectLevel(level)}>{level.name}</div>
+                <div className="buttonGroup">
+                  <div className="button-light button-level" key={`level-${index}`} onClick={onSelectLevel(level)}>{level.name}</div>
+                  {levelType === 'CUSTOM' ? (
+                    <div className="button-light button-edit" onClick={onEditLevel(level)} title="Edit"><i className="fa-solid fa-pen"></i></div>    
+                  ) : null}
+                </div>
               ))}
               <div className="button-light" onClick={onSelectBack} title="Back"><i className="fa-solid fa-left-long"></i></div>
             </div>

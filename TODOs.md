@@ -66,8 +66,11 @@
           - [x] compress data using https://github.com/pieroxy/lz-string
         - [x] load from local storage
           - [x] uncompress data using https://github.com/pieroxy/lz-string
-      - [ ] show toast message on save  
-      - [ ] indicate when unsaved changes
+    - [ ] show toast message on save  
+    - [ ] indicate when unsaved changes
+    - [x] support editing existing level
+      - [x] introduce level ID - as UUID
+    - [x] support deleting existing level
       
     - [ ] mobile support
     - [x] share

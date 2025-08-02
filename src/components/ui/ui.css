@@ -168,6 +168,7 @@
 }
 
 .buttonGroup {
+  position: relative;
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
@@ -295,6 +296,16 @@
 
 .button-level {
   font-size: 16px;
+  min-width: 210px;
+  max-width: 210px;
+}
+
+.button-edit {
+  position: absolute;
+  right: -50px;
+  font-size: 16px;
+  min-width: 45px;
+  max-width: 45px;
 }
 
 .hud {

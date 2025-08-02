@@ -14,6 +14,7 @@ export default function Editor (){
   const editGridSize = useGlobalStore((state: GlobalState) => state.editGridSize);
   const editFill = useGlobalStore((state: GlobalState) => state.editFill);
   const editReset = useGlobalStore((state: GlobalState) => state.editReset);
+  const editDelete = useGlobalStore((state: GlobalState) => state.editDelete);
   const editSave = useGlobalStore((state: GlobalState) => state.editSave);
   const editBack = useGlobalStore((state: GlobalState) => state.editBack);
   const setToggleMode = useGlobalStore((state: GlobalState) => state.setToggleMode);
@@ -64,6 +65,10 @@ export default function Editor (){
     editBack();
   }, []);
 
+  const onDeleteClicked = useCallback(() => {
+    editDelete();
+  }, []);
+
   useEffect(() => {
     if (gameMode === 'EDITING') {
       setToggleMode('TOGGLE_BLOCK_TYPE');
@@ -79,6 +84,7 @@ export default function Editor (){
         <div className="hudHeader">
           <div className="editor-buttonGroup">
             <div className="button-dark" onClick={onBackClicked} title="Back"><i className="fa-solid fa-left-long"></i></div>
+            <div className="button-dark" onClick={onDeleteClicked} title="Delete"><i className="fa-solid fa-trash-can"></i></div>
             <div className="button-dark" onClick={onSaveClicked} title="Save"><i className="fa-solid fa-floppy-disk"></i></div>
           </div>
           <input 
