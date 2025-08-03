@@ -557,6 +557,8 @@ const COLORS: Colors = {
 
 export type ToggleMode = 'TOGGLE_ON' | 'TOGGLE_BLOCK_TYPE'; 
 
+export type ToastMessage = 'NONE' | 'BLOCK_MODE' | 'MOVE_MODE' | 'SHARE';
+
 export type GlobalState = {
   gameMode: GameMode;
   levelType: LevelType;
@@ -573,8 +575,8 @@ export type GlobalState = {
   colors: Colors;
   toggleMode: ToggleMode;
   customLevels: Level[];
-  canShare: boolean;
   editingLevelId: string;
+  toastMessage: ToastMessage;
 
   shareCustomLevel: () => Promise<void>;
   openCustomLevel: (hash: string) => void;
@@ -595,6 +597,7 @@ export type GlobalState = {
   editDelete: () => void;
   editSave: () => void;
   editBack: () => void;
+  setToastMessage: (toastMessage: ToastMessage) => void;
 };
 
 const customLzStorage: StateStorage = {
@@ -649,8 +652,8 @@ export const useGlobalStore = create<GlobalState>()(
         colors: COLORS,
         toggleMode: 'TOGGLE_ON',
         customLevels: [],
-        canShare: false,
         editingLevelId: '',
+        toastMessage: 'NONE',
 
         shareCustomLevel: async () => {
           // Copy link to clipboard
@@ -686,9 +689,10 @@ export const useGlobalStore = create<GlobalState>()(
           }
         }),
 
-        newLevel: () => set(({ editLevel }) => {
+        newLevel: () => set(({ editLevel, editSave }) => {
           const level = {...NEW_LEVEL, id: uuidv4()};
           editLevel(level);
+          editSave();
           return {};
         }),
 
@@ -716,7 +720,6 @@ export const useGlobalStore = create<GlobalState>()(
           const moves = [...level.moves];
           const idToBlock = populateIdToBlock(blocks);
           const onIds = blocks.filter(block => block.on).map(block => block.id);
-          const canShare = (levelType === 'CUSTOM');
 
           return {
             gameMode: 'PLAYING',
@@ -727,8 +730,7 @@ export const useGlobalStore = create<GlobalState>()(
             blocks,
             moves,
             idToBlock,
-            onIds,
-            canShare
+            onIds
           };
         }),
 
@@ -867,6 +869,8 @@ export const useGlobalStore = create<GlobalState>()(
           showLevels('CUSTOM');
           return {};
         }),
+
+        setToastMessage: (toastMessage: ToastMessage) => set(() => ({ toastMessage }))
       }
     },
     {

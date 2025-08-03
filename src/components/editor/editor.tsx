@@ -5,11 +5,11 @@ import "./editor.css";
 export default function Editor (){
   const [showSizeEditor, setShowSizeEditor] = useState(false);
   const [showFillEditor, setShowFillEditor] = useState(false);
-  const [showToast, setShowToast] = useState(false);
 
   const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
   const toggleMode = useGlobalStore((state: GlobalState) => state.toggleMode);
   const levelName = useGlobalStore((state: GlobalState) => state.levelName);
+
   const editLevelName = useGlobalStore((state: GlobalState) => state.editLevelName);
   const editGridSize = useGlobalStore((state: GlobalState) => state.editGridSize);
   const editFill = useGlobalStore((state: GlobalState) => state.editFill);
@@ -18,6 +18,8 @@ export default function Editor (){
   const editSave = useGlobalStore((state: GlobalState) => state.editSave);
   const editBack = useGlobalStore((state: GlobalState) => state.editBack);
   const setToggleMode = useGlobalStore((state: GlobalState) => state.setToggleMode);
+  const shareCustomLevel = useGlobalStore((state: GlobalState) => state.shareCustomLevel);
+  const setToastMessage = useGlobalStore((state: GlobalState) => state.setToastMessage);
 
   const onLevelNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     editLevelName(event.target.value);
@@ -25,8 +27,7 @@ export default function Editor (){
 
   const onToggleModeClicked = useCallback(() => {
     setToggleMode(toggleMode === 'TOGGLE_BLOCK_TYPE' ? 'TOGGLE_ON' : 'TOGGLE_BLOCK_TYPE');
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 5000);
+    setToastMessage(toggleMode === 'TOGGLE_BLOCK_TYPE' ? 'BLOCK_MODE' : 'MOVE_MODE');
   }, [toggleMode]);
 
   const onOpenSizeEditorClicked = useCallback(() => {
@@ -69,6 +70,11 @@ export default function Editor (){
     editDelete();
   }, []);
 
+  const onShareClicked = useCallback(async () => {
+    await shareCustomLevel();
+    setToastMessage('SHARE');
+  }, []);
+
   useEffect(() => {
     if (gameMode === 'EDITING') {
       setToggleMode('TOGGLE_BLOCK_TYPE');
@@ -82,19 +88,22 @@ export default function Editor (){
       {gameMode === 'EDITING' ? 
         <div className="hud">
         <div className="hudHeader">
-          <div className="editor-buttonGroup">
-            <div className="button-dark" onClick={onBackClicked} title="Back"><i className="fa-solid fa-left-long"></i></div>
-            <div className="button-dark" onClick={onDeleteClicked} title="Delete"><i className="fa-solid fa-trash-can"></i></div>
-            <div className="button-dark" onClick={onSaveClicked} title="Save"><i className="fa-solid fa-floppy-disk"></i></div>
+          <div className="subHeading editor-subHeading">
+            <div className="editor-buttonGroup">
+              <div className="button-dark" onClick={onBackClicked} title="Back"><i className="fa-solid fa-left-long"></i></div>
+              <div className="button-dark" onClick={onDeleteClicked} title="Delete"><i className="fa-solid fa-trash-can"></i></div>
+              <div className="button-dark" onClick={onShareClicked} title="Share"><i className="fa-solid fa-link"></i></div>
+              <div className="button-dark" onClick={onSaveClicked} title="Save"><i className="fa-solid fa-floppy-disk"></i></div>
+            </div>
+            <input 
+              className="editor-nameInput"
+              type="text"
+              value={levelName}
+              onChange={onLevelNameChange}
+              onKeyDown={event => event.stopPropagation()}
+              maxLength={15}
+            />
           </div>
-          <input 
-            className="editor-nameInput"
-            type="text"
-            value={levelName}
-            onChange={onLevelNameChange}
-            onKeyDown={event => event.stopPropagation()}
-            maxLength={15}
-          />
         </div>          
         <div className="hudMain"></div>
         <div className="hudFooter"></div>   
@@ -142,24 +151,6 @@ export default function Editor (){
             </div>
 
             <div className="button-dark" onClick={onResetClicked} title="Reset Moves"><i className="fa-solid fa-rotate"></i></div>
-          </div>
-          {/* TOAST */}
-          <div className={`editor-toast ${showToast ? 'show' : ''}`}>
-            {toggleMode === 'TOGGLE_BLOCK_TYPE' ? (
-              <>
-                <div>
-                  <i className="fa-solid fa-cube"></i>&nbsp;Block Mode
-                </div>
-                <div>Click a block to change type</div>
-              </>
-            ) : (
-              <>
-                <div>
-                  <i className="fa-solid fa-cubes"></i>&nbsp;Move Mode
-                </div>
-                <div>Click a block to make a move</div>
-              </>
-            )}
           </div>
         </div>
         : null}

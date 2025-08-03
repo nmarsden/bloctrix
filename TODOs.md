@@ -67,10 +67,13 @@
         - [x] load from local storage
           - [x] uncompress data using https://github.com/pieroxy/lz-string
     - [ ] show toast message on save  
-    - [ ] indicate when unsaved changes
+    - [ ] unsaved changes
+      - [ ] indicate when unsaved changes
+
     - [x] support editing existing level
       - [x] introduce level ID - as UUID
     - [x] support deleting existing level
+      - [ ] confirm deleting
       
     - [ ] mobile support
     - [x] share
@@ -83,8 +86,11 @@
         - [x] react to URL hash starting with 'cl='
         - [x] decode level data
         - [x] add level to customLevels
+          - [ ] what if the levelId already exists in customLevels?
+                * prompt to override?
         - [x] starting playing level
       - [x] improve the share button - use a link icon   
+      - [ ] prevent share when unsaved changes
 
   - [ ] custom levels
     - [ ] new level - open level editor
@@ -108,6 +114,12 @@
       - [ ] moves
       - [x] reset - use icon
       - [x] quit - use icon
+    - [ ] toast messages
+      - [x] shared
+      - [ ] block mode (show at bottom)
+      - [ ] move mode (show at bottom)
+      - [ ] saved
+      - [ ] deleted
 
 - [x] plane tool
   - [x] enable/disable on xz plane
