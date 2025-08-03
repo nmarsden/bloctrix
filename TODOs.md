@@ -73,7 +73,7 @@
     - [x] support editing existing level
       - [x] introduce level ID - as UUID
     - [x] support deleting existing level
-      - [ ] confirm deleting
+      - [x] confirm deleting
       
     - [ ] mobile support
     - [x] share
@@ -116,10 +116,10 @@
       - [x] quit - use icon
     - [ ] toast messages
       - [x] shared
-      - [ ] block mode (show at bottom)
-      - [ ] move mode (show at bottom)
-      - [ ] saved
-      - [ ] deleted
+      - [x] block mode
+      - [x] move mode
+      - [x] saved
+      - [x] deleted
 
 - [x] plane tool
   - [x] enable/disable on xz plane

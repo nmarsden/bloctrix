@@ -5,6 +5,7 @@
   --dark-color: 7, 4, 99;
   --light-color: 250, 250, 250;
 	--selected-colour: 255, 255, 0;
+	--danger-color: #be424c;
 }
 
 @font-face {

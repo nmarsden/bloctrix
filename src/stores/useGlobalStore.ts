@@ -557,7 +557,7 @@ const COLORS: Colors = {
 
 export type ToggleMode = 'TOGGLE_ON' | 'TOGGLE_BLOCK_TYPE'; 
 
-export type ToastMessage = 'NONE' | 'BLOCK_MODE' | 'MOVE_MODE' | 'SHARE';
+export type ToastMessage = 'NONE' | 'BLOCK_MODE' | 'MOVE_MODE' | 'SHARE' | 'SAVED' | 'DELETED';
 
 export type GlobalState = {
   gameMode: GameMode;
