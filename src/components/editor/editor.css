@@ -151,3 +151,13 @@
   background: var(--danger-color);
   color: rgba(var(--light-color), 1.0);
 }
+
+.unsaved-badge {
+  position: absolute;
+  top: -5px;
+  right: -20px;
+  width: 15px;
+  aspect-ratio: 1;
+  background: var(--danger-color);
+  border-radius: 50%;
+}

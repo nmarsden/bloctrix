@@ -66,16 +66,16 @@
           - [x] compress data using https://github.com/pieroxy/lz-string
         - [x] load from local storage
           - [x] uncompress data using https://github.com/pieroxy/lz-string
-    - [ ] show toast message on save  
-    - [ ] unsaved changes
-      - [ ] indicate when unsaved changes
+    - [x] show toast message on save  
+    - [x] unsaved changes
+      - [x] indicate when unsaved changes
 
     - [x] support editing existing level
       - [x] introduce level ID - as UUID
     - [x] support deleting existing level
       - [x] confirm deleting
       
-    - [ ] mobile support
+    - [x] mobile support
     - [x] share
       - [x] write...
         - [x] share button to trigger sharing
@@ -92,29 +92,29 @@
       - [x] improve the share button - use a link icon   
       - [ ] prevent share when unsaved changes
 
-  - [ ] custom levels
-    - [ ] new level - open level editor
-    - [ ] list custom levels loaded from local storage
-      - [ ] show columns: checkbox, name, updated (timestamp), grid size, block types, moves
-      - [ ] options
-        - [ ] play
-        - [ ] edit
-        - [ ] copy
-        - [ ] delete
-        - [ ] export
-      - [ ] export - exports selected levels (or all if none selected)
-      - [ ] import  
+  - [x] custom levels
+    - [x] new level - open level editor
+    - [x] list custom levels loaded from local storage
+      - [-] show columns: checkbox, name, updated (timestamp), grid size, block types, moves
+      - [-] options
+        - [-] play
+        - [-] edit
+        - [-] copy
+        - [-] delete
+        - [-] export
+      - [-] export - exports selected levels (or all if none selected)
+      - [-] import  
   - [ ] level completed
 
-  - [ ] ui
-    - [ ] main menu
-    - [ ] level menu
-      - [ ] new custom
-    - [ ] hud
-      - [ ] moves
+  - [x] ui
+    - [x] main menu
+    - [x] level menu
+      - [x] new custom
+    - [x] hud
+      - [x] moves
       - [x] reset - use icon
       - [x] quit - use icon
-    - [ ] toast messages
+    - [x] toast messages
       - [x] shared
       - [x] block mode
       - [x] move mode

@@ -577,6 +577,7 @@ export type GlobalState = {
   customLevels: Level[];
   editingLevelId: string;
   toastMessage: ToastMessage;
+  unsavedChanges: boolean;
 
   shareCustomLevel: () => Promise<void>;
   openCustomLevel: (hash: string) => void;
@@ -598,6 +599,7 @@ export type GlobalState = {
   editSave: () => void;
   editBack: () => void;
   setToastMessage: (toastMessage: ToastMessage) => void;
+  updateUnsavedChanges: () => void;
 };
 
 const customLzStorage: StateStorage = {
@@ -654,6 +656,7 @@ export const useGlobalStore = create<GlobalState>()(
         customLevels: [],
         editingLevelId: '',
         toastMessage: 'NONE',
+        unsavedChanges: false,
 
         shareCustomLevel: async () => {
           // Copy link to clipboard
@@ -711,7 +714,8 @@ export const useGlobalStore = create<GlobalState>()(
             moves,
             idToBlock,
             onIds,
-            editingLevelId: level.id
+            editingLevelId: level.id,
+            unsavedChanges: false
           };
         }),
 
@@ -754,14 +758,15 @@ export const useGlobalStore = create<GlobalState>()(
           return { hoveredIds };
         }),
 
-        toggleHovered: () => set(({ idToBlock, hoveredIds, moves, onIds, toggleMode, blocks, moveCount }) => {
+        toggleHovered: () => {
+          const { idToBlock, hoveredIds, moves, onIds, toggleMode, blocks, moveCount, gameMode } = get();
           const hoveredBlock = idToBlock.get(hoveredIds[0]) as BlockInfo;
 
           if (toggleMode === 'TOGGLE_ON') {
             const newMoves = moves.includes(hoveredBlock.id) ? moves.filter(id => id !== hoveredBlock.id) : [...moves, hoveredBlock.id];
             const newOnIds = updateOnIds(onIds, hoveredBlock.toggleIds);
 
-            return { moves: newMoves, onIds: newOnIds, moveCount: moveCount + 1 };
+            set({ moves: newMoves, onIds: newOnIds, moveCount: moveCount + 1 });
           }
           if (toggleMode === 'TOGGLE_BLOCK_TYPE') {
             const blockType = hoveredBlock.blockType;
@@ -772,15 +777,18 @@ export const useGlobalStore = create<GlobalState>()(
               blockType: (block.id === hoveredBlock.id ? newBlockType : block.blockType), 
             }));
 
-            return { 
+            set({ 
               onIds: [],
               blocks: updatedBlocks,
               moves: [],
               idToBlock: populateIdToBlock(updatedBlocks)
-            };            
+            });            
           }
-          return {};
-        }),
+
+          if (gameMode === 'EDITING') {
+            get().updateUnsavedChanges();
+          }
+        },
 
         setActivePlane: (activePlane) => set(() => ({ activePlane })),
 
@@ -801,23 +809,26 @@ export const useGlobalStore = create<GlobalState>()(
           }
         }),
 
-        editLevelName: (levelName: string) => set(() => {
-          return { levelName };
-        }),
+        editLevelName: (levelName: string) => {
+          set({ levelName });
+          get().updateUnsavedChanges();
+        },
 
-        editGridSize: (gridSize: number) => set(() => {
+        editGridSize: (gridSize: number) => {
           const levelBlocks: LevelBlock[] = initLevelBlocks(gridSize);
           const blocks: BlockInfo[] = levelBlocksToBlocks(levelBlocks);
 
-          return { 
+          set({ 
             onIds: [],
             blocks,
             moves: [],
             idToBlock: populateIdToBlock(blocks)
-          };
-        }),
+          });
+          get().updateUnsavedChanges();
+        },
 
-        editFill: (blockType: BlockType) => set(({ blocks, toggleMode }) => {
+        editFill: (blockType: BlockType) => {
+          const { blocks, toggleMode } = get();
           const gridSize = Math.round(Math.pow(blocks.length, 1 / 3));
           const updatedBlocks = blocks.map(block => ({
             ...block, 
@@ -826,15 +837,19 @@ export const useGlobalStore = create<GlobalState>()(
             on: false
           }));
 
-          return { 
+          set({ 
             onIds: [],
             blocks: updatedBlocks,
             moves: [],
             idToBlock: populateIdToBlock(updatedBlocks)
-          };
-        }),
+          });
+          get().updateUnsavedChanges();
+        },
 
-        editReset: () => set(() => ({ onIds: [], moves: [] })),
+        editReset: () => {
+          set({ onIds: [], moves: [] });
+          get().updateUnsavedChanges();
+        },
 
         editDelete: () => {
           const { editingLevelId, customLevels, editBack } = get();
@@ -863,14 +878,31 @@ export const useGlobalStore = create<GlobalState>()(
             customLevels[levelIndex] = saveLevel;
             set({ customLevels: [...customLevels] });
           }
+
+          set({ currentLevel: saveLevel });
+          get().updateUnsavedChanges();
         },
 
         editBack: () => set(({ showLevels }) => {
           showLevels('CUSTOM');
-          return {};
+          return { editingLevelId: '' };
         }),
 
-        setToastMessage: (toastMessage: ToastMessage) => set(() => ({ toastMessage }))
+        setToastMessage: (toastMessage: ToastMessage) => set(() => ({ toastMessage })),
+
+        updateUnsavedChanges: () => {
+          const { currentLevel, levelName, blocks, moves } = get();
+
+          const levelBlocks = blocks.map(block => toLevelBlock(block.blockType))
+
+          const unsavedChanges = !(
+              currentLevel.name === levelName &&
+              arraysAreEqual(currentLevel.blocks, levelBlocks) &&
+              arraysAreEqual(currentLevel.moves, moves)
+          );
+
+          set({ unsavedChanges });
+        }
       }
     },
     {

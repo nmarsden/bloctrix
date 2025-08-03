@@ -10,6 +10,7 @@ export default function Editor (){
   const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
   const toggleMode = useGlobalStore((state: GlobalState) => state.toggleMode);
   const levelName = useGlobalStore((state: GlobalState) => state.levelName);
+  const unsavedChanges = useGlobalStore((state: GlobalState) => state.unsavedChanges);
 
   const editLevelName = useGlobalStore((state: GlobalState) => state.editLevelName);
   const editGridSize = useGlobalStore((state: GlobalState) => state.editGridSize);
@@ -105,7 +106,10 @@ export default function Editor (){
                 <div className="button-dark" onClick={onBackClicked} title="Back"><i className="fa-solid fa-left-long"></i></div>
                 <div className="button-dark" onClick={onDeleteClicked} title="Delete"><i className="fa-solid fa-trash-can"></i></div>
                 <div className="button-dark" onClick={onShareClicked} title="Share"><i className="fa-solid fa-link"></i></div>
-                <div className="button-dark" onClick={onSaveClicked} title="Save"><i className="fa-solid fa-floppy-disk"></i></div>
+                <div className="button-dark" onClick={onSaveClicked} title="Save">
+                  <i className="fa-solid fa-floppy-disk"></i>
+                  {unsavedChanges ? <i className="unsaved-badge"></i> : null}
+                </div>
               </div>
               <input 
                 className="editor-nameInput"
