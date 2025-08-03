@@ -105,7 +105,7 @@ export default function Editor (){
               <div className="editor-buttonGroup">
                 <div className="button-dark" onClick={onBackClicked} title="Back"><i className="fa-solid fa-left-long"></i></div>
                 <div className="button-dark" onClick={onDeleteClicked} title="Delete"><i className="fa-solid fa-trash-can"></i></div>
-                <div className="button-dark" onClick={onShareClicked} title="Share"><i className="fa-solid fa-link"></i></div>
+                <div className={`button-dark ${unsavedChanges ? 'button-disabled' : ''}`} onClick={onShareClicked} title="Share"><i className="fa-solid fa-link"></i></div>
                 <div className="button-dark" onClick={onSaveClicked} title="Save">
                   <i className="fa-solid fa-floppy-disk"></i>
                   {unsavedChanges ? <i className="unsaved-badge"></i> : null}

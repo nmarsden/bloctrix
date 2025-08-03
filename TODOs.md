@@ -90,7 +90,7 @@
                 * prompt to override?
         - [x] starting playing level
       - [x] improve the share button - use a link icon   
-      - [ ] prevent share when unsaved changes
+      - [x] prevent share when unsaved changes
 
   - [x] custom levels
     - [x] new level - open level editor
@@ -138,3 +138,5 @@
   - [x] show on pointer over
 
 - [x] rename game to bloctrix
+
+- [ ] show cursor as 'drag' (arrows all dirctions) when able to rotate the scene
