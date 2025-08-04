@@ -1,4 +1,5 @@
 import {CameraControls, PerspectiveCamera} from "@react-three/drei";
+import {useThree} from "@react-three/fiber";
 import {useControls} from "leva";
 import {ReactNode, useEffect, useRef} from "react";
 import {Group, PerspectiveCamera as PerspectiveCameraType, Vector3} from "three";
@@ -11,11 +12,37 @@ export default function Camera({ children } : { children?: ReactNode }) {
   const cameraPosition = useRef<Vector3>(new Vector3(8, 8, 8));
   const cameraTarget = useRef<Vector3>(new Vector3(0, 0, 0));
 
+  const { gl } = useThree();
+
   useEffect(() => {
+    gl.domElement.classList.add('cursor-grab');
+
     setTimeout(() => {
       cameraControls.current.setTarget(cameraTarget.current.x, cameraTarget.current.y, cameraTarget.current.z, true);
     }, 300);
   }, []);
+  
+  useEffect(() => {
+    const controls = cameraControls.current
+    if (!controls) return
+
+    const handleDragStart = () => {
+      gl.domElement.classList.add('cursor-grabbing');
+    }
+
+    const handleDragEnd = () => {
+      gl.domElement.classList.remove('cursor-grabbing');
+    }
+
+    controls.addEventListener('controlstart', handleDragStart)
+    controls.addEventListener('controlend', handleDragEnd)
+
+    // Cleanup listeners on unmount
+    return () => {
+      controls.removeEventListener('controlstart', handleDragStart)
+      controls.removeEventListener('controlend', handleDragEnd)
+    }
+  }, [gl]);
 
   useControls(
     'Camera',

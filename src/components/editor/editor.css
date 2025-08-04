@@ -22,6 +22,7 @@
   width: 16ch;
   margin-top: 20px;
   padding: 10px;
+  cursor: url('/cursors/bracket_a_vertical.png'), auto;  
 }
 
 .editor-editModeLabel {
@@ -140,11 +141,13 @@
 
 .editor-modal-close-button {
   position: absolute;
-  top: 5px;
-  right: 7px;
+  top: 0;
+  right: 0;
+  padding: 10px;
+  font-size: 24px;
   color: rgba(var(--dark-color), 0.6);
   pointer-events: all;
-  cursor: pointer;  
+  cursor: url('/cursors/hand_point.png'), auto;
 }
 
 .button-dark.editor-button-delete {

@@ -1,16 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useThree } from "@react-three/fiber";
 import { GlobalState, useGlobalStore } from "../stores/useGlobalStore";
 import Block from "./block";
-import { useCursor } from "@react-three/drei";
 
 export default function Blocks (){
   const blocks = useGlobalStore((state: GlobalState) => state.blocks);  
   const hoveredIds = useGlobalStore((state: GlobalState) => state.hoveredIds);  
-  const [hovered, setHovered] = useState(false);
+  const { gl } = useThree();
 
-  useCursor(hovered)
-
-  useEffect(() => setHovered(hoveredIds.length > 0), [ hoveredIds ]);
+  useEffect(() => {
+    if (hoveredIds.length > 0) {
+      gl.domElement.classList.add('cursor-click');
+    } else {
+      gl.domElement.classList.remove('cursor-click');
+    }
+  }, [ hoveredIds ]);
 
   return (
     <>

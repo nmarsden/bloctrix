@@ -139,4 +139,9 @@
 
 - [x] rename game to bloctrix
 
-- [ ] show cursor as 'drag' (arrows all dirctions) when able to rotate the scene
+- [x] have custom cursor for...
+  - [x] pointer
+  - [x] click
+  - [x] drag
+  - [x] dragging
+  - [x] text input

@@ -24,6 +24,7 @@ body,
 	height: 100%;
 	background: var(--background-colour);
 	overflow: hidden;
+	cursor: url('/cursors/pointer_a.png'), auto;
 }
 
 body {
@@ -65,3 +66,16 @@ a:hover {
 	--leva-sizes-rootWidth: 500px !important;
 	--leva-sizes-controlWidth: 240px !important;
 }
+
+.cursor-grab {
+	cursor: url('/cursors/hand_open.png'), grab;
+}
+
+.cursor-click {
+	cursor: url('/cursors/hand_point.png'), pointer;
+}
+
+.cursor-grabbing {
+	cursor: url('/cursors/hand_closed.png'), grabbing;
+}
+

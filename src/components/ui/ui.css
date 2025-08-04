@@ -67,7 +67,7 @@
 }
 .button-light:hover {
   outline: 1px solid rgba(var(--light-color), 1.0);
-  cursor: pointer;
+  cursor: url('/cursors/hand_point.png'), auto;
 }
 
 .button-dark {
@@ -97,7 +97,7 @@
 
 .button-dark:hover:not(.button-disabled) {
   outline: 1px solid rgba(var(--dark-color), 1.0);
-  cursor: pointer;
+  cursor: url('/cursors/hand_point.png'), auto;
 }
 
 .pulse,
@@ -350,19 +350,6 @@
   align-items: center;
   justify-content: center;
   gap: 20px;
-}
-
-.shareLink {
-  position: absolute;
-  padding-top: 3px;
-  padding-left: 10px;
-  color: rgba(var(--dark-color), 0.6);
-  pointer-events: all;
-  cursor: pointer;
-  transition: transform 300ms;
-}
-.shareLink:hover {
-  transform: scale(1.1);
 }
 
 .levelMenuFooter {

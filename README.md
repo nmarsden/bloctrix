@@ -7,4 +7,7 @@ Built with React, TypeScript, & Vite.
 #### Music
 #### SFX
 #### Icons
+- Fontawesome - https://fontawesome.com/
 #### Fonts
+#### Cursors
+- Kenney - Cursor Pack - https://kenney-assets.itch.io/cursor-pack
