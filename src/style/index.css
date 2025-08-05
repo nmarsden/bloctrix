@@ -67,6 +67,10 @@ a:hover {
 	--leva-sizes-controlWidth: 240px !important;
 }
 
+.cursor-pointer {
+	cursor: url('/cursors/pointer_a.png'), grab;
+}
+
 .cursor-grab {
 	cursor: url('/cursors/hand_open.png'), grab;
 }

@@ -3,6 +3,7 @@ import {useThree} from "@react-three/fiber";
 import {useControls} from "leva";
 import {ReactNode, useEffect, useRef} from "react";
 import {Group, PerspectiveCamera as PerspectiveCameraType, Vector3} from "three";
+import {GlobalState, useGlobalStore} from "../stores/useGlobalStore";
 
 export default function Camera({ children } : { children?: ReactNode }) {
   const cameraGroup = useRef<Group>(null!);
@@ -11,6 +12,8 @@ export default function Camera({ children } : { children?: ReactNode }) {
   const fov = useRef(40);
   const cameraPosition = useRef<Vector3>(new Vector3(8, 8, 8));
   const cameraTarget = useRef<Vector3>(new Vector3(0, 0, 0));
+
+  const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
 
   const { gl } = useThree();
 
@@ -21,16 +24,33 @@ export default function Camera({ children } : { children?: ReactNode }) {
       cameraControls.current.setTarget(cameraTarget.current.x, cameraTarget.current.y, cameraTarget.current.z, true);
     }, 300);
   }, []);
+
+  useEffect(() => {
+    cameraControls.current.setPosition(cameraPosition.current.x, cameraPosition.current.y, cameraPosition.current.z, true);
+    if (gameMode === 'LEVEL_COMPLETED') {
+      cameraControls.current.enabled = false;
+      gl.domElement.classList.remove('cursor-grab');
+      gl.domElement.classList.add('cursor-pointer');
+    } else {
+      cameraControls.current.enabled = true;
+      gl.domElement.classList.remove('cursor-pointer');
+      gl.domElement.classList.add('cursor-grab');
+    }
+  }, [gameMode]);
   
   useEffect(() => {
     const controls = cameraControls.current
     if (!controls) return
 
     const handleDragStart = () => {
+      if (gameMode === 'LEVEL_COMPLETED') return;
+
       gl.domElement.classList.add('cursor-grabbing');
     }
 
     const handleDragEnd = () => {
+      if (gameMode === 'LEVEL_COMPLETED') return;
+
       gl.domElement.classList.remove('cursor-grabbing');
     }
 
@@ -113,6 +133,7 @@ export default function Camera({ children } : { children?: ReactNode }) {
         <CameraControls 
           ref={cameraControls}
           enabled={true}
+          
           // truckSpeed={0}
           // minPolarAngle={0}
           // maxPolarAngle={Math.PI * 0.45}

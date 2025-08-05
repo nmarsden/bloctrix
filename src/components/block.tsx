@@ -37,10 +37,14 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   const toggleHovered = useGlobalStore((state: GlobalState) => state.toggleHovered);
   const toggleMode = useGlobalStore((state: GlobalState) => state.toggleMode);
   const idToBlock = useGlobalStore((state: GlobalState) => state.idToBlock);
+  const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
 
   const isOn = useRef(onIds.includes(id));
-
+  const levelCompleteTimelines = useRef<gsap.core.Timeline[]>([]);
+  
   const onPointerOver = useCallback((event: ThreeEvent<PointerEvent>) => { 
+    if (gameMode === 'LEVEL_COMPLETED') return;
+
     // console.log(`pointerOver: ${id}`);
     if (toggleIds.length > 0) {
       blockHovered(id, true);
@@ -49,6 +53,8 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   }, [toggleIds]);
 
   const onPointerOut = useCallback((event: ThreeEvent<PointerEvent>) => {
+    if (gameMode === 'LEVEL_COMPLETED') return;
+    
     // console.log(`pointerOut: ${id}`);
     if (toggleIds.length > 0) {
       blockHovered(id, false);
@@ -171,6 +177,99 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
       }
     );
   }, []);
+
+  useEffect(() => {
+    if (gameMode === 'LEVEL_COMPLETED') {
+      const x = parseInt(id.split('-')[1]);
+      const y = parseInt(id.split('-')[2]);
+      const z = parseInt(id.split('-')[3]);
+      const delay = (0.2 * x) + (0.2 * y) + (0.2 * z);
+
+      // Animate scale
+      const scale = 0.5;
+      const timelineScale = gsap.timeline();
+      timelineScale.to(
+        block.current.scale,
+        {
+          delay: delay + 0.4,
+          keyframes: [
+            { x: scale, y: scale, z: scale, ease: 'linear', duration: 0.4 },
+            { x: 1.0,   y: 1.0,   z: 1.0,   ease: 'linear', duration: 0.4 },
+            { x: 1.0,   y: 1.0,   z: 1.0,   ease: 'linear', duration: 1.0 }
+          ],
+          repeat: -1
+        }
+      );
+      levelCompleteTimelines.current.push(timelineScale);
+
+      // Animate label
+      const timelineLabel = gsap.timeline();
+      timelineLabel.to(
+        material.uniforms.uColorB.value, {
+        r: colors.blockOff.r, 
+        g: colors.blockOff.g, 
+        b: colors.blockOff.b,
+        duration: 0.4,
+        ease: 'linear'
+      });
+      levelCompleteTimelines.current.push(timelineLabel);
+
+      // Animage border
+      const timelineBorder = gsap.timeline();
+      timelineBorder.to(
+        material.uniforms.uBorderColor.value, {
+        delay,
+        r: colors.blockCompleteA.r, 
+        g: colors.blockCompleteA.g, 
+        b: colors.blockCompleteA.b,
+        duration: 0.2,
+        ease: 'linear'
+      });
+      timelineBorder.to(
+        material.uniforms.uBorderColor.value,
+        {
+          keyframes: [
+            { r: colors.blockCompleteB.r, g: colors.blockCompleteB.g, b: colors.blockCompleteB.b, ease: 'linear', duration: 0.4 },
+            { r: colors.blockCompleteB.r, g: colors.blockCompleteB.g, b: colors.blockCompleteB.b, ease: 'linear', duration: 0.4 },
+            { r: colors.blockCompleteA.r, g: colors.blockCompleteA.g, b: colors.blockCompleteA.b, ease: 'linear', duration: 0.4 },
+            { r: colors.blockCompleteA.r, g: colors.blockCompleteA.g, b: colors.blockCompleteA.b, ease: 'linear', duration: 0.6 }
+          ],
+          repeat: -1
+        }
+      );
+      levelCompleteTimelines.current.push(timelineBorder);
+    } else {
+      // Kill level complete animations
+      if (levelCompleteTimelines.current.length > 0) {
+        const numTweens = levelCompleteTimelines.current.length;
+        for (let i=0; i<numTweens; i++) {
+          const tween = levelCompleteTimelines.current.pop() as gsap.core.Timeline;
+          tween.kill();
+        }
+      }
+      // Reset scale
+      gsap.to(block.current.scale, {
+        x: 1.0,
+        y: 1.0,
+        z: 1.0,
+        ease: 'linear',
+        duration: 0.2
+      });
+      // Reset label
+      gsap.to(
+        material.uniforms.uColorB.value,
+        {
+          r: colors.blockLabel.r,
+          g: colors.blockLabel.g,
+          b: colors.blockLabel.b,
+          duration: 0.2,
+          ease: "linear",
+        }
+      );
+      // Reset border
+      updateBorderColor(colors.blockEdge);
+    }
+  }, [gameMode]);
 
   useEffect(() => {
     const newIsOn = onIds.includes(id);

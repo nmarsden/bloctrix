@@ -71,6 +71,7 @@
 }
 
 .button-dark {
+  position: relative;
   font-size: 24px;
   line-height: 24px;
   padding: 5px;
@@ -292,6 +293,10 @@
   visibility: hidden;
 }
 
+.button-hidden {
+  visibility: hidden;
+}
+
 .button-level {
   font-size: 16px;
   min-width: 210px;
@@ -354,4 +359,11 @@
 
 .levelMenuFooter {
   height: 80px;
+}
+
+.levelCompleted {
+  font-size: 30px;
+  line-height: 30px;
+  text-align: center;
+  text-transform: uppercase;
 }

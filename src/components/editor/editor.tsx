@@ -18,7 +18,7 @@ export default function Editor (){
   const editReset = useGlobalStore((state: GlobalState) => state.editReset);
   const editDelete = useGlobalStore((state: GlobalState) => state.editDelete);
   const editSave = useGlobalStore((state: GlobalState) => state.editSave);
-  const editBack = useGlobalStore((state: GlobalState) => state.editBack);
+  const editPlay = useGlobalStore((state: GlobalState) => state.editPlay);
   const setToggleMode = useGlobalStore((state: GlobalState) => state.setToggleMode);
   const shareCustomLevel = useGlobalStore((state: GlobalState) => state.shareCustomLevel);
   const setToastMessage = useGlobalStore((state: GlobalState) => state.setToastMessage);
@@ -65,10 +65,6 @@ export default function Editor (){
     setToastMessage('SAVED');
   }, []);
 
-  const onBackClicked = useCallback(() => {
-    editBack();
-  }, []);
-
   const onDeleteClicked = useCallback(() => {
     setShowDeleteConfirm(true);
   }, []);
@@ -88,6 +84,10 @@ export default function Editor (){
     setToastMessage('SHARE');
   }, []);
 
+  const onPlayClicked = useCallback(() => {
+    editPlay();
+  }, []);
+
   useEffect(() => {
     if (gameMode === 'EDITING') {
       setToggleMode('TOGGLE_BLOCK_TYPE');
@@ -103,13 +103,13 @@ export default function Editor (){
           <div className="hudHeader">
             <div className="subHeading editor-subHeading">
               <div className="editor-buttonGroup">
-                <div className="button-dark" onClick={onBackClicked} title="Back"><i className="fa-solid fa-left-long"></i></div>
                 <div className="button-dark" onClick={onDeleteClicked} title="Delete"><i className="fa-solid fa-trash-can"></i></div>
                 <div className={`button-dark ${unsavedChanges ? 'button-disabled' : ''}`} onClick={onShareClicked} title="Share"><i className="fa-solid fa-link"></i></div>
                 <div className="button-dark" onClick={onSaveClicked} title="Save">
                   <i className="fa-solid fa-floppy-disk"></i>
                   {unsavedChanges ? <i className="unsaved-badge"></i> : null}
                 </div>
+                <div className="button-dark" onClick={onPlayClicked} title="Play"><i className="fa-solid fa-play"></i></div>
               </div>
               <input 
                 className="editor-nameInput"

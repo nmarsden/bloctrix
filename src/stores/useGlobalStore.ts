@@ -4,7 +4,7 @@ import { persist, StateStorage, createJSONStorage } from 'zustand/middleware';
 import * as lz from 'lz-string';
 import { v4 as uuidv4 } from 'uuid';
 
-export type GameMode = 'MAIN_MENU' | 'LEVEL_MENU' | 'EDITING' | 'PLAYING';
+export type GameMode = 'MAIN_MENU' | 'LEVEL_MENU' | 'EDITING' | 'PLAYING' | 'LEVEL_COMPLETED';
 
 // --------------
 // --- LEVELS ---
@@ -533,6 +533,8 @@ type Colors = {
   blockLabel: Color;
   blockEdge: Color;
   blockEdgeHover: Color;
+  blockCompleteA: Color;
+  blockCompleteB: Color;
   planeTool: string;
   planeSwitchActive: string;
   planeSwitchInactive: string;
@@ -545,6 +547,8 @@ const COLORS: Colors = {
   blockLabel: new Color('#1d3557'),
   blockEdge: new Color('#1d3557'),
   blockEdgeHover: new Color('#f1faee'),
+  blockCompleteA: new Color('#1d3557'),
+  blockCompleteB: new Color('#f8f8f8'),
   planeTool: '#76afff',
   planeSwitchActive: '#76afff',
   planeSwitchInactive: '#eeeeee',
@@ -585,6 +589,7 @@ export type GlobalState = {
   newLevel: () => void;
   editLevel: (level: Level) => void;
   playLevel: (level: Level, levelType: LevelType) => void;
+  playNextLevel: () => void;
   showMainMenu: () => void;
   blockHovered: (id: string, isHovered: boolean) => void;
   toggleHovered: () => void;
@@ -597,7 +602,7 @@ export type GlobalState = {
   editReset: () => void;
   editDelete: () => void;
   editSave: () => void;
-  editBack: () => void;
+  editPlay: () => void;
   setToastMessage: (toastMessage: ToastMessage) => void;
   updateUnsavedChanges: () => void;
 };
@@ -734,9 +739,16 @@ export const useGlobalStore = create<GlobalState>()(
             blocks,
             moves,
             idToBlock,
-            onIds
+            onIds,
+            editingLevelId: ''
           };
         }),
+
+        playNextLevel: () => {
+          const { playLevel, currentLevel, levelType } = get();
+          // TODO play next level
+          playLevel(currentLevel, levelType);
+        },
 
         showMainMenu: () => set(() => {
           return { 
@@ -765,6 +777,10 @@ export const useGlobalStore = create<GlobalState>()(
           if (toggleMode === 'TOGGLE_ON') {
             const newMoves = moves.includes(hoveredBlock.id) ? moves.filter(id => id !== hoveredBlock.id) : [...moves, hoveredBlock.id];
             const newOnIds = updateOnIds(onIds, hoveredBlock.toggleIds);
+
+            if (gameMode === 'PLAYING' && newOnIds.length === 0) {
+              set({ gameMode: 'LEVEL_COMPLETED', hoveredIds: [] });
+            }
 
             set({ moves: newMoves, onIds: newOnIds, moveCount: moveCount + 1 });
           }
@@ -852,10 +868,10 @@ export const useGlobalStore = create<GlobalState>()(
         },
 
         editDelete: () => {
-          const { editingLevelId, customLevels, editBack } = get();
+          const { editingLevelId, customLevels, showLevels } = get();
           const newCustomLevels = customLevels.filter(level => level.id !== editingLevelId);
-          set({ customLevels: newCustomLevels });
-          editBack();
+          set({ customLevels: newCustomLevels, editingLevelId: '' });
+          showLevels('CUSTOM');
         },
 
         editSave: () => {
@@ -883,8 +899,8 @@ export const useGlobalStore = create<GlobalState>()(
           get().updateUnsavedChanges();
         },
 
-        editBack: () => set(({ showLevels }) => {
-          showLevels('CUSTOM');
+        editPlay: () => set(({ currentLevel, playLevel }) => {
+          playLevel(currentLevel, 'CUSTOM');
           return { editingLevelId: '' };
         }),
 

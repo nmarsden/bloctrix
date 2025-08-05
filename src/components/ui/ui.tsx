@@ -14,6 +14,7 @@ export default function Ui() {
   const newLevel = useGlobalStore((state: GlobalState) => state.newLevel);
   const editLevel = useGlobalStore((state: GlobalState) => state.editLevel);
   const playLevel = useGlobalStore((state: GlobalState) => state.playLevel);
+  const playNextLevel = useGlobalStore((state: GlobalState) => state.playNextLevel);
   const showMainMenu = useGlobalStore((state: GlobalState) => state.showMainMenu);
 
   const onSelectLevelType = useCallback((levelType: LevelType) => {
@@ -32,12 +33,16 @@ export default function Ui() {
     return () => editLevel(level);
   }, []);
 
-  const onSelectBack = useCallback(() => {
+  const onSelectMenu = useCallback(() => {
     showMainMenu();
   }, []);
 
   const onSelectReset = useCallback(() => {
     playLevel(currentLevel, levelType);
+  }, [currentLevel, levelType]);
+
+  const onSelectNext = useCallback(() => {
+    playNextLevel();
   }, [currentLevel, levelType]);
 
   const onSelectQuit = useCallback(() => {
@@ -69,7 +74,7 @@ export default function Ui() {
       {gameMode === 'LEVEL_MENU' ? (
         <div className={'overlay show'}>
           <div className="hudHeader">
-            <div className="button-light button-icon" onClick={onSelectBack} title="Back"><i className="fa-solid fa-left-long"></i></div>
+            <div className="button-light button-icon" onClick={onSelectMenu} title="Back"><i className="fa-solid fa-bars"></i></div>
             <div className="subHeading">
               <div>{levelType}</div>
               <div>LEVELS</div>
@@ -93,17 +98,23 @@ export default function Ui() {
         </div>
       ) : null}
 
-      {/* PLAYING */}
-      {gameMode === 'PLAYING' ? (
-        <div className={`hud ${gameMode === 'PLAYING' ? 'show' : 'hide'}`}>
+      {/* PLAYING or LEVEL_COMPLETED */}
+      {(gameMode === 'PLAYING' || gameMode === 'LEVEL_COMPLETED') ? (
+        <div className="hud show">
           <div className="hudHeader">
-            <div className="button-dark" onClick={onSelectQuit} title="Back"><i className="fa-solid fa-left-long"></i></div>
+            <div 
+              className={`button-dark ${gameMode === 'LEVEL_COMPLETED' ? 'button-hidden' : ''}`} 
+              onClick={onSelectQuit} 
+              title="Back"
+            >
+              <i className="fa-solid fa-left-long"></i>
+            </div>
             <div className="subHeading">
               <div>{levelType}</div>
               <div className="levelName">{levelName}</div>
             </div>
             <div 
-              className={`button-dark ${levelType === 'CUSTOM' ? 'button-icon' : 'button-icon-hidden'}`}
+              className={`button-dark ${gameMode === 'LEVEL_COMPLETED' || levelType !== 'CUSTOM' ? 'button-icon-hidden' : 'button-icon'}`}
               onClick={onEditLevel(currentLevel)} 
               title="Edit">
                 <i className="fa-solid fa-pen"></i>
@@ -113,9 +124,34 @@ export default function Ui() {
           <div className="hudFooter">
             <div>Moves: {moveCount}</div>
             <div className="buttonGroup">
-              <div className="button-dark" onClick={onSelectReset} title="Reset"><i className="fa-solid fa-rotate"></i></div>
+              <div 
+                className={`button-dark ${gameMode === 'LEVEL_COMPLETED' ? 'button-hidden' : ''}`} 
+                onClick={onSelectReset} 
+                title="Reset"
+              >
+                  <i className="fa-solid fa-rotate"></i>
+              </div>
             </div>
           </div>
+          {/* LEVEL_COMPLETED Modal */}
+          <div className={`editor-modal ${gameMode === 'LEVEL_COMPLETED' ? 'show': ''}`}>
+            <div className="editor-modal-header">
+              <div className="levelCompleted">Level Completed</div>
+            </div>
+            <div className="editor-buttonGroup">
+              <div className="button-dark button-icon" onClick={onSelectMenu} title="Back">
+                <i className="fa-solid fa-bars"></i>
+              </div>
+              <div className="button-dark" onClick={onSelectReset} title="Reset">
+                  <i className="fa-solid fa-rotate"></i>
+              </div>
+              <div className="button-dark button-icon button-hidden"></div>
+              <div className="button-dark" onClick={onSelectNext} title="Next Level">
+                  <i className="fa-solid fa-arrow-right"></i>
+              </div>
+            </div>
+          </div>
+
         </div>
       ) : null}
 

@@ -111,6 +111,7 @@
   padding: 20px;
   margin-bottom: 20px;
   min-width: 250px;
+  max-width: 264px;
   border: 2px solid rgba(var(--dark-color), 0.6);
   left: 50%;
   z-index: 1000;
@@ -158,7 +159,7 @@
 .unsaved-badge {
   position: absolute;
   top: -5px;
-  right: -20px;
+  right: -5px;
   width: 15px;
   aspect-ratio: 1;
   background: var(--danger-color);

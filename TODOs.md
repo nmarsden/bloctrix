@@ -103,8 +103,25 @@
         - [-] delete
         - [-] export
       - [-] export - exports selected levels (or all if none selected)
-      - [-] import  
+      - [-] import
   - [ ] level completed
+    - [x] disable interactions with buttons, blocks, and camera
+      - [x] hide buttons
+      - [x] disable camera controls
+      - [x] update cursor
+      - [x] ignore block interactions
+      - [x] reset camera position
+    - [x] animation
+      - [x] rotate blocks group
+      - [x] pulse individual blocks with varying delays
+        - [x] scale
+        - [x] border color
+        - [x] surface color
+        - [x] label color
+    - [ ] show 'Level Completed' modal
+      - [x] Menu button
+      - [x] Replay button
+      - [ ] Next button
 
   - [x] ui
     - [x] main menu

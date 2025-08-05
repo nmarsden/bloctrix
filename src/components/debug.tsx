@@ -28,6 +28,8 @@ export default function Debug (){
       blockLabel:           { value: `#${colors.blockLabel.getHexString()}`,      onChange: value => setColors({ ...colors, blockLabel: new Color(value) }) },
       blockEdge:            { value: `#${colors.blockEdge.getHexString()}`,       onChange: value => setColors({ ...colors, blockEdge: new Color(value) }) },
       blockEdgeHover:       { value: `#${colors.blockEdgeHover.getHexString()}`,  onChange: value => setColors({ ...colors, blockEdgeHover: new Color(value) }) },
+      blockCompleteA:       { value: `#${colors.blockCompleteA.getHexString()}`,  onChange: value => setColors({ ...colors, blockCompleteA: new Color(value) }) },
+      blockCompleteB:       { value: `#${colors.blockCompleteB.getHexString()}`,  onChange: value => setColors({ ...colors, blockCompleteB: new Color(value) }) },
       planeTool:            { value: colors.planeTool,                            onChange: value => setColors({ ...colors, planeTool: value }) },
       planeSwitchActive:    { value: colors.planeSwitchActive,                    onChange: value => setColors({ ...colors, planeSwitchActive: value }) },
       planeSwitchInactive:  { value: colors.planeSwitchInactive,                  onChange: value => setColors({ ...colors, planeSwitchInactive: value }) },
