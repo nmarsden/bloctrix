@@ -339,6 +339,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-bottom: 30px;
 }
 
 .hudMain {
@@ -346,7 +347,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  overflow-y: auto;
+  scrollbar-gutter: stable both-edges;
+  width: 100%;
 }
 
 .hudFooter {
