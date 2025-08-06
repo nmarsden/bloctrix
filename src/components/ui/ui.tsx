@@ -1,11 +1,13 @@
 import { useCallback } from 'react';
-import { GlobalState, LevelType, Level, useGlobalStore } from '../../stores/useGlobalStore';
+import { GlobalState, LevelType, useGlobalStore } from '../../stores/useGlobalStore';
+import { Level } from '../../stores/levelData';
 import './ui.css';
 import Toast from '../toast/toast';
 
 export default function Ui() {
   const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
   const levelType = useGlobalStore((state: GlobalState) => state.levelType);
+  const levelIndex = useGlobalStore((state: GlobalState) => state.levelIndex);
   const currentLevel = useGlobalStore((state: GlobalState) => state.currentLevel);
   const moveCount = useGlobalStore((state: GlobalState) => state.moveCount);
   const levelName = useGlobalStore((state: GlobalState) => state.levelName);
@@ -25,8 +27,8 @@ export default function Ui() {
     newLevel();
   }, []);
 
-  const onSelectLevel = useCallback((level: Level) => {
-    return () => playLevel(level, levelType);
+  const onSelectLevel = useCallback((levelIndex: number) => {
+    return () => playLevel(levelIndex, levelType);
   }, [levelType]);
 
   const onEditLevel = useCallback((level: Level) => {
@@ -38,12 +40,12 @@ export default function Ui() {
   }, []);
 
   const onSelectReset = useCallback(() => {
-    playLevel(currentLevel, levelType);
-  }, [currentLevel, levelType]);
+    playLevel(levelIndex, levelType);
+  }, [levelIndex, levelType]);
 
   const onSelectNext = useCallback(() => {
     playNextLevel();
-  }, [currentLevel, levelType]);
+  }, []);
 
   const onSelectQuit = useCallback(() => {
     showLevels(levelType);
@@ -90,7 +92,7 @@ export default function Ui() {
           <div className="hudMain">
             <div className="buttonGroup buttonGroup-column">
               {levels.map((level, index) => (
-                <div className="button-light button-level" key={`level-${index}`} onClick={onSelectLevel(level)}>{level.name}</div>
+                <div className="button-light button-level" key={`level-${index}`} onClick={onSelectLevel(index)}>{level.name}</div>
               ))}
             </div>
           </div>

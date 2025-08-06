@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { persist, StateStorage, createJSONStorage } from 'zustand/middleware';
 import * as lz from 'lz-string';
 import { v4 as uuidv4 } from 'uuid';
+import { EASY_LEVELS, HARD_LEVELS, Level, LevelBlock, MEDIUM_LEVELS } from './levelData';
 
 export type GameMode = 'MAIN_MENU' | 'LEVEL_MENU' | 'EDITING' | 'PLAYING' | 'LEVEL_COMPLETED';
 
@@ -12,16 +13,6 @@ export type GameMode = 'MAIN_MENU' | 'LEVEL_MENU' | 'EDITING' | 'PLAYING' | 'LEV
 export type LevelType = 'EASY' | 'MEDIUM' | 'HARD' | 'CUSTOM' | 'NONE';
 
 export type BlockType = 'ALL' | 'EDGES_AND_CORNERS' | 'SELF_AND_EDGES' | 'EDGES' | 'SELF_AND_CORNERS' | 'CORNERS' | 'NONE' | 'EMPTY';
-
-export type LevelBlock = 
-    'a'  // toggle all
-  | 'o'  // toggle edges & corners
-  | 'p'  // toggle self & edges. Note: 'p' is short for plus sign (+) which is the shape of the toggle blocks
-  | 'e'  // toggle edges
-  | 'x'  // toggle self and corners
-  | 'c'  // toggle corners
-  | 'n'  // toggle none
-  | ' '  // empty
 
 const BLOCK_TYPE_LOOKUP: Map<LevelBlock, BlockType> = new Map<LevelBlock, BlockType>([
   ['a', 'ALL'              ],
@@ -33,6 +24,16 @@ const BLOCK_TYPE_LOOKUP: Map<LevelBlock, BlockType> = new Map<LevelBlock, BlockT
   ['n', 'NONE'             ],
   [' ', 'EMPTY'            ],
 ]);
+
+const getLevels = (levelType: LevelType, customLevels: Level[]): Level[] => {
+  switch(levelType) {
+    case 'EASY': return EASY_LEVELS;
+    case 'MEDIUM': return MEDIUM_LEVELS;
+    case 'HARD': return HARD_LEVELS;
+    case 'CUSTOM': return [...customLevels];
+    default: return [];
+  }
+};
 
 export const toLevelBlock = (blockType: BlockType): LevelBlock => {
   const matchingEntries = [...BLOCK_TYPE_LOOKUP.entries()].filter(([_, value]) => value === blockType);
@@ -51,13 +52,6 @@ const nextBlockType = (blockType: BlockType): BlockType => {
     case 'CORNERS':           return 'NONE';
     case 'NONE':              return 'ALL';
   }
-};
-
-export type Level = {
-  id: string;
-  name: string;
-  blocks: LevelBlock[];
-  moves: string[];
 };
 
 const NEW_LEVEL: Level = {
@@ -80,7 +74,7 @@ const NEW_LEVEL: Level = {
   moves: []
 };
 
-const LEVEL: Level = {
+const EMPTY_LEVEL: Level = {
   id: 'd9045321-b9ca-425a-804b-690b484fbc10',
   name: 'Sample 01',
   blocks: [
@@ -373,7 +367,7 @@ const levelBlocksToBlocks = (levelBlocks: LevelBlock[], moves?: string[]): Block
   return blocks;
 }
 
-const BLOCKS: BlockInfo[] = levelBlocksToBlocks(LEVEL.blocks, LEVEL.moves);
+const BLOCKS: BlockInfo[] = levelBlocksToBlocks(EMPTY_LEVEL.blocks, EMPTY_LEVEL.moves);
 
 const populateIdToBlock = (blocks: BlockInfo[]): Map<string, BlockInfo> => {
   let idToBlock: Map<string, BlockInfo> = new Map<string, BlockInfo>();
@@ -565,6 +559,7 @@ export type ToastMessage = 'NONE' | 'BLOCK_MODE' | 'MOVE_MODE' | 'SHARE' | 'SAVE
 
 export type GlobalState = {
   gameMode: GameMode;
+  levelIndex: number;
   levelType: LevelType;
   currentLevel: Level;
   moveCount: number;
@@ -588,7 +583,7 @@ export type GlobalState = {
   showLevels: (levelType: LevelType) => void;
   newLevel: () => void;
   editLevel: (level: Level) => void;
-  playLevel: (level: Level, levelType: LevelType) => void;
+  playLevel: (levelIndex: number, levelType: LevelType) => void;
   playNextLevel: () => void;
   showMainMenu: () => void;
   blockHovered: (id: string, isHovered: boolean) => void;
@@ -645,13 +640,14 @@ export const useGlobalStore = create<GlobalState>()(
     (set, get) => {
       return {
         gameMode: 'MAIN_MENU',
+        levelIndex: 0,
         levelType: 'NONE',
-        currentLevel: LEVEL,
+        currentLevel: EMPTY_LEVEL,
         moveCount: 0,
         levels: [],
-        levelName: LEVEL.name,
+        levelName: EMPTY_LEVEL.name,
         blocks: BLOCKS,
-        moves: LEVEL.moves,
+        moves: EMPTY_LEVEL.moves,
         idToBlock: populateIdToBlock(BLOCKS),
         hoveredIds: [],
         onIds: BLOCKS.filter(block => block.on).map(block => block.id),
@@ -676,20 +672,16 @@ export const useGlobalStore = create<GlobalState>()(
           if (isNotExistingLevel(level, customLevels)) {
             customLevels = [...customLevels, level];
           }
+          const levelIndex = customLevels.findIndex(lvl => lvl.id === level.id);
 
-          playLevel(level, 'CUSTOM');
+          playLevel(levelIndex, 'CUSTOM');
 
           return { customLevels };
         }),
 
         showLevels: (levelType: LevelType) => set(({ customLevels }) => {
-          let levels: Level[] = [];
-          switch(levelType) {
-            case 'EASY': levels = [LEVEL]; break;
-            case 'MEDIUM': levels = [LEVEL]; break;
-            case 'HARD': levels = [LEVEL]; break;
-            case 'CUSTOM': levels = [...customLevels]; break;
-          }
+          const levels = getLevels(levelType, customLevels);
+
           return {
             gameMode: 'LEVEL_MENU',
             levelType,
@@ -724,7 +716,9 @@ export const useGlobalStore = create<GlobalState>()(
           };
         }),
 
-        playLevel: (level: Level, levelType: LevelType) => set(() => {
+        playLevel: (levelIndex: number, levelType: LevelType) => set(({ customLevels }) => {
+          const levels = getLevels(levelType, customLevels);
+          const level = levels[levelIndex];
           const blocks = levelBlocksToBlocks(level.blocks, level.moves);
           const moves = [...level.moves];
           const idToBlock = populateIdToBlock(blocks);
@@ -734,6 +728,8 @@ export const useGlobalStore = create<GlobalState>()(
             gameMode: 'PLAYING',
             currentLevel: level,
             moveCount: 0,
+            levelIndex,
+            levels,
             levelType,
             levelName: level.name,
             blocks,
@@ -745,9 +741,20 @@ export const useGlobalStore = create<GlobalState>()(
         }),
 
         playNextLevel: () => {
-          const { playLevel, currentLevel, levelType } = get();
-          // TODO play next level
-          playLevel(currentLevel, levelType);
+          const { levels, playLevel, levelIndex, levelType } = get();
+          
+          let newLevelIndex = levelIndex + 1;
+          let newLevelType = levelType;
+          if (newLevelIndex >= levels.length) {
+            newLevelIndex = 0;
+            switch (levelType) {
+              case 'EASY':   newLevelType = 'MEDIUM'; break;
+              case 'MEDIUM': newLevelType = 'HARD';   break;
+              case 'HARD':   newLevelType = 'CUSTOM'; break;
+            }
+          }
+
+          playLevel(newLevelIndex, newLevelType);
         },
 
         showMainMenu: () => set(() => {
@@ -899,8 +906,8 @@ export const useGlobalStore = create<GlobalState>()(
           get().updateUnsavedChanges();
         },
 
-        editPlay: () => set(({ currentLevel, playLevel }) => {
-          playLevel(currentLevel, 'CUSTOM');
+        editPlay: () => set(({ levelIndex, playLevel }) => {
+          playLevel(levelIndex, 'CUSTOM');
           return { editingLevelId: '' };
         }),
 
