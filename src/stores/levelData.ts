@@ -276,56 +276,32 @@ export const EASY_LEVELS: Level[] = [
 // *************************
 
 const MEDIUM_LEVEL_01: Level = {
-  id: 'ff46aff9-a82e-4919-ac57-735b7557a094',
+  id: 'a9711e79-1754-43fa-8493-b3e9ab76d59a',
   name: 'Level 1',
   blocks: [
     // layer 1
+    'a','n','a',
     'n','n','n',
-    'n','p','n',
-    'n','n','n',
+    'a','n','a',
     // layer 2
     'n','n','n',
-    'n',' ','e',
-    'n','a','n',
+    'n',' ','n',
+    'n','n','n',
     // layer 3
+    'a','n','a',
     'n','n','n',
-    'n','n','n',
-    'n','n','n',
+    'a','n','a',
   ],
   moves: [
-    'block-1-1-2',
-    'block-2-1-1',
-    'block-1-2-1',
-  ]
-};
-
-const MEDIUM_LEVEL_02: Level = {
-  id: '0c91d45b-b2b4-4236-a6d7-f96750c10a48',
-  name: 'Level 2',
-  blocks: [
-    // layer 1
-    'n','n','n',
-    'n','p','n',
-    'n','n','n',
-    // layer 2
-    'n','n','n',
-    'n',' ','e',
-    'n','a','n',
-    // layer 3
-    'n','n','n',
-    'n','n','n',
-    'n','n','n',
-  ],
-  moves: [
-    'block-1-1-2',
-    'block-2-1-1',
-    'block-1-2-1',
+    'block-2-0-2',
+    'block-2-2-0',
+    'block-0-2-2',
+    'block-0-0-0',
   ]
 };
 
 export const MEDIUM_LEVELS: Level[] = [
   MEDIUM_LEVEL_01,
-  MEDIUM_LEVEL_02
 ];
 
 // *************************
@@ -356,33 +332,9 @@ const HARD_LEVEL_01: Level = {
   ]
 };
 
-const HARD_LEVEL_02: Level = {
-  id: '639edd26-d8ab-42cf-8969-cc43345c0569',
-  name: 'Level 2',
-  blocks: [
-    // layer 1
-    'n','n','n',
-    'n','p','n',
-    'n','n','n',
-    // layer 2
-    'n','n','n',
-    'n',' ','e',
-    'n','a','n',
-    // layer 3
-    'n','n','n',
-    'n','n','n',
-    'n','n','n',
-  ],
-  moves: [
-    'block-1-1-2',
-    'block-2-1-1',
-    'block-1-2-1',
-  ]
-};
 
 export const HARD_LEVELS: Level[] = [
   HARD_LEVEL_01,
-  HARD_LEVEL_02
 ];
 
 
