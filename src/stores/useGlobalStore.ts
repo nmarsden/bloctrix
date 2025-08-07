@@ -892,17 +892,21 @@ export const useGlobalStore = create<GlobalState>()(
             moves 
           };
 
-          const levelIndex = customLevels.findIndex(level => level.id === editingLevelId);
+          let levelIndex = customLevels.findIndex(level => level.id === editingLevelId);
           if (levelIndex === -1) {
             // Save new level
             set({ customLevels: [saveLevel, ...customLevels] });
+            levelIndex = 0;
           } else {
             // Update existing level
             customLevels[levelIndex] = saveLevel;
             set({ customLevels: [...customLevels] });
           }
 
-          set({ currentLevel: saveLevel });
+          set({ 
+            currentLevel: saveLevel,
+            levelIndex
+          });
           get().updateUnsavedChanges();
         },
 

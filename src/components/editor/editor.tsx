@@ -22,6 +22,7 @@ export default function Editor (){
   const setToggleMode = useGlobalStore((state: GlobalState) => state.setToggleMode);
   const shareCustomLevel = useGlobalStore((state: GlobalState) => state.shareCustomLevel);
   const setToastMessage = useGlobalStore((state: GlobalState) => state.setToastMessage);
+  const showLevels = useGlobalStore((state: GlobalState) => state.showLevels);
 
   const onLevelNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     editLevelName(event.target.value);
@@ -65,6 +66,10 @@ export default function Editor (){
     setToastMessage('SAVED');
   }, []);
 
+  const onLevelMenuClicked = useCallback(() => {
+    showLevels('CUSTOM');
+  }, []);
+
   const onDeleteClicked = useCallback(() => {
     setShowDeleteConfirm(true);
   }, []);
@@ -103,6 +108,7 @@ export default function Editor (){
           <div className="hudHeader">
             <div className="subHeading editor-subHeading">
               <div className="editor-buttonGroup">
+                <div className="button-dark" onClick={onLevelMenuClicked} title="Menu"><i className="fa-solid fa-bars"></i></div>
                 <div className="button-dark" onClick={onDeleteClicked} title="Delete"><i className="fa-solid fa-trash-can"></i></div>
                 <div className={`button-dark ${unsavedChanges ? 'button-disabled' : ''}`} onClick={onShareClicked} title="Share"><i className="fa-solid fa-link"></i></div>
                 <div className="button-dark" onClick={onSaveClicked} title="Save">
