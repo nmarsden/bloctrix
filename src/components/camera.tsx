@@ -14,6 +14,7 @@ export default function Camera({ children } : { children?: ReactNode }) {
   const cameraTarget = useRef<Vector3>(new Vector3(0, 0, 0));
 
   const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
+  const blocks = useGlobalStore((state: GlobalState) => state.blocks);
 
   const { gl } = useThree();
 
@@ -36,7 +37,7 @@ export default function Camera({ children } : { children?: ReactNode }) {
       gl.domElement.classList.remove('cursor-pointer');
       gl.domElement.classList.add('cursor-grab');
     }
-  }, [gameMode]);
+  }, [gameMode, blocks]);
   
   useEffect(() => {
     const controls = cameraControls.current
