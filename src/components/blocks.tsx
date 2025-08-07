@@ -16,6 +16,17 @@ export default function Blocks (){
   const { gl } = useThree();
 
   useEffect(() => {
+    // slowly move up & down
+    gsap.to(group.current.position, {
+      y: `+=0.4`,
+      duration: 4,
+      ease: 'sine.inOut',
+      repeat: -1,
+      yoyo: true
+    });
+  }, []);
+
+  useEffect(() => {
     if (hoveredIds.length > 0) {
       gl.domElement.classList.add('cursor-click');
     } else {
