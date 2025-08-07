@@ -5,7 +5,7 @@
   - [x] lights
   - [x] blocks
 
-- [ ] block
+- [x] block
   - [x] edges
   - [x] shadows
   - [x] pointer over
@@ -35,7 +35,7 @@
         [x] toggles nothing
   - [x] only show blocks that are on the cubes surface
 
-- [ ] level
+- [x] level
   - [x] introduce Level
   - [x] level editor
     - [x] press 'e' to enable/disable the editor
@@ -104,7 +104,7 @@
         - [-] export
       - [-] export - exports selected levels (or all if none selected)
       - [-] import
-  - [ ] level completed
+  - [x] level completed
     - [x] disable interactions with buttons, blocks, and camera
       - [x] hide buttons
       - [x] disable camera controls
@@ -118,15 +118,17 @@
         - [x] border color
         - [x] surface color
         - [x] label color
-    - [ ] show 'Level Completed' modal
+    - [x] show 'Level Completed' modal
       - [x] Menu button
       - [x] Replay button
-      - [ ] Next button
+      - [x] Next button
 
   - [x] ui
     - [x] main menu
+      - [ ] reset & animate blocks
     - [x] level menu
       - [x] new custom
+      - [ ] reset & animate blocks
     - [x] hud
       - [x] moves
       - [x] reset - use icon

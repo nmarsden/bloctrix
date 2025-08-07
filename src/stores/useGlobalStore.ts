@@ -76,26 +76,22 @@ const NEW_LEVEL: Level = {
 
 const EMPTY_LEVEL: Level = {
   id: 'd9045321-b9ca-425a-804b-690b484fbc10',
-  name: 'Sample 01',
+  name: 'Empty Level',
   blocks: [
     // layer 1
     'n','n','n',
-    'n','p','n',
+    'n','n','n',
     'n','n','n',
     // layer 2
     'n','n','n',
-    'n',' ','e',
-    'n','a','n',
+    'n',' ','n',
+    'n','n','n',
     // layer 3
     'n','n','n',
     'n','n','n',
     'n','n','n',
   ],
-  moves: [
-    'block-1-1-2',
-    'block-2-1-1',
-    'block-1-2-1',
-  ]
+  moves: []
 };
 
 const GRID_3x3x3: LevelBlock[] = [
@@ -685,7 +681,9 @@ export const useGlobalStore = create<GlobalState>()(
           return {
             gameMode: 'LEVEL_MENU',
             levelType,
-            levels
+            levels,
+            blocks: BLOCKS,
+            onIds: []
           }
         }),
 
@@ -760,7 +758,9 @@ export const useGlobalStore = create<GlobalState>()(
         showMainMenu: () => set(() => {
           return { 
             gameMode: 'MAIN_MENU',
-            levelType: 'NONE'
+            levelType: 'NONE',
+            blocks: BLOCKS,
+            onIds: []
           };
         }),
 

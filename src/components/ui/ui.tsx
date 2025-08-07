@@ -90,7 +90,7 @@ export default function Ui() {
             </div>
           </div>
           <div className="hudMain">
-            <div className="buttonGroup buttonGroup-column">
+            <div className="levelMenuContainer">
               {levels.map((level, index) => (
                 <div className="button-light button-level" key={`level-${index}`} onClick={onSelectLevel(index)}>{level.name}</div>
               ))}
