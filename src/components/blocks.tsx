@@ -16,14 +16,15 @@ export default function Blocks (){
   const { gl } = useThree();
 
   useEffect(() => {
+    // TODO animate camera up & down instead?
     // slowly move up & down
-    gsap.to(group.current.position, {
-      y: `+=0.4`,
-      duration: 4,
-      ease: 'sine.inOut',
-      repeat: -1,
-      yoyo: true
-    });
+    // gsap.to(group.current.position, {
+    //   y: `+=0.4`,
+    //   duration: 4,
+    //   ease: 'sine.inOut',
+    //   repeat: -1,
+    //   yoyo: true
+    // });
   }, []);
 
   useEffect(() => {

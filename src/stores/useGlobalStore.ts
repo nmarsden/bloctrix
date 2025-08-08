@@ -582,6 +582,8 @@ export type GlobalState = {
   playLevel: (levelIndex: number, levelType: LevelType) => void;
   playNextLevel: () => void;
   showMainMenu: () => void;
+  showPreviousLevel: () => void;
+  showNextLevel: () => void;
   blockHovered: (id: string, isHovered: boolean) => void;
   toggleHovered: () => void;
   setActivePlane: (activePlane: number) => void;
@@ -677,13 +679,19 @@ export const useGlobalStore = create<GlobalState>()(
 
         showLevels: (levelType: LevelType) => set(({ customLevels }) => {
           const levels = getLevels(levelType, customLevels);
+          const levelIndex = 0;
+          const currentLevel = levels[levelIndex];
+          const blocks = levelBlocksToBlocks(currentLevel.blocks, currentLevel.moves);
+          const onIds = blocks.filter(block => block.on).map(block => block.id);
 
           return {
             gameMode: 'LEVEL_MENU',
             levelType,
             levels,
-            blocks: BLOCKS,
-            onIds: []
+            levelIndex,
+            currentLevel,
+            blocks,
+            onIds
           }
         }),
 
@@ -763,6 +771,36 @@ export const useGlobalStore = create<GlobalState>()(
             onIds: []
           };
         }),
+
+        showPreviousLevel: () => {
+          const { levels, levelIndex } = get();
+          const previousLevelIndex = levelIndex - 1;
+          const currentLevel = levels[previousLevelIndex];
+          const blocks = levelBlocksToBlocks(currentLevel.blocks, currentLevel.moves);
+          const onIds = blocks.filter(block => block.on).map(block => block.id);
+
+          set({
+            levelIndex: previousLevelIndex,
+            currentLevel,
+            blocks,
+            onIds
+          });
+        },
+
+        showNextLevel: () => {
+          const { levels, levelIndex } = get();
+          const nextLevelIndex = levelIndex + 1;
+          const currentLevel = levels[nextLevelIndex];
+          const blocks = levelBlocksToBlocks(currentLevel.blocks, currentLevel.moves);
+          const onIds = blocks.filter(block => block.on).map(block => block.id);
+
+          set({
+            levelIndex: nextLevelIndex,
+            currentLevel,
+            blocks,
+            onIds
+          });
+        },
 
         blockHovered: (id: string, isHovered: boolean) => set(({ hoveredIds }) => {
 

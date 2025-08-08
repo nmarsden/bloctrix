@@ -43,7 +43,7 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   const levelCompleteTimelines = useRef<gsap.core.Timeline[]>([]);
   
   const onPointerOver = useCallback((event: ThreeEvent<PointerEvent>) => { 
-    if (gameMode === 'LEVEL_COMPLETED') return;
+    if (gameMode !== 'PLAYING' && gameMode !== 'EDITING') return;
 
     // console.log(`pointerOver: ${id}`);
     if (toggleIds.length > 0) {
@@ -53,7 +53,7 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   }, [toggleIds]);
 
   const onPointerOut = useCallback((event: ThreeEvent<PointerEvent>) => {
-    if (gameMode === 'LEVEL_COMPLETED') return;
+    if (gameMode !== 'PLAYING' && gameMode !== 'EDITING') return;
     
     // console.log(`pointerOut: ${id}`);
     if (toggleIds.length > 0) {
@@ -66,6 +66,8 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   const pointerUpData = useRef<PointerData>({ pos: new Vector2(), time: 10000 });
 
   const onPointerDown = useCallback((event: ThreeEvent<PointerEvent>) => {
+    if (gameMode !== 'PLAYING' && gameMode !== 'EDITING') return;
+
     if (toggleIds.length > 0) {
       pointerDownData.current.pos.setX(event.x);
       pointerDownData.current.pos.setY(event.y);
@@ -73,7 +75,10 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
     }
     event.stopPropagation();
   }, [toggleIds]);
+
   const onPointerUp = useCallback((event: ThreeEvent<PointerEvent>) => {
+    if (gameMode !== 'PLAYING' && gameMode !== 'EDITING') return;
+
     if (toggleIds.length > 0) {
       pointerUpData.current.pos.setX(event.x);
       pointerUpData.current.pos.setY(event.y);

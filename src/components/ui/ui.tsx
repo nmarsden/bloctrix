@@ -18,6 +18,8 @@ export default function Ui() {
   const playLevel = useGlobalStore((state: GlobalState) => state.playLevel);
   const playNextLevel = useGlobalStore((state: GlobalState) => state.playNextLevel);
   const showMainMenu = useGlobalStore((state: GlobalState) => state.showMainMenu);
+  const showPreviousLevel = useGlobalStore((state: GlobalState) => state.showPreviousLevel);
+  const showNextLevel = useGlobalStore((state: GlobalState) => state.showNextLevel);
 
   const onSelectLevelType = useCallback((levelType: LevelType) => {
     return () => showLevels(levelType);
@@ -37,6 +39,22 @@ export default function Ui() {
 
   const onSelectMenu = useCallback(() => {
     showMainMenu();
+  }, []);
+
+  const isSelectPreviousLevel = useCallback(() => {
+    return levelIndex > 0;
+  }, [levelIndex]);
+
+  const onSelectPreviousLevel = useCallback(() => {
+    showPreviousLevel();
+  }, []);
+
+  const isSelectNextLevel = useCallback(() => {
+    return levelIndex < levels.length - 1;
+  }, [levelIndex, levels]);
+
+  const onSelectNextLevel = useCallback(() => {
+    showNextLevel();
   }, []);
 
   const onSelectReset = useCallback(() => {
@@ -74,15 +92,15 @@ export default function Ui() {
 
       {/* LEVEL MENU */}
       {gameMode === 'LEVEL_MENU' ? (
-        <div className={'overlay show'}>
+        <div className={'hud show'}>
           <div className="hudHeader">
-            <div className="button-light button-icon" onClick={onSelectMenu} title="Back"><i className="fa-solid fa-bars"></i></div>
+            <div className="button-dark" onClick={onSelectMenu} title="Back"><i className="fa-solid fa-bars"></i></div>
             <div className="subHeading">
               <div>{levelType}</div>
               <div>LEVELS</div>
             </div>
             <div 
-              className={`button-light ${levelType === 'CUSTOM' ? 'button-icon' : 'button-icon-hidden'}`} 
+              className={`button-dark ${levelType === 'CUSTOM' ? 'button-icon' : 'button-icon-hidden'}`} 
               onClick={onSelectNewLevel} 
               title="New Level"
             >
@@ -90,13 +108,27 @@ export default function Ui() {
             </div>
           </div>
           <div className="hudMain">
-            <div className="levelMenuContainer">
-              {levels.map((level, index) => (
-                <div className="button-light button-level" key={`level-${index}`} onClick={onSelectLevel(index)}>{level.name}</div>
-              ))}
+            <div className="button-dark levelMenuPlayButton" onClick={onSelectLevel(levelIndex)}>
+              <i className="fa-solid fa-play"></i>
             </div>
           </div>
-          <div className="hudFooter levelMenuFooter"></div>
+          <div className="hudFooter">
+            <div className="buttonGroup levelMenuFooter">
+              <div 
+                className={`button-dark ${isSelectPreviousLevel() ? '' : 'button-disabled'}`} 
+                onClick={onSelectPreviousLevel}
+              >
+                  <i className="fa-solid fa-arrow-left"></i>
+              </div>
+              <div className="levelMenuName">{currentLevel.name}</div>
+              <div 
+                className={`button-dark ${isSelectNextLevel() ? '' : 'button-disabled'}`} 
+                onClick={onSelectNextLevel}
+              >
+                  <i className="fa-solid fa-arrow-right"></i>
+              </div>              
+            </div>
+          </div>
         </div>
       ) : null}
 
