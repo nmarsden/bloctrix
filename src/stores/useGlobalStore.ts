@@ -677,9 +677,8 @@ export const useGlobalStore = create<GlobalState>()(
           return { customLevels };
         }),
 
-        showLevels: (levelType: LevelType) => set(({ customLevels }) => {
+        showLevels: (levelType: LevelType) => set(({ customLevels, levelIndex }) => {
           const levels = getLevels(levelType, customLevels);
-          const levelIndex = 0;
           const currentLevel = levels[levelIndex];
           const blocks = levelBlocksToBlocks(currentLevel.blocks, currentLevel.moves);
           const onIds = blocks.filter(block => block.on).map(block => block.id);
@@ -767,6 +766,7 @@ export const useGlobalStore = create<GlobalState>()(
           return { 
             gameMode: 'MAIN_MENU',
             levelType: 'NONE',
+            levelIndex: 0,
             blocks: BLOCKS,
             onIds: []
           };

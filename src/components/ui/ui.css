@@ -339,7 +339,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-bottom: 30px;
 }
 
 .hudMain {
@@ -372,15 +371,24 @@
 }
 
 .levelMenuFooter {
-  padding-bottom: 20px;
+  padding-block: 20px;
 }
 
 .levelMenuPlayButton {
   font-size: 100px;
-  width: 120px;
-  height: 120px;
-  border: unset;
-  color: var(--main-text-colour);
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  color: var(--background-colour);
+  border-color: var(--background-colour);
+  opacity: 0.8;
+}
+.levelMenuPlayButton i {
+  margin-left: 15px;
+}
+.levelMenuPlayButton:hover {
+  color: var(--background-colour);
+  opacity: 1.0;
 }
 
 .levelMenuName {
