@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useThree } from "@react-three/fiber";
 import { GlobalState, useGlobalStore } from "../stores/useGlobalStore";
 import Block from "./block";
@@ -15,16 +15,24 @@ export default function Blocks (){
 
   const { gl } = useThree();
 
+  const killRotateTween = useCallback(() => {
+      if (rotateTween.current !== null) {
+        rotateTween.current.kill();
+        rotateTween.current = null;
+      }
+  }, [rotateTween]);
+
   useEffect(() => {
-    // TODO animate camera up & down instead?
     // slowly move up & down
-    // gsap.to(group.current.position, {
-    //   y: `+=0.4`,
-    //   duration: 4,
-    //   ease: 'sine.inOut',
-    //   repeat: -1,
-    //   yoyo: true
-    // });
+    gsap.to(group.current.position, {
+      keyframes: [
+        { y: `+=0.4`, duration: 4 },
+        { y: `-=0.4`, duration: 4 },
+      ],      
+      ease: 'sine.inOut',
+      repeat: -1,
+      yoyo: true
+    });
   }, []);
 
   useEffect(() => {
@@ -36,25 +44,40 @@ export default function Blocks (){
   }, [ hoveredIds ]);
 
   useEffect(() => {
-    if (gameMode === 'LEVEL_COMPLETED') {
+    if (gameMode === 'MAIN_MENU' || gameMode == 'LEVEL_MENU') {
+      // reset rotate
+      killRotateTween();
+      gsap.to(group.current.rotation, {
+        x: 0,
+        y: 0,
+        duration: 1.0,
+        ease: 'sine.inOut',
+      });
+      // rotate y
+      rotateTween.current = gsap.to(group.current.rotation, {
+        y: `+=${Math.PI * 2}`,
+        duration: 30,
+        ease: 'none',
+        repeat: -1,
+      });
+    } else if (gameMode === 'PLAYING' || gameMode === 'EDITING') {
+      // reset rotate
+      killRotateTween();
+      gsap.to(group.current.rotation, {
+        x: 0,
+        y: 0,
+        duration: 1.0,
+        ease: 'sine.inOut',
+      });
+    } else if (gameMode === 'LEVEL_COMPLETED') {
+      // rotate x & y
+      killRotateTween();
       rotateTween.current = gsap.to(group.current.rotation, {
         x: `+=${Math.PI * 2}`,
         y: `+=${Math.PI * 2}`,
         duration: 15,
         ease: 'none',
         repeat: -1,
-      });
-    } else {
-      if (rotateTween.current !== null) {
-        rotateTween.current.kill();
-        rotateTween.current = null;
-      }
-      // reset rotate
-      gsap.to(group.current.rotation, {
-        x: 0,
-        y: 0,
-        duration: 0.2,
-        ease: 'linear',
       });
     }
   }, [gameMode]);

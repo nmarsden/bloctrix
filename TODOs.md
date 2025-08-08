@@ -125,10 +125,10 @@
 
   - [x] ui
     - [x] main menu
-      - [ ] reset & animate blocks
+      - [x] reset & animate blocks
     - [x] level menu
       - [x] new custom
-      - [ ] reset & animate blocks
+      - [x] reset & animate blocks
       - [x] switch to a gallery layout
           - [x] show a single level
             - [x] level name
