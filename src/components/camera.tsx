@@ -27,7 +27,9 @@ export default function Camera({ children } : { children?: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    cameraControls.current.setPosition(cameraPosition.current.x, cameraPosition.current.y, cameraPosition.current.z, true);
+    if (gameMode === 'PLAYING') {
+      cameraControls.current.setPosition(cameraPosition.current.x, cameraPosition.current.y, cameraPosition.current.z, true);
+    }
     if (gameMode === 'LEVEL_COMPLETED') {
       cameraControls.current.enabled = false;
       gl.domElement.classList.remove('cursor-grab');
