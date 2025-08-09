@@ -28,6 +28,7 @@ export default function Camera({ children } : { children?: ReactNode }) {
 
   useEffect(() => {
     if (gameMode === 'PLAYING') {
+      cameraControls.current.normalizeRotations();
       cameraControls.current.setPosition(cameraPosition.current.x, cameraPosition.current.y, cameraPosition.current.z, true);
     }
     if (gameMode === 'LEVEL_COMPLETED') {
