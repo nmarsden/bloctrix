@@ -132,9 +132,11 @@
       - [x] switch to a gallery layout
           - [x] show a single level
             - [x] level name
+            - [x] n of N
             - [x] blocks
           - [x] show play button  
           - [x] show next & previous buttons
+      - [x] handle no custom levels
 
     - [x] hud
       - [x] moves

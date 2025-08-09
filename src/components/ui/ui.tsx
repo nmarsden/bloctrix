@@ -108,11 +108,14 @@ export default function Ui() {
             </div>
           </div>
           <div className="hudMain">
-            <div className="button-light levelMenuPlayButton" onClick={onSelectLevel(levelIndex)}>
-              <i className="fa-solid fa-play"></i>
-            </div>
+            {levels.length > 0 ? (
+              <div className="button-light levelMenuPlayButton" onClick={onSelectLevel(levelIndex)}>
+                <i className="fa-solid fa-play"></i>
+              </div>
+            ) : null}
           </div>
           <div className="hudFooter">
+            {levels.length > 0 ? (
             <div className="buttonGroup levelMenuFooter">
               <div 
                 className={`button-dark ${isSelectPreviousLevel() ? '' : 'button-disabled'}`} 
@@ -120,7 +123,10 @@ export default function Ui() {
               >
                   <i className="fa-solid fa-chevron-left"></i>
               </div>
-              <div className="levelMenuName">{currentLevel.name}</div>
+              <div className="levelMenuName">
+                <div>{currentLevel.name}</div>
+                <div>{levelIndex + 1} of {levels.length}</div>
+              </div>
               <div 
                 className={`button-dark ${isSelectNextLevel() ? '' : 'button-disabled'}`} 
                 onClick={onSelectNextLevel}
@@ -128,6 +134,7 @@ export default function Ui() {
                   <i className="fa-solid fa-chevron-right"></i>
               </div>              
             </div>
+          ) : null}
           </div>
         </div>
       ) : null}
