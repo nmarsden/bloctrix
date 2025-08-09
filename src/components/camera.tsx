@@ -135,12 +135,12 @@ export default function Camera({ children } : { children?: ReactNode }) {
           ref={cameraControls}
           enabled={true}
           
-          // truckSpeed={0}
+          truckSpeed={0}
           // minPolarAngle={0}
-          // maxPolarAngle={Math.PI * 0.45}
-          // minDistance={0.1}
-          // maxDistance={71.0}
-          // draggingSmoothTime={0.3}
+          // maxPolarAngle={Math.PI}
+          minDistance={10.0}
+          maxDistance={30.0}
+          draggingSmoothTime={0.2}
         />
       </group>
     </>
