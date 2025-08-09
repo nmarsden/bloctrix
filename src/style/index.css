@@ -1,8 +1,8 @@
 :root {
-	--main-text-colour: #040337;
+	--main-text-colour: rgb(250, 250, 250);
 	--link-colour: #a8ffed;
-	--background-colour: #a8dadc;
-  --dark-color: 7, 4, 99;
+	--background-colour: #1f3d6a;
+  --dark-color: 250, 250, 250;
   --light-color: 250, 250, 250;
 	--selected-colour: 255, 255, 0;
 	--danger-color: #be424c;

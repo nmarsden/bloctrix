@@ -181,7 +181,7 @@ export default function Ui() {
               </div>
               <div className="button-dark button-icon button-hidden"></div>
               <div className="button-dark" onClick={onSelectNext} title="Next Level">
-                  <i className="fa-solid fa-arrow-right"></i>
+                  <i className="fa-solid fa-chevron-right"></i>
               </div>
             </div>
           </div>

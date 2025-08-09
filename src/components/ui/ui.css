@@ -5,7 +5,6 @@
   right: 0;
   bottom: 0;
   padding: 20px;
-  background-color: rgba(var(--dark-color), 0.5);
   color: rgba(var(--light-color), 1.0);
   font-size: 40px;
   text-align: center;
@@ -379,15 +378,15 @@
   width: 140px;
   height: 140px;
   border-radius: 50%;
-  color: var(--background-colour);
-  border-color: var(--background-colour);
+  color: var(--light-color);
+  border-color: var(--light-color);
   opacity: 0.8;
 }
 .levelMenuPlayButton i {
   margin-left: 15px;
 }
 .levelMenuPlayButton:hover {
-  color: var(--background-colour);
+  color: var(--light-color);
   opacity: 1.0;
 }
 
