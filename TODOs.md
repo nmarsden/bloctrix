@@ -39,7 +39,7 @@
   - [x] introduce Level
   - [x] level editor
     - [x] press 'e' to enable/disable the editor
-    - [x] edit mode
+    - [x] edit
       - [x] name
       - [x] grid size
         - [x] 3 x 3
@@ -49,7 +49,13 @@
         - [x] block type: all
         - [x] block type: neighbours
         - [x] block type: none
+    - [x] block mode    
       - [x] clicking a block toggles block type
+      - [x] improve block mode
+        - [x] when a block type changes, instead of clearing moves, re-apply the moves based on the new block type
+        - [x] handle a move no longer possible to apply, ie. block type was changed to 'NONE' for a moved block
+        - [x] when saving level, remove any moves which became invalid due to the block type changing to 'NONE'
+
     - [x] play mode
       - [x] clicking a block toggles on/off according to standard rules
         - [ ] delay toggle animation

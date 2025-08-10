@@ -314,7 +314,19 @@ const updateOnIds = (onIds: string[], idsToToggle: string[]): string[] => {
   return [...newOnIds, ...toggleOnIds];
 }
 
-const levelBlocksToBlocks = (levelBlocks: LevelBlock[], moves?: string[]): BlockInfo[] => {
+const applyMoves = (blocks: BlockInfo[], moves: string[]): BlockInfo[] => {
+  // Populate onIds according to moves
+  let onIds: string[] = [];
+  moves.forEach(move => {
+    const idsToToggle = (blocks.filter(block => block.id === move))[0].toggleIds;
+    onIds = updateOnIds(onIds, idsToToggle);
+  });
+
+  // Update 'on' in blocks according to onIds
+  return blocks.map(block => ({ ...block, on: onIds.includes(block.id) }));
+};
+
+const levelBlocksToBlocks = (levelBlocks: LevelBlock[], moves: string[]): BlockInfo[] => {
   let blocks: BlockInfo[] = [];
 
   const gridSize = Math.round(Math.pow(levelBlocks.length, 1 / 3));
@@ -347,15 +359,8 @@ const levelBlocksToBlocks = (levelBlocks: LevelBlock[], moves?: string[]): Block
     }
   }
 
-  // Populate onIds according to moves
-  let onIds: string[] = [];
-  moves?.forEach(move => {
-    const idsToToggle = (blocks.filter(block => block.id === move))[0].toggleIds;
-    onIds = updateOnIds(onIds, idsToToggle);
-  });
-
-  // Update 'on' in blocks according to onIds
-  blocks = blocks.map(block => ({ ...block, on: onIds.includes(block.id) }));
+  // Populate block 'on' values
+  blocks = applyMoves(blocks, moves);
 
   return blocks;
 }
@@ -916,7 +921,7 @@ export const useGlobalStore = create<GlobalState>()(
         }),
 
         toggleHovered: () => {
-          const { idToBlock, hoveredIds, moves, onIds, toggleMode, blocks, moveCount, gameMode } = get();
+          const { idToBlock, hoveredIds, moves, onIds, toggleMode, blocks, moveCount, gameMode, gridSize } = get();
           const hoveredBlock = idToBlock.get(hoveredIds[0]) as BlockInfo;
 
           if (toggleMode === 'TOGGLE_ON') {
@@ -941,18 +946,30 @@ export const useGlobalStore = create<GlobalState>()(
             const blockType = hoveredBlock.blockType;
             const newBlockType = nextBlockType(blockType);
 
-            const updatedBlocks = blocks.map(block => ({
+            // Update blocks with block type & also temporarily toggleIds for 'TOGGLE_ON' mode so that moves can be re-applied
+            let updatedBlocks = blocks.map(block => {
+              const blockType = (block.id === hoveredBlock.id ? newBlockType : block.blockType);
+              return {
+                ...block, 
+                blockType,
+                toggleIds: calcToggleIds(blockType, block.id, 'TOGGLE_ON', gridSize)
+              };
+            });
+            // Re-apply moves
+            updatedBlocks = applyMoves(updatedBlocks, moves);
+            const updatedOnIds = updatedBlocks.filter(block => block.on).map(block => block.id);
+            // Reset toggleIds for 'TOGGLE_BLOCK_TYPE' mode
+            updatedBlocks = updatedBlocks.map(block => ({
               ...block, 
-              blockType: (block.id === hoveredBlock.id ? newBlockType : block.blockType), 
-            }));
+              toggleIds: calcToggleIds(block.blockType, block.id, 'TOGGLE_BLOCK_TYPE', gridSize)
+            }));            
 
             Sounds.getInstance().playSoundFX('BLOCK_TOGGLE');
 
             set({ 
-              onIds: [],
-              idToToggleDelay: populateIdToToggleDelay(blocks, ''),
               blocks: updatedBlocks,
-              moves: [],
+              onIds: updatedOnIds,
+              idToToggleDelay: populateIdToToggleDelay(updatedBlocks, ''),
               idToBlock: populateIdToBlock(updatedBlocks)
             });            
           }
@@ -989,7 +1006,7 @@ export const useGlobalStore = create<GlobalState>()(
 
         editGridSize: (gridSize: number) => {
           const levelBlocks: LevelBlock[] = initLevelBlocks(gridSize);
-          const blocks: BlockInfo[] = levelBlocksToBlocks(levelBlocks);
+          const blocks: BlockInfo[] = levelBlocksToBlocks(levelBlocks, []);
 
           Sounds.getInstance().playSoundFX('BLOCK_TOGGLE');
 
@@ -1043,14 +1060,17 @@ export const useGlobalStore = create<GlobalState>()(
         },
 
         editSave: () => {
-          const { editingLevelId, levelName, blocks, moves, customLevels } = get();
-          outputLevelToConsole(editingLevelId, levelName, blocks, moves);
+          const { editingLevelId, levelName, blocks, moves, customLevels, idToBlock } = get();
+          // Remove invalid moves (Note: could happen if block type was changed to 'NONE' after being moved)
+          const validMoves = moves.filter(move => idToBlock.get(move)?.blockType !== 'NONE');
+
+          outputLevelToConsole(editingLevelId, levelName, blocks, validMoves);
 
           const saveLevel: Level = {
             id: editingLevelId,
             name: levelName, 
             blocks: blocks.map(block => toLevelBlock(block.blockType)), 
-            moves 
+            moves: validMoves 
           };
 
           let levelIndex = customLevels.findIndex(level => level.id === editingLevelId);
@@ -1066,6 +1086,7 @@ export const useGlobalStore = create<GlobalState>()(
 
           set({ 
             currentLevel: saveLevel,
+            moves: validMoves,
             levelIndex
           });
 
