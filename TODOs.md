@@ -189,5 +189,5 @@
   - [ ] sound effects
     - [ ] button clicked
     - [x] block toggled
-    - [ ] level completed
+    - [x] level completed
 

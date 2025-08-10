@@ -1,4 +1,4 @@
-import { Color } from 'three';
+import { Color, MathUtils } from 'three';
 import { create } from 'zustand';
 import { persist, StateStorage, createJSONStorage } from 'zustand/middleware';
 import * as lz from 'lz-string';
@@ -192,9 +192,7 @@ const calcBlockId = (x: number, y: number, z: number): string => {
 }
 
 const calcBlockCornerIds = (blockId: string, gridSize: number): string[] => {
-  const x = parseInt(blockId.split('-')[1]);
-  const y = parseInt(blockId.split('-')[2]);
-  const z = parseInt(blockId.split('-')[3]);
+  const { x, y, z } = blockIdToXYZ(blockId);
 
   // xyz for block corners
   let cornerBlockXYZs: [number, number, number][];
@@ -258,9 +256,7 @@ const calcBlockCornerIds = (blockId: string, gridSize: number): string[] => {
 };
 
 const calcBlockEdgeIds = (blockId: string, gridSize: number): string[] => {
-  const x = parseInt(blockId.split('-')[1]);
-  const y = parseInt(blockId.split('-')[2]);
-  const z = parseInt(blockId.split('-')[3]);
+  const { x, y, z } = blockIdToXYZ(blockId);
 
   // xyz for block edges
   let edgeBlockXYZs: [number, number, number][] = [
@@ -372,12 +368,60 @@ const BLOCKS: BlockInfo[] = levelBlocksToBlocks(EMPTY_LEVEL.blocks, EMPTY_LEVEL.
 const GRID_SIZE = getGridSize(BLOCKS);
 
 const populateIdToBlock = (blocks: BlockInfo[]): Map<string, BlockInfo> => {
-  let idToBlock: Map<string, BlockInfo> = new Map<string, BlockInfo>();
+  const idToBlock: Map<string, BlockInfo> = new Map<string, BlockInfo>();
   for (let i=0; i<blocks.length; i++) {
     const block = blocks[i];
     idToBlock.set(block.id, block);
   }
   return idToBlock;
+};
+
+const blockIdToXYZ = (blockId: string): { x: number, y: number, z: number } => {
+  return {
+    x: parseInt(blockId.split('-')[1]),
+    y: parseInt(blockId.split('-')[2]),
+    z: parseInt(blockId.split('-')[3])
+  };
+};
+
+const populateIdToToggleDelay = (blocks: BlockInfo[], toggledBlockId: string): Map<string, number> => {
+  const idToToggleDelay: Map<string, number> = new Map<string, number>();
+
+  if (toggledBlockId === '') {
+    // Give each block a unique delay based on x,y,z
+    const gridSize = getGridSize(blocks);
+
+    for (let i=0; i<blocks.length; i++) {
+      const block = blocks[i];
+      const { x, y, z } = blockIdToXYZ(block.id);
+
+      // calc factor between min & max delay, base on x,y,z
+      // Given k is the max value in the range of x,y,z. (Note: (k + 1) = gridSize)
+      //   factor = (x + (k + 1) * y + (k + 1)^2 * z) / ((k + 1)^3 - 1);
+      const factor = (x + (gridSize * y) + (Math.pow(gridSize, 2) * z)) / (Math.pow(gridSize, 3) - 1);
+
+      const minDelay = 0;
+      const maxDelay = 300;
+      const delay = MathUtils.lerp(minDelay, maxDelay, factor);
+      idToToggleDelay.set(block.id, delay);
+    }
+    return idToToggleDelay;
+  }
+
+  for (let i=0; i<blocks.length; i++) {
+    const block = blocks[i];
+    if (block.id === toggledBlockId) {
+      idToToggleDelay.set(block.id, 0);
+    } else {
+      // TODO calc. delay based on block position relative to toggledBlock position
+      // - neighbours should have varying delay.  Perhaps with increasing delay based on relative position to the clicked block 
+      //   in a clockwise rotation when looking from the clicked block to the blocks origin
+
+      const delay = 0;
+      idToToggleDelay.set(block.id, delay);
+    }
+  }
+  return idToToggleDelay;
 };
 
 const outputLevelToConsole = (levelId: string, levelName: string, blocks: BlockInfo[], moves: string[]) => {
@@ -573,6 +617,7 @@ export type GlobalState = {
   idToBlock: Map<string, BlockInfo>;
   hoveredIds: string[];
   onIds: string[];
+  idToToggleDelay: Map<string, number>;
   activePlane: number;
   colors: Colors;
   toggleMode: ToggleMode;
@@ -661,6 +706,7 @@ export const useGlobalStore = create<GlobalState>()(
         idToBlock: populateIdToBlock(BLOCKS),
         hoveredIds: [],
         onIds: BLOCKS.filter(block => block.on).map(block => block.id),
+        idToToggleDelay: populateIdToToggleDelay(BLOCKS, ''),
         activePlane: 2,
         colors: COLORS,
         toggleMode: 'TOGGLE_ON',
@@ -702,7 +748,8 @@ export const useGlobalStore = create<GlobalState>()(
               levels: [],
               blocks: BLOCKS,
               gridSize: GRID_SIZE,
-              onIds: []
+              onIds: [],
+              idToToggleDelay: populateIdToToggleDelay(BLOCKS, ''),
             });
             return;
           }
@@ -711,6 +758,7 @@ export const useGlobalStore = create<GlobalState>()(
           const blocks = levelBlocksToBlocks(currentLevel.blocks, currentLevel.moves);
           const gridSize = getGridSize(blocks);
           const onIds = blocks.filter(block => block.on).map(block => block.id);
+          const idToToggleDelay = populateIdToToggleDelay(blocks, '');
 
           set({
             gameMode: 'LEVEL_MENU',
@@ -720,7 +768,8 @@ export const useGlobalStore = create<GlobalState>()(
             currentLevel,
             blocks,
             gridSize,
-            onIds
+            onIds,
+            idToToggleDelay
           });
         },
 
@@ -737,6 +786,7 @@ export const useGlobalStore = create<GlobalState>()(
           const moves = [...level.moves];
           const idToBlock = populateIdToBlock(blocks);
           const onIds = blocks.filter(block => block.on).map(block => block.id);
+          const idToToggleDelay = populateIdToToggleDelay(blocks, '');
           
           return {
             gameMode: 'EDITING',
@@ -748,6 +798,7 @@ export const useGlobalStore = create<GlobalState>()(
             moves,
             idToBlock,
             onIds,
+            idToToggleDelay,
             editingLevelId: level.id,
             unsavedChanges: false
           };
@@ -761,6 +812,7 @@ export const useGlobalStore = create<GlobalState>()(
           const moves = [...level.moves];
           const idToBlock = populateIdToBlock(blocks);
           const onIds = blocks.filter(block => block.on).map(block => block.id);
+          const idToToggleDelay = populateIdToToggleDelay(blocks, '');
 
           return {
             gameMode: 'PLAYING',
@@ -775,6 +827,7 @@ export const useGlobalStore = create<GlobalState>()(
             moves,
             idToBlock,
             onIds,
+            idToToggleDelay,
             editingLevelId: ''
           };
         }),
@@ -803,7 +856,8 @@ export const useGlobalStore = create<GlobalState>()(
             levelIndex: 0,
             blocks: BLOCKS,
             gridSize: GRID_SIZE,
-            onIds: []
+            onIds: [],
+            idToToggleDelay: populateIdToToggleDelay(BLOCKS, '')
           };
         }),
 
@@ -814,13 +868,15 @@ export const useGlobalStore = create<GlobalState>()(
           const blocks = levelBlocksToBlocks(currentLevel.blocks, currentLevel.moves);
           const gridSize = getGridSize(blocks);
           const onIds = blocks.filter(block => block.on).map(block => block.id);
+          const idToToggleDelay = populateIdToToggleDelay(blocks, '');
 
           set({
             levelIndex: previousLevelIndex,
             currentLevel,
             blocks,
             gridSize,
-            onIds
+            onIds,
+            idToToggleDelay
           });
         },
 
@@ -831,13 +887,15 @@ export const useGlobalStore = create<GlobalState>()(
           const blocks = levelBlocksToBlocks(currentLevel.blocks, currentLevel.moves);
           const gridSize = getGridSize(blocks);
           const onIds = blocks.filter(block => block.on).map(block => block.id);
+          const idToToggleDelay = populateIdToToggleDelay(blocks, '');
 
           set({
             levelIndex: nextLevelIndex,
             currentLevel,
             blocks,
             gridSize,
-            onIds
+            onIds,
+            idToToggleDelay
           });
         },
 
@@ -860,6 +918,8 @@ export const useGlobalStore = create<GlobalState>()(
 
           if (toggleMode === 'TOGGLE_ON') {
             // TODO fix bug: hoveredBlock can be undefined
+
+            const idToToggleDelay = populateIdToToggleDelay(blocks, hoveredBlock.id);
             const newMoves = moves.includes(hoveredBlock.id) ? moves.filter(id => id !== hoveredBlock.id) : [...moves, hoveredBlock.id];
             const newOnIds = updateOnIds(onIds, hoveredBlock.toggleIds);
 
@@ -867,7 +927,12 @@ export const useGlobalStore = create<GlobalState>()(
               set({ gameMode: 'LEVEL_COMPLETED', hoveredIds: [] });
             }
 
-            set({ moves: newMoves, onIds: newOnIds, moveCount: moveCount + 1 });
+            set({ 
+              moves: newMoves, 
+              onIds: newOnIds,
+              idToToggleDelay,
+              moveCount: moveCount + 1 
+            });
           }
           if (toggleMode === 'TOGGLE_BLOCK_TYPE') {
             const blockType = hoveredBlock.blockType;
@@ -880,6 +945,7 @@ export const useGlobalStore = create<GlobalState>()(
 
             set({ 
               onIds: [],
+              idToToggleDelay: populateIdToToggleDelay(blocks, ''),
               blocks: updatedBlocks,
               moves: [],
               idToBlock: populateIdToBlock(updatedBlocks)
@@ -920,6 +986,7 @@ export const useGlobalStore = create<GlobalState>()(
 
           set({ 
             onIds: [],
+            idToToggleDelay: populateIdToToggleDelay(blocks, ''),
             blocks,
             gridSize,
             moves: [],
@@ -939,6 +1006,7 @@ export const useGlobalStore = create<GlobalState>()(
 
           set({ 
             onIds: [],
+            idToToggleDelay: populateIdToToggleDelay(updatedBlocks, ''),
             blocks: updatedBlocks,
             moves: [],
             idToBlock: populateIdToBlock(updatedBlocks)
@@ -947,7 +1015,12 @@ export const useGlobalStore = create<GlobalState>()(
         },
 
         editReset: () => {
-          set({ onIds: [], moves: [] });
+          const { blocks } = get();
+          set({ 
+            onIds: [], 
+            idToToggleDelay: populateIdToToggleDelay(blocks, ''),
+            moves: [] 
+          });
           get().updateUnsavedChanges();
         },
 

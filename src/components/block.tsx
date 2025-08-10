@@ -34,12 +34,12 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   const colors = useGlobalStore((state: GlobalState) => state.colors);
   const hoveredIds = useGlobalStore((state: GlobalState) => state.hoveredIds);  
   const onIds = useGlobalStore((state: GlobalState) => state.onIds);  
+  const idToToggleDelay = useGlobalStore((state: GlobalState) => state.idToToggleDelay);  
   const blockHovered = useGlobalStore((state: GlobalState) => state.blockHovered);
   const toggleHovered = useGlobalStore((state: GlobalState) => state.toggleHovered);
   const toggleMode = useGlobalStore((state: GlobalState) => state.toggleMode);
   const idToBlock = useGlobalStore((state: GlobalState) => state.idToBlock);
   const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
-  const gridSize = useGlobalStore((state: GlobalState) => state.gridSize);
 
   const isOn = useRef(onIds.includes(id));
   const levelCompleteTimelines = useRef<gsap.core.Timeline[]>([]);
@@ -109,27 +109,6 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
     }
   }, [blockLabelAll, blockLabelEdgesAndCorners, blockLabelSelfAndEdges, blockLabelEdges, blockLabelSelfAndCorners, blockLabelCorners]);
   
-  const toggleDelay = useMemo(() => {
-      // TODO have smarter delay
-      // - actual clicked block should have no delay
-      // - neighbours should have varying delay.  Perhaps with increasing delay based on relative position to the clicked block 
-      //   in a clockwise rotation when looking from the clicked block to the blocks origin
-
-      const x = parseInt(id.split('-')[1]);
-      const y = parseInt(id.split('-')[2]);
-      const z = parseInt(id.split('-')[3]);
-
-      // calc factor between min & max delay, base on x,y,z
-      // Given k is the max value in the range of x,y,z. (Note: (k + 1) = gridSize)
-      //   factor = (x + (k + 1) * y + (k + 1)^2 * z) / ((k + 1)^3 - 1);
-      const factor = (x + (gridSize * y) + (Math.pow(gridSize, 2) * z)) / (Math.pow(gridSize, 3) - 1);
-
-      const minDelay = 0;
-      const maxDelay = 300;
-      return MathUtils.lerp(minDelay, maxDelay, factor);
-
-  }, [id, gridSize]);
-
   const material: ShaderMaterial = useMemo(() => {
     const color = onIds.includes(id) ? colors.blockOn : colors.blockOff;
     const texture = getTexture(blockType);
@@ -304,6 +283,8 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
     if (newIsOn !== isOn.current) {
       isOn.current = newIsOn;
 
+      const delay = idToToggleDelay.get(id);
+
       setTimeout(() => {
         Sounds.getInstance().playSoundFX('BLOCK_TOGGLE');
         
@@ -330,7 +311,7 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
             ]
           }
         );
-      }, toggleDelay)
+      }, delay);
     }
   }, [colors, onIds]);
 
