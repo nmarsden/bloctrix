@@ -4,6 +4,7 @@ import { GlobalState, useGlobalStore } from "../stores/useGlobalStore";
 import Block from "./block";
 import { Group } from "three";
 import gsap from "gsap";
+import { Sounds } from "../utils/sounds";
 
 export default function Blocks (){
   const group = useRef<Group>(null!);
@@ -70,15 +71,21 @@ export default function Blocks (){
         ease: 'sine.inOut',
       });
     } else if (gameMode === 'LEVEL_COMPLETED') {
-      // rotate x & y
-      killRotateTween();
-      rotateTween.current = gsap.to(group.current.rotation, {
-        x: `+=${Math.PI * 2}`,
-        y: `+=${Math.PI * 2}`,
-        duration: 15,
-        ease: 'none',
-        repeat: -1,
-      });
+
+      setTimeout(() => {
+        Sounds.getInstance().playSoundFX('LEVEL_COMPLETED');
+
+        // rotate x & y
+        killRotateTween();
+        rotateTween.current = gsap.to(group.current.rotation, {
+          x: `+=${Math.PI * 2}`,
+          y: `+=${Math.PI * 2}`,
+          duration: 15,
+          ease: 'none',
+          repeat: -1
+        });
+
+      }, 400);
     }
   }, [gameMode]);
 

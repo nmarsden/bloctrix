@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { GlobalState, LevelType, useGlobalStore } from '../../stores/useGlobalStore';
 import { Level } from '../../stores/levelData';
 import './ui.css';
@@ -27,6 +27,8 @@ export default function Ui() {
   const showPreviousLevel = useGlobalStore((state: GlobalState) => state.showPreviousLevel);
   const showNextLevel = useGlobalStore((state: GlobalState) => state.showNextLevel);
 
+  const [showLevelCompletedModal, setShowLevelCompletedModal] = useState(false);
+
   const onSelectLevelType = useCallback((levelType: LevelType) => {
     return () => showLevels(levelType);
   }, []);
@@ -44,6 +46,7 @@ export default function Ui() {
   }, []);
 
   const onSelectMenu = useCallback(() => {
+    setShowLevelCompletedModal(false);
     showMainMenu();
   }, []);
 
@@ -64,10 +67,12 @@ export default function Ui() {
   }, []);
 
   const onSelectReset = useCallback(() => {
+    setShowLevelCompletedModal(false);
     playLevel(levelIndex, levelType);
   }, [levelIndex, levelType]);
 
   const onSelectNext = useCallback(() => {
+    setShowLevelCompletedModal(false);
     playNextLevel();
   }, []);
 
@@ -75,6 +80,12 @@ export default function Ui() {
     showLevels(levelType);
   }, [levelType]);
   
+  useEffect(() => {
+    if (gameMode === 'LEVEL_COMPLETED') {
+      setTimeout(() => setShowLevelCompletedModal(true), 500);
+    }
+  }, [gameMode]);
+
   useEffect(() => {
     if (musicOn) {
       Sounds.getInstance().enableMusic();
@@ -203,7 +214,7 @@ export default function Ui() {
             </div>
           </div>
           {/* LEVEL_COMPLETED Modal */}
-          <div className={`editor-modal ${gameMode === 'LEVEL_COMPLETED' ? 'show': ''}`}>
+          <div className={`editor-modal ${showLevelCompletedModal ? 'show': ''}`}>
             <div className="editor-modal-header">
               <div className="levelCompleted">Level Completed</div>
             </div>

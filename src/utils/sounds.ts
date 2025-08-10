@@ -2,39 +2,15 @@ import { Howl } from 'howler';
 
 export type MusicTrack = 'IDLE' | 'PLAYING';
 
-export type SoundEffect = 'BLOCK_TOGGLE' | 'NONE';
+export type SoundEffect = 'BLOCK_TOGGLE' | 'LEVEL_COMPLETED' | 'NONE';
 
 const MUSIC_TRACKS: Map<MusicTrack, Howl> = new Map<MusicTrack, Howl>([
   ['IDLE',    new Howl({ src: ['audio/Funky-Puzzler.mp3', 'audio/Funky-Puzzler.webm'], format: ['mp3', 'webm'], loop: true, autoplay: true })],
 ]);
 
 const SOUND_EFFECTS: Map<SoundEffect, Howl> = new Map<SoundEffect, Howl>([
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-50.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-49.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-48.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-47.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-46.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-45.wav'], format: ['wav'] })],
-  ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-44.wav'], format: ['wav'], rate: 1.6 })], // <-- sounds interesting
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-43.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-42.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-41.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-40.wav'], format: ['wav'] })], // <-- sounds interesting
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-39.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-38.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-37.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-35.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-34.wav'], format: ['wav'] })], // <-- sounds interesting
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-32.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-31.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-22.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-21.wav'], format: ['wav'] })], // <-- sounds interesting
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-20.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-19.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-16.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-07.wav'], format: ['wav'] })],
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-03.wav'], format: ['wav'] })], // <-- sounds interesting
-  // ['BLOCK_TOGGLE', new Howl({ src: ['audio/DM-CGS-03.mp3', 'audio/DM-CGS-03.webm'], format: ['mp3', 'webm'] })],
+  ['BLOCK_TOGGLE',    new Howl({ src: ['audio/DM-CGS-44.wav'], format: ['wav'], rate: 1.6 })],
+  ['LEVEL_COMPLETED', new Howl({ src: ['audio/DM-CGS-26.wav'], format: ['wav'] })],
 ])
 
 class Sounds {
