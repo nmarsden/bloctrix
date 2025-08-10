@@ -13,6 +13,7 @@ export default function Blocks (){
   const blocks = useGlobalStore((state: GlobalState) => state.blocks);  
   const hoveredIds = useGlobalStore((state: GlobalState) => state.hoveredIds);  
   const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
+  const gridSize = useGlobalStore((state: GlobalState) => state.gridSize);
 
   const { gl } = useThree();
 
@@ -89,11 +90,15 @@ export default function Blocks (){
     }
   }, [gameMode]);
 
+  useEffect(() => {
+    Sounds.getInstance().playSoundFX('BLOCK_TOGGLE');
+  }, [gridSize]);
+
   return (
     <group ref={group}>
       {blocks.filter(block => block.blockType !== 'EMPTY').map(block => (
         <Block
-          key={block.id}
+          key={`${block.id}-${gridSize}`}
           {...block}
         />
       ))}

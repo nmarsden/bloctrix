@@ -139,6 +139,7 @@
     - [x] level menu
       - [x] new custom
       - [x] reset & animate blocks
+        - [x] animate grid size change
       - [x] switch to a gallery layout
           - [x] show a single level
             - [x] level name

@@ -34,10 +34,6 @@ class Sounds {
     this.numSoundFXPlaying = 0;
   }
 
-  onSoundFxPlay = () => {
-    this.numSoundFXPlaying++;
-  }
-
   onSoundFxEnd = () => {
     this.numSoundFXPlaying--;
   }
@@ -47,14 +43,13 @@ class Sounds {
       src: [`audio/${filename}.mp3`, `audio/${filename}.webm`], 
       format: ['mp3', 'webm'],
       volume: volume,
-      onplay: this.onSoundFxPlay,
       onend: this.onSoundFxEnd
     });
   }
 
   initSoundFXs = (): Map<SoundEffect, Howl> => {
     return new Map<SoundEffect, Howl>([
-      ['BLOCK_TOGGLE',    this.newSoundFx('DM-CGS-32', 0.2)],
+      ['BLOCK_TOGGLE',    this.newSoundFx('DM-CGS-32', 1.0)],
       ['LEVEL_COMPLETED', this.newSoundFx('DM-CGS-26', 1.0)],
     ])
   }
@@ -94,7 +89,9 @@ class Sounds {
   }
 
   playSoundFX(soundEffect: SoundEffect): void {
-    if (!this.soundFXOn || this.numSoundFXPlaying > 2) return;
+    if (!this.soundFXOn || this.numSoundFXPlaying > 0) return;
+
+    this.numSoundFXPlaying++;
 
     // console.log('playSoundFx: ', soundEffect);
 

@@ -368,7 +368,7 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
       position={position}
       // castShadow={true}
       receiveShadow={true}
-      scale={1}
+      scale={0}
       material={material}
       onPointerOver={onPointerOver}
       onPointerOut={onPointerOut}

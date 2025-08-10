@@ -392,42 +392,40 @@ const blockIdToXYZ = (blockId: string): { x: number, y: number, z: number } => {
 
 const populateIdToToggleDelay = (blocks: BlockInfo[], toggledBlockId: string): Map<string, number> => {
   const idToToggleDelay: Map<string, number> = new Map<string, number>();
+  const minDelaySecs = 0;
+  const maxDelaySecs = toggledBlockId === '' ? 0.5 : 0.1;
 
-  if (toggledBlockId === '') {
-    // Give each block a unique delay based on x,y,z
-    const gridSize = getGridSize(blocks);
-
-    for (let i=0; i<blocks.length; i++) {
-      const block = blocks[i];
-      const { x, y, z } = blockIdToXYZ(block.id);
-
-      // calc factor between min & max delay, base on x,y,z
-      // Given k is the max value in the range of x,y,z. (Note: (k + 1) = gridSize)
-      //   factor = (x + (k + 1) * y + (k + 1)^2 * z) / ((k + 1)^3 - 1);
-      const factor = (x + (gridSize * y) + (Math.pow(gridSize, 2) * z)) / (Math.pow(gridSize, 3) - 1);
-
-      const minDelaySecs = 0;
-      const maxDelaySecs = 0.5;
-      const delay = MathUtils.lerp(minDelaySecs, maxDelaySecs, factor);
-      idToToggleDelay.set(block.id, delay);
-    }
-    return idToToggleDelay;
-  }
+  // Give each block a unique delay based on x,y,z
+  const gridSize = getGridSize(blocks);
 
   for (let i=0; i<blocks.length; i++) {
     const block = blocks[i];
-    if (block.id === toggledBlockId) {
-      idToToggleDelay.set(block.id, 0);
-    } else {
-      // TODO calc. delay based on block position relative to toggledBlock position
-      // - neighbours should have varying delay.  Perhaps with increasing delay based on relative position to the clicked block 
-      //   in a clockwise rotation when looking from the clicked block to the blocks origin
+    const { x, y, z } = blockIdToXYZ(block.id);
 
-      const delay = 0;
-      idToToggleDelay.set(block.id, delay);
-    }
+    // calc factor between min & max delay, base on x,y,z
+    // Given k is the max value in the range of x,y,z. (Note: (k + 1) = gridSize)
+    //   factor = (x + (k + 1) * y + (k + 1)^2 * z) / ((k + 1)^3 - 1);
+    const factor = (x + (gridSize * y) + (Math.pow(gridSize, 2) * z)) / (Math.pow(gridSize, 3) - 1);
+
+    const delay = MathUtils.lerp(minDelaySecs, maxDelaySecs, factor);
+    idToToggleDelay.set(block.id, delay);
   }
   return idToToggleDelay;
+
+  // for (let i=0; i<blocks.length; i++) {
+  //   const block = blocks[i];
+  //   if (block.id === toggledBlockId) {
+  //     idToToggleDelay.set(block.id, 0);
+  //   } else {
+  //     // TODO calc. delay based on block position relative to toggledBlock position
+  //     // - neighbours should have varying delay.  Perhaps with increasing delay based on relative position to the clicked block 
+  //     //   in a clockwise rotation when looking from the clicked block to the blocks origin
+
+  //     const delay = 0;
+  //     idToToggleDelay.set(block.id, delay);
+  //   }
+  // }
+  // return idToToggleDelay;
 };
 
 const outputLevelToConsole = (levelId: string, levelName: string, blocks: BlockInfo[], moves: string[]) => {
