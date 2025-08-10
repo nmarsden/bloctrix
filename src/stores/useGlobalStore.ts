@@ -363,7 +363,13 @@ const levelBlocksToBlocks = (levelBlocks: LevelBlock[], moves?: string[]): Block
   return blocks;
 }
 
+const getGridSize = (blocks: BlockInfo[]): number => {
+  return Math.round(Math.pow(blocks.length, 1 / 3));
+}
+
 const BLOCKS: BlockInfo[] = levelBlocksToBlocks(EMPTY_LEVEL.blocks, EMPTY_LEVEL.moves);
+
+const GRID_SIZE = getGridSize(BLOCKS);
 
 const populateIdToBlock = (blocks: BlockInfo[]): Map<string, BlockInfo> => {
   let idToBlock: Map<string, BlockInfo> = new Map<string, BlockInfo>();
@@ -412,7 +418,7 @@ const outputLevelToConsole = (levelId: string, levelName: string, blocks: BlockI
   output.push(`  name: '${levelName}',`);
 
   output.push('  blocks: [');
-  const gridSize = Math.round(Math.pow(blocks.length, 1 / 3));
+  const gridSize = getGridSize(blocks);
   let blockIndex = 0;
   for (let layer=0; layer<gridSize; layer++) {
     output.push(`    // layer ${layer + 1}`);
@@ -562,6 +568,7 @@ export type GlobalState = {
   levels: Level[];
   levelName: string;
   blocks: BlockInfo[];
+  gridSize: number;
   moves: string[];
   idToBlock: Map<string, BlockInfo>;
   hoveredIds: string[];
@@ -573,6 +580,8 @@ export type GlobalState = {
   editingLevelId: string;
   toastMessage: ToastMessage;
   unsavedChanges: boolean;
+  musicOn: boolean;
+  soundFXOn: boolean;
 
   shareCustomLevel: () => Promise<void>;
   openCustomLevel: (hash: string) => void;
@@ -598,6 +607,8 @@ export type GlobalState = {
   editPlay: () => void;
   setToastMessage: (toastMessage: ToastMessage) => void;
   updateUnsavedChanges: () => void;
+  toggleMusic: () => void;
+  toggleSoundFx: () => void;
 };
 
 const customLzStorage: StateStorage = {
@@ -645,6 +656,7 @@ export const useGlobalStore = create<GlobalState>()(
         levels: [],
         levelName: EMPTY_LEVEL.name,
         blocks: BLOCKS,
+        gridSize: GRID_SIZE,
         moves: EMPTY_LEVEL.moves,
         idToBlock: populateIdToBlock(BLOCKS),
         hoveredIds: [],
@@ -656,6 +668,8 @@ export const useGlobalStore = create<GlobalState>()(
         editingLevelId: '',
         toastMessage: 'NONE',
         unsavedChanges: false,
+        musicOn: true,
+        soundFXOn: true,
 
         shareCustomLevel: async () => {
           // Copy link to clipboard
@@ -687,6 +701,7 @@ export const useGlobalStore = create<GlobalState>()(
               levelType,
               levels: [],
               blocks: BLOCKS,
+              gridSize: GRID_SIZE,
               onIds: []
             });
             return;
@@ -694,6 +709,7 @@ export const useGlobalStore = create<GlobalState>()(
 
           const currentLevel = levels[levelIndex];
           const blocks = levelBlocksToBlocks(currentLevel.blocks, currentLevel.moves);
+          const gridSize = getGridSize(blocks);
           const onIds = blocks.filter(block => block.on).map(block => block.id);
 
           set({
@@ -703,6 +719,7 @@ export const useGlobalStore = create<GlobalState>()(
             levelIndex,
             currentLevel,
             blocks,
+            gridSize,
             onIds
           });
         },
@@ -716,6 +733,7 @@ export const useGlobalStore = create<GlobalState>()(
 
         editLevel: (level: Level) => set(() => {
           const blocks = levelBlocksToBlocks(level.blocks, level.moves);
+          const gridSize = getGridSize(blocks);
           const moves = [...level.moves];
           const idToBlock = populateIdToBlock(blocks);
           const onIds = blocks.filter(block => block.on).map(block => block.id);
@@ -726,6 +744,7 @@ export const useGlobalStore = create<GlobalState>()(
             currentLevel: level,
             moveCount: 0,
             blocks,
+            gridSize,
             moves,
             idToBlock,
             onIds,
@@ -738,6 +757,7 @@ export const useGlobalStore = create<GlobalState>()(
           const levels = getLevels(levelType, customLevels);
           const level = levels[levelIndex];
           const blocks = levelBlocksToBlocks(level.blocks, level.moves);
+          const gridSize = getGridSize(blocks);
           const moves = [...level.moves];
           const idToBlock = populateIdToBlock(blocks);
           const onIds = blocks.filter(block => block.on).map(block => block.id);
@@ -751,6 +771,7 @@ export const useGlobalStore = create<GlobalState>()(
             levelType,
             levelName: level.name,
             blocks,
+            gridSize,
             moves,
             idToBlock,
             onIds,
@@ -781,6 +802,7 @@ export const useGlobalStore = create<GlobalState>()(
             levelType: 'NONE',
             levelIndex: 0,
             blocks: BLOCKS,
+            gridSize: GRID_SIZE,
             onIds: []
           };
         }),
@@ -790,12 +812,14 @@ export const useGlobalStore = create<GlobalState>()(
           const previousLevelIndex = levelIndex - 1;
           const currentLevel = levels[previousLevelIndex];
           const blocks = levelBlocksToBlocks(currentLevel.blocks, currentLevel.moves);
+          const gridSize = getGridSize(blocks);
           const onIds = blocks.filter(block => block.on).map(block => block.id);
 
           set({
             levelIndex: previousLevelIndex,
             currentLevel,
             blocks,
+            gridSize,
             onIds
           });
         },
@@ -805,12 +829,14 @@ export const useGlobalStore = create<GlobalState>()(
           const nextLevelIndex = levelIndex + 1;
           const currentLevel = levels[nextLevelIndex];
           const blocks = levelBlocksToBlocks(currentLevel.blocks, currentLevel.moves);
+          const gridSize = getGridSize(blocks);
           const onIds = blocks.filter(block => block.on).map(block => block.id);
 
           set({
             levelIndex: nextLevelIndex,
             currentLevel,
             blocks,
+            gridSize,
             onIds
           });
         },
@@ -833,6 +859,7 @@ export const useGlobalStore = create<GlobalState>()(
           const hoveredBlock = idToBlock.get(hoveredIds[0]) as BlockInfo;
 
           if (toggleMode === 'TOGGLE_ON') {
+            // TODO fix bug: hoveredBlock can be undefined
             const newMoves = moves.includes(hoveredBlock.id) ? moves.filter(id => id !== hoveredBlock.id) : [...moves, hoveredBlock.id];
             const newOnIds = updateOnIds(onIds, hoveredBlock.toggleIds);
 
@@ -868,9 +895,8 @@ export const useGlobalStore = create<GlobalState>()(
 
         setColors: (colors: Colors) => set(() => ({ colors: {...colors} })),
 
-        setToggleMode: (toggleMode: ToggleMode) => set(({ blocks }) => {
+        setToggleMode: (toggleMode: ToggleMode) => set(({ blocks, gridSize }) => {
           // Recalculate Toggle IDs 
-          const gridSize = Math.round(Math.pow(blocks.length, 1 / 3));
           const updatedBlocks = blocks.map(block => ({
             ...block, 
             toggleIds: calcToggleIds(block.blockType, block.id, toggleMode, gridSize)
@@ -895,6 +921,7 @@ export const useGlobalStore = create<GlobalState>()(
           set({ 
             onIds: [],
             blocks,
+            gridSize,
             moves: [],
             idToBlock: populateIdToBlock(blocks)
           });
@@ -902,8 +929,7 @@ export const useGlobalStore = create<GlobalState>()(
         },
 
         editFill: (blockType: BlockType) => {
-          const { blocks, toggleMode } = get();
-          const gridSize = Math.round(Math.pow(blocks.length, 1 / 3));
+          const { blocks, gridSize, toggleMode } = get();
           const updatedBlocks = blocks.map(block => ({
             ...block, 
             blockType: block.blockType === 'EMPTY' ? 'EMPTY' : blockType,
@@ -980,13 +1006,19 @@ export const useGlobalStore = create<GlobalState>()(
           );
 
           set({ unsavedChanges });
-        }
+        },
+
+        toggleMusic: () => set(({ musicOn }) => ({ musicOn: !musicOn })),
+
+        toggleSoundFx: () => set(({ soundFXOn }) => ({ soundFXOn: !soundFXOn })),
       }
     },
     {
       name: 'bloctrix',
       partialize: (state) => ({ 
-        customLevels: state.customLevels
+        customLevels: state.customLevels,
+        musicOn: state.musicOn,
+        soundFXOn: state.soundFXOn,
       }),
       storage: createJSONStorage(() => customLzStorage)
     }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { Color, Mesh, ShaderMaterial, Texture, Uniform, Vector2, Vector3 } from "three";
+import { Color, MathUtils, Mesh, ShaderMaterial, Texture, Uniform, Vector2, Vector3 } from "three";
 import { BLOCK_GAP, BLOCK_SIZE, BlockInfo, BlockType, GlobalState, useGlobalStore } from "../stores/useGlobalStore";
 import vertexShader from '../shaders/block/vertex.glsl';
 import fragmentShader from '../shaders/block/fragment.glsl';
@@ -7,6 +7,7 @@ import { useControls } from "leva";
 import { ThreeEvent } from "@react-three/fiber";
 import gsap from "gsap";
 import { useTexture } from "@react-three/drei";
+import { Sounds } from "../utils/sounds";
 
 type PointerData = {
   pos: Vector2;
@@ -38,6 +39,7 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   const toggleMode = useGlobalStore((state: GlobalState) => state.toggleMode);
   const idToBlock = useGlobalStore((state: GlobalState) => state.idToBlock);
   const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
+  const gridSize = useGlobalStore((state: GlobalState) => state.gridSize);
 
   const isOn = useRef(onIds.includes(id));
   const levelCompleteTimelines = useRef<gsap.core.Timeline[]>([]);
@@ -107,6 +109,27 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
     }
   }, [blockLabelAll, blockLabelEdgesAndCorners, blockLabelSelfAndEdges, blockLabelEdges, blockLabelSelfAndCorners, blockLabelCorners]);
   
+  const toggleDelay = useMemo(() => {
+      // TODO have smarter delay
+      // - actual clicked block should have no delay
+      // - neighbours should have varying delay.  Perhaps with increasing delay based on relative position to the clicked block 
+      //   in a clockwise rotation when looking from the clicked block to the blocks origin
+
+      const x = parseInt(id.split('-')[1]);
+      const y = parseInt(id.split('-')[2]);
+      const z = parseInt(id.split('-')[3]);
+
+      // calc factor between min & max delay, base on x,y,z
+      // Given k is the max value in the range of x,y,z. (Note: (k + 1) = gridSize)
+      //   factor = (x + (k + 1) * y + (k + 1)^2 * z) / ((k + 1)^3 - 1);
+      const factor = (x + (gridSize * y) + (Math.pow(gridSize, 2) * z)) / (Math.pow(gridSize, 3) - 1);
+
+      const minDelay = 0;
+      const maxDelay = 300;
+      return MathUtils.lerp(minDelay, maxDelay, factor);
+
+  }, [id, gridSize]);
+
   const material: ShaderMaterial = useMemo(() => {
     const color = onIds.includes(id) ? colors.blockOn : colors.blockOff;
     const texture = getTexture(blockType);
@@ -281,29 +304,33 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
     if (newIsOn !== isOn.current) {
       isOn.current = newIsOn;
 
-      // Animate color
-      const color = newIsOn ? colors.blockOn : colors.blockOff;
-      gsap.to(
-        material.uniforms.uColorA.value,
-        {
-          r: color.r,
-          g: color.g,
-          b: color.b,
-          duration: 0.2,
-          ease: "linear",
-        }
-      );
+      setTimeout(() => {
+        Sounds.getInstance().playSoundFX('BLOCK_TOGGLE');
+        
+        // Animate color
+        const color = newIsOn ? colors.blockOn : colors.blockOff;
+        gsap.to(
+          material.uniforms.uColorA.value,
+          {
+            r: color.r,
+            g: color.g,
+            b: color.b,
+            duration: 0.2,
+            ease: "linear",
+          }
+        );
 
-      // Animate scale
-      gsap.to(
-        block.current.scale,
-        {
-          keyframes: [
-            { x: 0.2, y: 0.2, z: 0.2, ease: 'linear', duration: 0.1 },
-            { x: 1.0, y: 1.0, z: 1.0, ease: 'bounce', duration: 0.4 }
-          ]
-        }
-      );
+        // Animate scale
+        gsap.to(
+          block.current.scale,
+          {
+            keyframes: [
+              { x: 0.2, y: 0.2, z: 0.2, ease: 'linear', duration: 0.1 },
+              { x: 1.0, y: 1.0, z: 1.0, ease: 'bounce', duration: 0.4 }
+            ]
+          }
+        );
+      }, toggleDelay)
     }
   }, [colors, onIds]);
 
@@ -335,6 +362,8 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   }, [colors.blockLabel]);
 
   useEffect((() => {
+    // TODO animate blockType changing
+    
     const texture = getTexture(blockType);
     material.uniforms.uUseTexture.value = texture ? 1.0 : 0.0;    
     material.uniforms.uTexture.value = texture;

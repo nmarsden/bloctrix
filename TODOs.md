@@ -52,6 +52,10 @@
       - [x] clicking a block toggles block type
     - [x] play mode
       - [x] clicking a block toggles on/off according to standard rules
+        - [ ] delay toggle animation
+              - actual clicked block should have no delay
+              - neighbours should have varying delay.  Perhaps with increasing delay based on relative position to   the clicked block in a clockwise rotation when looking from the clicked block to the blocks origin
+
       - [x] reset - toggle all blocks off
       - [x] save - output level data JS code to browser console
         - [x] add moves, eg. moves: ['block-0-0-1', 'block-1-2-0']
@@ -148,6 +152,9 @@
       - [x] move mode
       - [x] saved
       - [x] deleted
+    - [x] options
+      - [x] sfx on/off
+      - [x] music on/off
 
 - [x] plane tool
   - [x] enable/disable on xz plane
@@ -173,3 +180,14 @@
   - [x] drag
   - [x] dragging
   - [x] text input
+
+- [ ] sound
+  - [ ] music
+    - [ ] game mode: MAIN_MENU & LEVEL_MENU
+    - [ ] game mode: PLAYING & EDITING
+    - [ ] game mode: LEVEL_COMPLETED
+  - [ ] sound effects
+    - [ ] button clicked
+    - [x] block toggled
+    - [ ] level completed
+

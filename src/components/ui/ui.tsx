@@ -1,8 +1,9 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { GlobalState, LevelType, useGlobalStore } from '../../stores/useGlobalStore';
 import { Level } from '../../stores/levelData';
 import './ui.css';
 import Toast from '../toast/toast';
+import { Sounds } from '../../utils/sounds';
 
 export default function Ui() {
   const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
@@ -12,6 +13,11 @@ export default function Ui() {
   const moveCount = useGlobalStore((state: GlobalState) => state.moveCount);
   const levelName = useGlobalStore((state: GlobalState) => state.levelName);
   const levels = useGlobalStore((state: GlobalState) => state.levels);
+  const musicOn = useGlobalStore((state: GlobalState) => state.musicOn);
+  const soundFXOn = useGlobalStore((state: GlobalState) => state.soundFXOn);
+  const toggleMusic = useGlobalStore((state: GlobalState) => state.toggleMusic);
+  const toggleSoundFx = useGlobalStore((state: GlobalState) => state.toggleSoundFx);
+
   const showLevels = useGlobalStore((state: GlobalState) => state.showLevels);
   const newLevel = useGlobalStore((state: GlobalState) => state.newLevel);
   const editLevel = useGlobalStore((state: GlobalState) => state.editLevel);
@@ -69,6 +75,22 @@ export default function Ui() {
     showLevels(levelType);
   }, [levelType]);
   
+  useEffect(() => {
+    if (musicOn) {
+      Sounds.getInstance().enableMusic();
+    } else {
+      Sounds.getInstance().disableMusic();
+    }
+  }, [musicOn]);
+
+  useEffect(() => {
+    if (soundFXOn) {
+      Sounds.getInstance().enableSoundFX();
+    } else {
+      Sounds.getInstance().disableSoundFX();
+    }
+  }, [soundFXOn]);
+
   return (
     <>
       {/* MAIN MENU */}
@@ -84,8 +106,14 @@ export default function Ui() {
           </div>
           <div className="subHeading">Options</div>
           <div className="buttonGroup">
-            <div className="button-light">SFX</div>
-            <div className="button-light">MUSIC</div>
+            <div className="button-light button-toggle" onClick={() => toggleMusic()}>
+              <span>MUSIC</span>
+              <span>{musicOn ? 'ON' : 'OFF'}</span>
+            </div>
+            <div className="button-light button-toggle" onClick={() => toggleSoundFx()}>
+              <span>SFX</span>
+              <span>{soundFXOn ? 'ON' : 'OFF'}</span>
+            </div>
           </div>
         </div>
       ) : null}
