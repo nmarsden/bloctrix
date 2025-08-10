@@ -8,11 +8,6 @@ const MUSIC_TRACKS: Map<MusicTrack, Howl> = new Map<MusicTrack, Howl>([
   ['IDLE',    new Howl({ src: ['audio/Funky-Puzzler.mp3', 'audio/Funky-Puzzler.webm'], format: ['mp3', 'webm'], loop: true, autoplay: true })],
 ]);
 
-const SOUND_EFFECTS: Map<SoundEffect, Howl> = new Map<SoundEffect, Howl>([
-  ['BLOCK_TOGGLE',    new Howl({ src: ['audio/DM-CGS-44.wav'], format: ['wav'], rate: 1.6 })],
-  ['LEVEL_COMPLETED', new Howl({ src: ['audio/DM-CGS-26.wav'], format: ['wav'] })],
-])
-
 class Sounds {
   static instance: Sounds;
 
@@ -20,6 +15,7 @@ class Sounds {
   musicTracks: Map<MusicTrack, Howl>;
   soundFXOn: boolean;
   soundFXs: Map<SoundEffect, Howl>;
+  numSoundFXPlaying: number;
   
   static getInstance(): Sounds {
     if (typeof Sounds.instance === 'undefined') {
@@ -34,7 +30,33 @@ class Sounds {
     this.musicOn = false;
     this.musicTracks = MUSIC_TRACKS;
     this.soundFXOn = false;
-    this.soundFXs = SOUND_EFFECTS;
+    this.soundFXs = this.initSoundFXs();
+    this.numSoundFXPlaying = 0;
+  }
+
+  onSoundFxPlay = () => {
+    this.numSoundFXPlaying++;
+  }
+
+  onSoundFxEnd = () => {
+    this.numSoundFXPlaying--;
+  }
+
+  newSoundFx = (filename: string, volume: number): Howl => {
+    return new Howl({ 
+      src: [`audio/${filename}.mp3`, `audio/${filename}.webm`], 
+      format: ['mp3', 'webm'],
+      volume: volume,
+      onplay: this.onSoundFxPlay,
+      onend: this.onSoundFxEnd
+    });
+  }
+
+  initSoundFXs = (): Map<SoundEffect, Howl> => {
+    return new Map<SoundEffect, Howl>([
+      ['BLOCK_TOGGLE',    this.newSoundFx('DM-CGS-32', 0.2)],
+      ['LEVEL_COMPLETED', this.newSoundFx('DM-CGS-26', 1.0)],
+    ])
   }
 
   enableMusic(): void {
@@ -72,7 +94,8 @@ class Sounds {
   }
 
   playSoundFX(soundEffect: SoundEffect): void {
-    if (!this.soundFXOn) return;
+    if (!this.soundFXOn || this.numSoundFXPlaying > 2) return;
+
     // console.log('playSoundFx: ', soundEffect);
 
     // For testing!!!

@@ -406,9 +406,9 @@ const populateIdToToggleDelay = (blocks: BlockInfo[], toggledBlockId: string): M
       //   factor = (x + (k + 1) * y + (k + 1)^2 * z) / ((k + 1)^3 - 1);
       const factor = (x + (gridSize * y) + (Math.pow(gridSize, 2) * z)) / (Math.pow(gridSize, 3) - 1);
 
-      const minDelay = 0;
-      const maxDelay = 300;
-      const delay = MathUtils.lerp(minDelay, maxDelay, factor);
+      const minDelaySecs = 0;
+      const maxDelaySecs = 0.5;
+      const delay = MathUtils.lerp(minDelaySecs, maxDelaySecs, factor);
       idToToggleDelay.set(block.id, delay);
     }
     return idToToggleDelay;

@@ -288,33 +288,32 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
 
       const delay = idToToggleDelay.get(id);
 
-      setTimeout(() => {
-        Sounds.getInstance().playSoundFX('BLOCK_TOGGLE');
-        
-        // Animate color
-        const color = newIsOn ? colors.blockOn : colors.blockOff;
-        gsap.to(
-          material.uniforms.uColorA.value,
-          {
-            r: color.r,
-            g: color.g,
-            b: color.b,
-            duration: 0.2,
-            ease: "linear",
-          }
-        );
+      // Animate color
+      const color = newIsOn ? colors.blockOn : colors.blockOff;
+      gsap.to(
+        material.uniforms.uColorA.value,
+        {
+          r: color.r,
+          g: color.g,
+          b: color.b,
+          duration: 0.2,
+          ease: "linear",
+          onStart: () => Sounds.getInstance().playSoundFX('BLOCK_TOGGLE'),
+          delay
+        }
+      );
 
-        // Animate scale
-        gsap.to(
-          block.current.scale,
-          {
-            keyframes: [
-              { x: 0.2, y: 0.2, z: 0.2, ease: 'linear', duration: 0.1 },
-              { x: 1.0, y: 1.0, z: 1.0, ease: 'bounce', duration: 0.4 }
-            ]
-          }
-        );
-      }, delay);
+      // Animate scale
+      gsap.to(
+        block.current.scale,
+        {
+          keyframes: [
+            { x: 0.2, y: 0.2, z: 0.2, ease: 'linear', duration: 0.1 },
+            { x: 1.0, y: 1.0, z: 1.0, ease: 'bounce', duration: 0.4 }
+          ],
+          delay
+        }
+      );
     }
   }, [colors, onIds]);
 
@@ -355,10 +354,12 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
           { value: 1.0, duration: 0.3 }
         ],
         ease: "linear",
+        onStart: () => {
+          material.uniforms.uTextureA.value = material.uniforms.uTextureB.value;
+          material.uniforms.uTextureB.value = getTexture(blockType);
+        }
       }
     );    
-    material.uniforms.uTextureA.value = material.uniforms.uTextureB.value;
-    material.uniforms.uTextureB.value = getTexture(blockType);
   }), [blockType]);
 
   return (
