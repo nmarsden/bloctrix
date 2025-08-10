@@ -4,6 +4,7 @@ import { persist, StateStorage, createJSONStorage } from 'zustand/middleware';
 import * as lz from 'lz-string';
 import { v4 as uuidv4 } from 'uuid';
 import { EASY_LEVELS, HARD_LEVELS, Level, LevelBlock, MEDIUM_LEVELS } from './levelData';
+import { Sounds } from '../utils/sounds';
 
 export type GameMode = 'MAIN_MENU' | 'LEVEL_MENU' | 'EDITING' | 'PLAYING' | 'LEVEL_COMPLETED';
 
@@ -718,6 +719,8 @@ export const useGlobalStore = create<GlobalState>()(
         soundFXOn: true,
 
         shareCustomLevel: async () => {
+          Sounds.getInstance().playSoundFX('BLOCK_TOGGLE');
+
           // Copy link to clipboard
           const customLevelURL = toCustomLevelURL(get().currentLevel);
           return await copyToClipboard(customLevelURL);
@@ -943,6 +946,8 @@ export const useGlobalStore = create<GlobalState>()(
               blockType: (block.id === hoveredBlock.id ? newBlockType : block.blockType), 
             }));
 
+            Sounds.getInstance().playSoundFX('BLOCK_TOGGLE');
+
             set({ 
               onIds: [],
               idToToggleDelay: populateIdToToggleDelay(blocks, ''),
@@ -968,6 +973,8 @@ export const useGlobalStore = create<GlobalState>()(
             toggleIds: calcToggleIds(block.blockType, block.id, toggleMode, gridSize)
           }));
 
+          Sounds.getInstance().playSoundFX('BLOCK_TOGGLE');
+
           return { 
             blocks: updatedBlocks,
             idToBlock: populateIdToBlock(updatedBlocks),
@@ -983,6 +990,8 @@ export const useGlobalStore = create<GlobalState>()(
         editGridSize: (gridSize: number) => {
           const levelBlocks: LevelBlock[] = initLevelBlocks(gridSize);
           const blocks: BlockInfo[] = levelBlocksToBlocks(levelBlocks);
+
+          Sounds.getInstance().playSoundFX('BLOCK_TOGGLE');
 
           set({ 
             onIds: [],
@@ -1003,6 +1012,8 @@ export const useGlobalStore = create<GlobalState>()(
             toggleIds: calcToggleIds(blockType, block.id, toggleMode, gridSize), 
             on: false
           }));
+
+          Sounds.getInstance().playSoundFX('BLOCK_TOGGLE');
 
           set({ 
             onIds: [],
@@ -1057,6 +1068,9 @@ export const useGlobalStore = create<GlobalState>()(
             currentLevel: saveLevel,
             levelIndex
           });
+
+          Sounds.getInstance().playSoundFX('BLOCK_TOGGLE');
+
           get().updateUnsavedChanges();
         },
 

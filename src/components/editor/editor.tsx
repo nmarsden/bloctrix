@@ -1,6 +1,7 @@
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
 import { BlockType, GlobalState, useGlobalStore } from "../../stores/useGlobalStore";
 import "./editor.css";
+import { Sounds } from "../../utils/sounds";
 
 export default function Editor (){
   const [showSizeEditor, setShowSizeEditor] = useState(false);
@@ -71,6 +72,7 @@ export default function Editor (){
   }, []);
 
   const onDeleteClicked = useCallback(() => {
+    Sounds.getInstance().playSoundFX('BLOCK_TOGGLE');
     setShowDeleteConfirm(true);
   }, []);
 

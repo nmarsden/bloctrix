@@ -30,6 +30,7 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   const blockLabelEdges = useTexture("textures/block_label_edges.png");
   const blockLabelSelfAndCorners = useTexture("textures/block_label_self_and_corners.png");
   const blockLabelCorners = useTexture("textures/block_label_corners.png");
+  const blockLabelNone = useTexture("textures/block_label_none.png");
 
   const colors = useGlobalStore((state: GlobalState) => state.colors);
   const hoveredIds = useGlobalStore((state: GlobalState) => state.hoveredIds);  
@@ -105,9 +106,10 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
       case 'EDGES': return blockLabelEdges;
       case 'SELF_AND_CORNERS': return blockLabelSelfAndCorners;
       case 'CORNERS': return blockLabelCorners;
+      case 'NONE': return blockLabelNone;
       default: return null;
     }
-  }, [blockLabelAll, blockLabelEdgesAndCorners, blockLabelSelfAndEdges, blockLabelEdges, blockLabelSelfAndCorners, blockLabelCorners]);
+  }, [blockLabelAll, blockLabelEdgesAndCorners, blockLabelSelfAndEdges, blockLabelEdges, blockLabelSelfAndCorners, blockLabelCorners, blockLabelNone]);
   
   const material: ShaderMaterial = useMemo(() => {
     const color = onIds.includes(id) ? colors.blockOn : colors.blockOff;
@@ -119,8 +121,9 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
       transparent: false,
       // depthWrite: false,
       uniforms: {
-        uUseTexture: { value: texture ? 1.0 : 0.0 },
-        uTexture: { value: texture },
+        uTextureMixFactor: { value: 1.0 },
+        uTextureA: { value: texture },
+        uTextureB: { value: texture },
         uColorA: new Uniform(new Color(color)),
         uColorB: new Uniform(new Color(colors.blockLabel)),
         uOpacity: new Uniform(BLOCK_SHOWN_OPACITY),
@@ -343,11 +346,19 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   }, [colors.blockLabel]);
 
   useEffect((() => {
-    // TODO animate blockType changing
-    
-    const texture = getTexture(blockType);
-    material.uniforms.uUseTexture.value = texture ? 1.0 : 0.0;    
-    material.uniforms.uTexture.value = texture;
+    // Animate blockType change
+    gsap.to(
+      material.uniforms.uTextureMixFactor,
+      {
+        keyframes: [
+          { value: 0,   duration: 0   },
+          { value: 1.0, duration: 0.3 }
+        ],
+        ease: "linear",
+      }
+    );    
+    material.uniforms.uTextureA.value = material.uniforms.uTextureB.value;
+    material.uniforms.uTextureB.value = getTexture(blockType);
   }), [blockType]);
 
   return (
@@ -374,3 +385,4 @@ useTexture.preload("textures/block_label_self_and_edges.png");
 useTexture.preload("textures/block_label_edges.png");
 useTexture.preload("textures/block_label_self_and_corners.png");
 useTexture.preload("textures/block_label_corners.png");
+useTexture.preload("textures/block_label_none.png");

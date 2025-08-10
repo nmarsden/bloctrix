@@ -1,5 +1,6 @@
-uniform float uUseTexture;
-uniform sampler2D uTexture;
+uniform float uTextureMixFactor;
+uniform sampler2D uTextureA;
+uniform sampler2D uTextureB;
 uniform vec3 uColorA;
 uniform vec3 uColorB;
 uniform float uOpacity;
@@ -30,12 +31,13 @@ void main() {
     }
   }
 
-  // -- Color
-  vec3 finalColor = uColorA;
-  if (uUseTexture > 0.5) {
-      float intensity = texture2D(uTexture, vUv).r;
-      finalColor = mix(uColorA, uColorB, intensity);
-  }
+  // -- Main Color
+  // Calc. colorMixFactor according to textureA & textureB based on uTextureMixFactor
+  float textureA = texture2D(uTextureA, vUv).r;
+  float textureB = texture2D(uTextureB, vUv).r;
+  float colorMixFactor = mix(textureA, textureB, uTextureMixFactor);
+  // Mix colorA and colorB according to colorMixFactor
+  vec3 finalColor = mix(uColorA, uColorB, colorMixFactor);
 
   // -- Border: Calculate color according distance to edge --
   float distToEdgeX = min(vUv.x, 1.0 - vUv.x);
