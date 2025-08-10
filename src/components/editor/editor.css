@@ -119,6 +119,7 @@
   background: var(--background-colour);
   transform: translateX(-50%) translateY(240px);
   transition: transform 200ms;
+  pointer-events: all;
 }
 
 .editor-modal.show {
@@ -155,6 +156,9 @@
 .button-dark.editor-button-delete {
   background: var(--danger-color);
   color: rgba(var(--light-color), 1.0);
+}
+.editor-modal-close-button:hover {
+  color: rgba(var(--dark-color), 1.0);
 }
 
 .unsaved-badge {

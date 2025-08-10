@@ -55,7 +55,8 @@
   font-size: 24px;
   line-height: 24px;
   padding: 5px;
-  color: rgba(var(--light-color), 1.0);
+  background: var(--background-colour);
+  color: rgba(var(--light-color), 0.6);
   border: 2px solid rgba(var(--light-color), 1.0);
   border-radius: 4px;
   min-width: 90px;
@@ -66,6 +67,7 @@
   pointer-events: all;
 }
 .button-light:hover {
+  color: rgba(var(--light-color), 1.0);
   outline: 1px solid rgba(var(--light-color), 1.0);
   cursor: url('/cursors/hand_point.png'), auto;
 }
@@ -75,8 +77,9 @@
   font-size: 24px;
   line-height: 24px;
   padding: 5px;
+  background: var(--background-colour);
   color: rgba(var(--dark-color), 0.6);
-  border: 1px solid rgba(var(--dark-color), 0.6);
+  border: 1px solid rgba(var(--dark-color), 1.0);
   border-radius: 4px;
   min-width: 50px;
   min-height: 50px;
@@ -97,6 +100,7 @@
 }
 
 .button-dark:hover:not(.button-disabled) {
+  color: rgba(var(--dark-color), 1.0);
   outline: 1px solid rgba(var(--dark-color), 1.0);
   cursor: url('/cursors/hand_point.png'), auto;
 }
