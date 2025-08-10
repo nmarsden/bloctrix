@@ -35,7 +35,7 @@ export default function App() {
       </Canvas>
       <Ui />
       <Editor />
-      <Loader containerStyles={{ background: '#0A0A0A' }}/>
+      <Loader containerStyles={{ background: '#1f3d6a' }}/>
     </>
   );
 }

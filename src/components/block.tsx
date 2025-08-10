@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { Color, MathUtils, Mesh, ShaderMaterial, Texture, Uniform, Vector2, Vector3 } from "three";
+import { Color, Mesh, ShaderMaterial, Texture, Uniform, Vector2, Vector3 } from "three";
 import { BLOCK_GAP, BLOCK_SIZE, BlockInfo, BlockType, GlobalState, useGlobalStore } from "../stores/useGlobalStore";
 import vertexShader from '../shaders/block/vertex.glsl';
 import fragmentShader from '../shaders/block/fragment.glsl';
