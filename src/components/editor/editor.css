@@ -46,42 +46,55 @@
 
 .editor-all-button {
   background-image: url('textures/block_label_all.png');
-  background-size: contain;
-  background-repeat: no-repeat;
 }
 
 .editor-edges-and-corners-button {
   background-image: url('textures/block_label_edges_and_corners.png');
-  background-size: contain;
-  background-repeat: no-repeat;
 }
 
 .editor-self-and-edges-button {
   background-image: url('textures/block_label_self_and_edges.png');
-  background-size: contain;
-  background-repeat: no-repeat;
 }
 
 .editor-edges-button {
   background-image: url('textures/block_label_edges.png');
-  background-size: contain;
-  background-repeat: no-repeat;
 }
 
 .editor-self-and-corners-button {
   background-image: url('textures/block_label_self_and_corners.png');
-  background-size: contain;
-  background-repeat: no-repeat;
 }
 
 .editor-corners-button {
   background-image: url('textures/block_label_corners.png');
-  background-size: contain;
-  background-repeat: no-repeat;
 }
 
 .editor-none-button {
   background: black;
+}
+
+.fill-button {
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+.fill-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #1b3964;
+  mix-blend-mode: lighten;
+}
+.fill-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #5c6068;
+  mix-blend-mode: hard-light;
 }
 
 .editor-instructions {
