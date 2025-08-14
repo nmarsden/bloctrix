@@ -5,7 +5,19 @@ export type MusicTrack = 'IDLE' | 'PLAYING';
 export type SoundEffect = 'BLOCK_TOGGLE' | 'LEVEL_COMPLETED' | 'NONE';
 
 const MUSIC_TRACKS: Map<MusicTrack, Howl> = new Map<MusicTrack, Howl>([
-  ['IDLE',    new Howl({ src: ['audio/Funky-Puzzler.mp3', 'audio/Funky-Puzzler.webm'], format: ['mp3', 'webm'], loop: true, autoplay: true })],
+  ['IDLE',    new Howl({ 
+                src: ['audio/Funky-Puzzler.mp3', 'audio/Funky-Puzzler.webm'], 
+                format: ['mp3', 'webm'], 
+                loop: true, 
+                autoplay: true 
+              })
+  ],
+  ['PLAYING', new Howl({ 
+                src: ['audio/lofi-chill-background-187713.mp3', 'audio/lofi-chill-background-187713.webm'], 
+                format: ['mp3', 'webm'], 
+                loop: true 
+              })
+  ],
 ]);
 
 class Sounds {
@@ -77,15 +89,28 @@ class Sounds {
 
   playMusicTrack(musicTrack: MusicTrack): void {
     if (!this.musicOn) return;
-    // console.log('playMusicTrack: ', musicTrack);
 
-    // Stop all music tracks
-    for (const track of this.musicTracks.values()) {
-       track.stop();
+    const sound = (this.musicTracks.get(musicTrack) as Howl);
+    if (sound.playing()) {
+      // Already playing - do nothing
+      return;
     }
 
-    // Play selected music track
-    (this.musicTracks.get(musicTrack) as Howl).play();
+    // Fade-out current music track
+    const onFade = (track: Howl) => { 
+      return () => track.stop();
+    };
+
+    for (const track of this.musicTracks.values()) {
+       if (track.playing()) {
+        track.fade(1, 0, 3000);
+        track.once('fade', onFade(track));
+       }
+    }
+
+    // Fade-in selected music track
+    sound.play();
+    sound.fade(0, 1, 3000);
   }
 
   playSoundFX(soundEffect: SoundEffect): void {

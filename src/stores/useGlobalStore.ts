@@ -747,6 +747,7 @@ export const useGlobalStore = create<GlobalState>()(
           const { customLevels, levelIndex } = get();
           const levels = getLevels(levelType, customLevels);
           if (levels.length === 0) {
+            Sounds.getInstance().playMusicTrack('IDLE');
             // Handle when no levels (ie. no customLevels)
             set({ 
               gameMode: 'LEVEL_MENU',
@@ -766,6 +767,7 @@ export const useGlobalStore = create<GlobalState>()(
           const onIds = blocks.filter(block => block.on).map(block => block.id);
           const idToToggleDelay = populateIdToToggleDelay(blocks, '');
 
+          Sounds.getInstance().playMusicTrack('IDLE');
           set({
             gameMode: 'LEVEL_MENU',
             levelType,
@@ -794,6 +796,7 @@ export const useGlobalStore = create<GlobalState>()(
           const onIds = blocks.filter(block => block.on).map(block => block.id);
           const idToToggleDelay = populateIdToToggleDelay(blocks, '');
           
+          Sounds.getInstance().playMusicTrack('PLAYING');
           return {
             gameMode: 'EDITING',
             levelName: level.name,
@@ -820,6 +823,7 @@ export const useGlobalStore = create<GlobalState>()(
           const onIds = blocks.filter(block => block.on).map(block => block.id);
           const idToToggleDelay = populateIdToToggleDelay(blocks, '');
 
+          Sounds.getInstance().playMusicTrack('PLAYING');
           return {
             gameMode: 'PLAYING',
             currentLevel: level,
@@ -856,6 +860,7 @@ export const useGlobalStore = create<GlobalState>()(
         },
 
         showMainMenu: () => set(() => {
+          Sounds.getInstance().playMusicTrack('IDLE');
           return { 
             gameMode: 'MAIN_MENU',
             levelType: 'NONE',
@@ -930,6 +935,7 @@ export const useGlobalStore = create<GlobalState>()(
             const newOnIds = updateOnIds(onIds, hoveredBlock.toggleIds);
 
             if (gameMode === 'PLAYING' && newOnIds.length === 0) {
+              Sounds.getInstance().playMusicTrack('IDLE');
               set({ gameMode: 'LEVEL_COMPLETED', hoveredIds: [] });
             }
 

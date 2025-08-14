@@ -6,6 +6,7 @@ Built with React, TypeScript, & Vite.
 #### Models
 #### Music
 - Funky Puzzler - Eric Matyas - https://soundimage.org/puzzle-music-5/
+- Lofi | Chill | background - Open-Music-for-Videos - https://pixabay.com/music/ambient-lofi-chill-background-187713/
 #### SFX
 - Casual Game Sounds - Dustyroom - https://dustyroom.com/free-casual-game-sounds
 #### Icons

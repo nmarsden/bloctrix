@@ -188,13 +188,13 @@
   - [x] dragging
   - [x] text input
 
-- [ ] sound
-  - [ ] music
-    - [ ] game mode: MAIN_MENU & LEVEL_MENU
-    - [ ] game mode: PLAYING & EDITING
-    - [ ] game mode: LEVEL_COMPLETED
-  - [ ] sound effects
-    - [ ] button clicked
+- [x] sound
+  - [x] music
+    - [x] game mode: MAIN_MENU & LEVEL_MENU & LEVEL_COMPLETED
+    - [x] game mode: PLAYING & EDITING
+  - [x] sound effects
+    - [x] button clicked
     - [x] block toggled
     - [x] level completed
 
+- [x] favicon
