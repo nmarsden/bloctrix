@@ -133,17 +133,9 @@ export default function Ui() {
       {gameMode === 'LEVEL_MENU' ? (
         <div className={'hud show'}>
           <div className="hudHeader">
-            <div className="button-dark" onClick={onSelectMenu} title="Back"><i className="fa-solid fa-bars"></i></div>
             <div className="subHeading">
-              <div>{levelType}</div>
-              <div>LEVELS</div>
-            </div>
-            <div 
-              className={`button-dark ${levelType === 'CUSTOM' ? 'button-icon' : 'button-icon-hidden'}`} 
-              onClick={onSelectNewLevel} 
-              title="New Level"
-            >
-              <i className="fa-solid fa-plus"></i>
+              <div className="levelName">{currentLevel.name}</div>
+              <div className="levelInfo">{levelType} {levelIndex + 1} of {levels.length}</div>
             </div>
           </div>
           <div className="hudMain">
@@ -154,26 +146,38 @@ export default function Ui() {
             ) : null}
           </div>
           <div className="hudFooter">
-            {levels.length > 0 ? (
-            <div className="buttonGroup levelMenuFooter">
+            <div className="buttonGroup">
+              <div className="button-dark" onClick={onSelectMenu} title="Back"><i className="fa-solid fa-bars"></i></div>
               <div 
-                className={`button-dark ${isSelectPreviousLevel() ? '' : 'button-disabled'}`} 
-                onClick={onSelectPreviousLevel}
+                className={`button-dark ${levelType === 'CUSTOM' ? 'button-icon' : 'button-icon-hidden'}`} 
+                onClick={onSelectNewLevel} 
+                title="New Level"
               >
+                <i className="fa-solid fa-plus"></i>
+              </div>
+              <div 
+                className={`button-dark ${levelType === 'CUSTOM' ? 'button-icon' : 'button-icon-hidden'}`}
+                onClick={onEditLevel(currentLevel)} 
+                title="Edit">
+                  <i className="fa-solid fa-pen"></i>
+              </div>    
+              {levels.length > 0 ? (
+                <div 
+                  className={`button-dark ${isSelectPreviousLevel() ? '' : 'button-disabled'}`} 
+                  onClick={onSelectPreviousLevel}
+                >
                   <i className="fa-solid fa-chevron-left"></i>
-              </div>
-              <div className="levelMenuName">
-                <div>{currentLevel.name}</div>
-                <div>{levelIndex + 1} of {levels.length}</div>
-              </div>
-              <div 
-                className={`button-dark ${isSelectNextLevel() ? '' : 'button-disabled'}`} 
-                onClick={onSelectNextLevel}
-              >
-                  <i className="fa-solid fa-chevron-right"></i>
-              </div>              
+                </div>
+              ) : null}
+              {levels.length > 0 ? (
+                <div 
+                  className={`button-dark ${isSelectNextLevel() ? '' : 'button-disabled'}`} 
+                  onClick={onSelectNextLevel}
+                >
+                    <i className="fa-solid fa-chevron-right"></i>
+                </div>              
+            ) : null}
             </div>
-          ) : null}
           </div>
         </div>
       ) : null}
@@ -182,28 +186,22 @@ export default function Ui() {
       {(gameMode === 'PLAYING' || gameMode === 'LEVEL_COMPLETED') ? (
         <div className="hud show">
           <div className="hudHeader">
-            <div 
-              className={`button-dark ${gameMode === 'LEVEL_COMPLETED' ? 'button-hidden' : ''}`} 
-              onClick={onSelectQuit} 
-              title="Back"
-            >
-              <i className="fa-solid fa-left-long"></i>
-            </div>
             <div className="subHeading">
-              <div>{levelType}</div>
               <div className="levelName">{levelName}</div>
+              <div className="levelInfo">{levelType} {levelIndex + 1} of {levels.length}</div>
             </div>
-            <div 
-              className={`button-dark ${gameMode === 'LEVEL_COMPLETED' || levelType !== 'CUSTOM' ? 'button-icon-hidden' : 'button-icon'}`}
-              onClick={onEditLevel(currentLevel)} 
-              title="Edit">
-                <i className="fa-solid fa-pen"></i>
-            </div>    
           </div>
           <div className="hudMain"></div>
           <div className="hudFooter">
-            <div>Moves: {moveCount}</div>
             <div className="buttonGroup">
+              <div 
+                className={`button-dark ${gameMode === 'LEVEL_COMPLETED' ? 'button-hidden' : ''}`} 
+                onClick={onSelectQuit} 
+                title="Back"
+              >
+                <i className="fa-solid fa-left-long"></i>
+              </div>
+              <div className="moves">Moves: {moveCount}</div>
               <div 
                 className={`button-dark ${gameMode === 'LEVEL_COMPLETED' ? 'button-hidden' : ''}`} 
                 onClick={onSelectReset} 

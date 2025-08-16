@@ -198,3 +198,9 @@
     - [x] level completed
 
 - [x] favicon
+
+- [ ] info
+- [ ] more levels
+- [ ] help
+- [ ] achievements
+- [ ] track bestMoves per level

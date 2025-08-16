@@ -48,7 +48,11 @@
 }
 
 .levelName {
-  font-size: 16px;
+  font-size: 24px;
+}
+
+.levelInfo {
+  font-size: 14px;
 }
 
 .button-light {
@@ -188,6 +192,7 @@
   gap: 10px;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
 }
 .buttonGroup-column {
   flex-direction: column;
@@ -372,9 +377,6 @@
   align-items: center;
   justify-content: center;
   gap: 20px;
-}
-
-.levelMenuFooter {
   padding-block: 20px;
 }
 
@@ -409,4 +411,9 @@
   line-height: 30px;
   text-align: center;
   text-transform: uppercase;
+}
+
+.moves {
+  text-align: center;
+  min-width: 160px;
 }
