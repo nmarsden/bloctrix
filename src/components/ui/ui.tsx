@@ -1,19 +1,18 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CompletedStatus, GlobalState, LevelType, useGlobalStore } from '../../stores/useGlobalStore';
+import { useCallback, useEffect, useState } from 'react';
+import { GlobalState, LevelType, useGlobalStore } from '../../stores/useGlobalStore';
 import { Level } from '../../stores/levelData';
 import './ui.css';
 import Toast from '../toast/toast';
 import { Sounds } from '../../utils/sounds';
 import LevelStats from '../levelStats/levelStats';
+import LevelInfo from '../levelInfo/levelInfo';
 
 export default function Ui() {
   const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
   const levelType = useGlobalStore((state: GlobalState) => state.levelType);
   const levelIndex = useGlobalStore((state: GlobalState) => state.levelIndex);
   const currentLevel = useGlobalStore((state: GlobalState) => state.currentLevel);
-  const levelToBestNumMoves = useGlobalStore((state: GlobalState) => state.levelToBestNumMoves);
   const moveCount = useGlobalStore((state: GlobalState) => state.moveCount);
-  const levelName = useGlobalStore((state: GlobalState) => state.levelName);
   const levels = useGlobalStore((state: GlobalState) => state.levels);
   const musicOn = useGlobalStore((state: GlobalState) => state.musicOn);
   const soundFXOn = useGlobalStore((state: GlobalState) => state.soundFXOn);
@@ -30,19 +29,6 @@ export default function Ui() {
   const showNextLevel = useGlobalStore((state: GlobalState) => state.showNextLevel);
 
   const [showLevelCompletedModal, setShowLevelCompletedModal] = useState(false);
-
-  const currentLevelCompletedStatus = useMemo(() => {
-    const bestNumMoves = levelToBestNumMoves[currentLevel.id] || 0;
-    let currentLevelCompletedStatus: CompletedStatus = 'COMPLETED_BEST';
-    if (bestNumMoves === 0) {
-      currentLevelCompletedStatus = 'NOT_COMPLETED';
-    }
-    if (bestNumMoves > currentLevel.moves.length) {
-      currentLevelCompletedStatus = 'COMPLETED';
-    }
-    return currentLevelCompletedStatus;
-
-  }, [levelToBestNumMoves, currentLevel]);
 
   const onSelectLevelType = useCallback((levelType: LevelType) => {
     return () => showLevels(levelType);
@@ -169,11 +155,7 @@ export default function Ui() {
         <div className={'hud show'}>
           <div className="hudHeader">
             {levels.length > 0 ? (
-              <div className="subHeading">
-                  <div className="levelName">{currentLevel.name}</div>
-                  <div className="levelInfo">{levelType} {levelIndex + 1} of {levels.length}</div>
-                  <div className={`levelCompletedStatus ${currentLevelCompletedStatus}`}><i className="fa-solid fa-square-check"></i></div>
-              </div>
+              <LevelInfo />
             ) : null}
           </div>
           <div className="hudMain">
@@ -240,11 +222,7 @@ export default function Ui() {
       {(gameMode === 'PLAYING' || gameMode === 'LEVEL_COMPLETED') ? (
         <div className="hud show">
           <div className="hudHeader">
-            <div className="subHeading">
-              <div className="levelName">{levelName}</div>
-              <div className="levelInfo">{levelType} {levelIndex + 1} of {levels.length}</div>
-              <div className={`levelCompletedStatus ${currentLevelCompletedStatus}`}><i className="fa-solid fa-square-check"></i></div>
-            </div>
+            <LevelInfo />
           </div>
           <div className="hudMain"></div>
           <div className="hudFooter">

@@ -1,0 +1,27 @@
+.levelInfo-levelName {
+  font-size: 24px;
+  line-height: 48px;
+}
+
+.levelInfo-subHeading {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.levelInfo-completedStatus {
+  font-size: 38px;
+}
+.levelInfo-completedStatus.NOT_COMPLETED {
+  color: rgba(var(--dark-color), 0.1);
+}
+.levelInfo-completedStatus.COMPLETED {
+  color: rgba(var(--silver-color), 1.0);
+}
+.levelInfo-completedStatus.COMPLETED_BEST {
+  color: rgba(var(--gold-color), 1.0);
+}
+
+.levelInfo-levelType {
+  font-size: 14px;
+}

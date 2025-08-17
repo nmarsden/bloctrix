@@ -40,35 +40,10 @@
 .subHeading {
   font-size: 20px;
   padding-block: 20px;
-  width: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-}
-
-.levelName {
-  font-size: 24px;
-  line-height: 48px;
-}
-
-.levelInfo {
-  font-size: 14px;
-}
-
-.levelCompletedStatus {
-  font-size: 38px;
-}
-
-.levelCompletedStatus.NOT_COMPLETED {
-  color: rgba(var(--dark-color), 0.1);
-}
-.levelCompletedStatus.COMPLETED {
-  color: rgba(var(--silver-color), 1.0);
-}
-.levelCompletedStatus.COMPLETED_BEST {
-  color: rgba(var(--gold-color), 1.0);
-  animation: pulse 1s ease-in-out infinite reverse;
 }
 
 .button-light {
