@@ -13,13 +13,13 @@
   font-size: 38px;
 }
 .levelInfo-completedStatus.NOT_COMPLETED {
-  color: rgba(var(--dark-color), 0.1);
+  color: rgba(var(--dark-color), 0.2);
 }
 .levelInfo-completedStatus.COMPLETED {
-  color: rgba(var(--silver-color), 1.0);
+  color: rgba(var(--silver-color), 0.7);
 }
 .levelInfo-completedStatus.COMPLETED_BEST {
-  color: rgba(var(--gold-color), 1.0);
+  color: rgba(var(--gold-color), 0.8);
 }
 
 .levelInfo-levelType {

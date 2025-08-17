@@ -6,10 +6,10 @@
 
 .levelStats-completedBestPercentage {
   font-size: 14px;
-  color: rgba(var(--gold-color), 1.0);
+  color: rgba(var(--gold-color), 0.8);
 }
 .levelStats-completedBestPercentage.zero {
-  color: rgba(var(--dark-color), 0.1);
+  color: rgba(var(--dark-color), 0.2);
 }
 
 .levelStats-pieChart {
@@ -22,12 +22,12 @@
   border-radius: 50%;
   background: conic-gradient(
     /* Slice 1 */
-    rgba(var(--gold-color), 1.0) 0% var(--slice-1),
+    rgba(var(--gold-color), 0.8) 0% var(--slice-1),
     
     /* Slice 2: Starts where slice 1 ends, ends at slice 1 + slice 2 */
-    rgba(var(--silver-color), 1.0) var(--slice-1) calc(var(--slice-1) + var(--slice-2)),
+    rgba(var(--silver-color), 0.7) var(--slice-1) calc(var(--slice-1) + var(--slice-2)),
     
     /* Slice 3: Starts where slice 2 ends, ends at slice 1 + slice 2 + slice 3 */
-    rgba(var(--dark-color), 0.1) calc(var(--slice-1) + var(--slice-2)) calc(var(--slice-1) + var(--slice-2) + var(--slice-3))
+    rgba(var(--dark-color), 0.15) calc(var(--slice-1) + var(--slice-2)) calc(var(--slice-1) + var(--slice-2) + var(--slice-3))
   );  
 }
