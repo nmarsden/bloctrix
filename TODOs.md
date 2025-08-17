@@ -203,4 +203,8 @@
 - [ ] more levels
 - [ ] help
 - [ ] achievements
-- [ ] track bestMoves per level
+- [x] track bestMoves per level
+- [x] indicate which levels have been completed
+  - [x] not completed
+  - [x] completed - but NOT minimum moves
+  - [x] completed best - minimum moves

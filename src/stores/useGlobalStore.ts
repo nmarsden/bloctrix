@@ -15,6 +15,14 @@ export type LevelType = 'EASY' | 'MEDIUM' | 'HARD' | 'CUSTOM' | 'NONE';
 
 export type BlockType = 'ALL' | 'EDGES_AND_CORNERS' | 'SELF_AND_EDGES' | 'EDGES' | 'SELF_AND_CORNERS' | 'CORNERS' | 'NONE' | 'EMPTY';
 
+export type CompletedStatus = 'NOT_COMPLETED' | 'COMPLETED' | 'COMPLETED_BEST';
+
+export type CompletedStats = {
+  completedBest: number;
+  completed: number;
+  notCompleted: number;
+}
+
 const BLOCK_TYPE_LOOKUP: Map<LevelBlock, BlockType> = new Map<LevelBlock, BlockType>([
   ['a', 'ALL'              ],
   ['o', 'EDGES_AND_CORNERS'],
@@ -631,6 +639,7 @@ export type GlobalState = {
   unsavedChanges: boolean;
   musicOn: boolean;
   soundFXOn: boolean;
+  levelToBestNumMoves: { [key: string]: number; };
 
   shareCustomLevel: () => Promise<void>;
   openCustomLevel: (hash: string) => void;
@@ -658,6 +667,7 @@ export type GlobalState = {
   updateUnsavedChanges: () => void;
   toggleMusic: () => void;
   toggleSoundFx: () => void;
+  getCompletedStats: (levelType: LevelType) => CompletedStats;
 };
 
 const customLzStorage: StateStorage = {
@@ -720,6 +730,7 @@ export const useGlobalStore = create<GlobalState>()(
         unsavedChanges: false,
         musicOn: true,
         soundFXOn: true,
+        levelToBestNumMoves: {},
 
         shareCustomLevel: async () => {
           Sounds.getInstance().playSoundFX('BLOCK_TOGGLE');
@@ -924,7 +935,7 @@ export const useGlobalStore = create<GlobalState>()(
         }),
 
         toggleHovered: () => {
-          const { idToBlock, hoveredIds, moves, onIds, toggleMode, blocks, moveCount, gameMode, gridSize } = get();
+          const { idToBlock, hoveredIds, moves, onIds, toggleMode, blocks, moveCount, gameMode, gridSize, currentLevel, levelToBestNumMoves } = get();
           const hoveredBlock = idToBlock.get(hoveredIds[0]) as BlockInfo;
 
           if (toggleMode === 'TOGGLE_ON') {
@@ -933,9 +944,14 @@ export const useGlobalStore = create<GlobalState>()(
             const idToToggleDelay = populateIdToToggleDelay(blocks, hoveredBlock.id);
             const newMoves = moves.includes(hoveredBlock.id) ? moves.filter(id => id !== hoveredBlock.id) : [...moves, hoveredBlock.id];
             const newOnIds = updateOnIds(onIds, hoveredBlock.toggleIds);
+            const newMoveCount = moveCount + 1;
 
             if (gameMode === 'PLAYING' && newOnIds.length === 0) {
               Sounds.getInstance().playMusicTrack('IDLE');
+              const bestNumMoves = levelToBestNumMoves[currentLevel.id];
+              if (bestNumMoves === undefined || newMoveCount < bestNumMoves) {
+                set({ levelToBestNumMoves: {...levelToBestNumMoves, [currentLevel.id]: newMoveCount} });
+              }
               set({ gameMode: 'LEVEL_COMPLETED', hoveredIds: [] });
             }
 
@@ -943,7 +959,7 @@ export const useGlobalStore = create<GlobalState>()(
               moves: newMoves, 
               onIds: newOnIds,
               idToToggleDelay,
-              moveCount: moveCount + 1 
+              moveCount: newMoveCount
             });
           }
           if (toggleMode === 'TOGGLE_BLOCK_TYPE') {
@@ -1123,11 +1139,32 @@ export const useGlobalStore = create<GlobalState>()(
         toggleMusic: () => set(({ musicOn }) => ({ musicOn: !musicOn })),
 
         toggleSoundFx: () => set(({ soundFXOn }) => ({ soundFXOn: !soundFXOn })),
+
+        getCompletedStats: (levelType: LevelType): CompletedStats => {
+          const { customLevels, levelToBestNumMoves } = get();
+          const levels = getLevels(levelType, customLevels);
+          let completedBest = 0;
+          let completed = 0;
+          let notCompleted = 0;
+          for (let i=0; i<levels.length; i++) {
+            const level = levels[i];
+            const bestNumMoves = levelToBestNumMoves[level.id] || 0;
+            if (bestNumMoves === 0) {
+              notCompleted++;
+            } else if (bestNumMoves <= level.moves.length) {
+              completedBest++;
+            } else {
+              completed++;
+            }
+          }
+          return { completedBest, completed, notCompleted }
+        }
       }
     },
     {
       name: 'bloctrix',
       partialize: (state) => ({ 
+        levelToBestNumMoves: state.levelToBestNumMoves,
         customLevels: state.customLevels,
         musicOn: state.musicOn,
         soundFXOn: state.soundFXOn,

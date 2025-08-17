@@ -1,15 +1,17 @@
-import { useCallback, useEffect, useState } from 'react';
-import { GlobalState, LevelType, useGlobalStore } from '../../stores/useGlobalStore';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CompletedStatus, GlobalState, LevelType, useGlobalStore } from '../../stores/useGlobalStore';
 import { Level } from '../../stores/levelData';
 import './ui.css';
 import Toast from '../toast/toast';
 import { Sounds } from '../../utils/sounds';
+import LevelStats from '../levelStats/levelStats';
 
 export default function Ui() {
   const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
   const levelType = useGlobalStore((state: GlobalState) => state.levelType);
   const levelIndex = useGlobalStore((state: GlobalState) => state.levelIndex);
   const currentLevel = useGlobalStore((state: GlobalState) => state.currentLevel);
+  const levelToBestNumMoves = useGlobalStore((state: GlobalState) => state.levelToBestNumMoves);
   const moveCount = useGlobalStore((state: GlobalState) => state.moveCount);
   const levelName = useGlobalStore((state: GlobalState) => state.levelName);
   const levels = useGlobalStore((state: GlobalState) => state.levels);
@@ -28,6 +30,19 @@ export default function Ui() {
   const showNextLevel = useGlobalStore((state: GlobalState) => state.showNextLevel);
 
   const [showLevelCompletedModal, setShowLevelCompletedModal] = useState(false);
+
+  const currentLevelCompletedStatus = useMemo(() => {
+    const bestNumMoves = levelToBestNumMoves[currentLevel.id] || 0;
+    let currentLevelCompletedStatus: CompletedStatus = 'COMPLETED_BEST';
+    if (bestNumMoves === 0) {
+      currentLevelCompletedStatus = 'NOT_COMPLETED';
+    }
+    if (bestNumMoves > currentLevel.moves.length) {
+      currentLevelCompletedStatus = 'COMPLETED';
+    }
+    return currentLevelCompletedStatus;
+
+  }, [levelToBestNumMoves, currentLevel]);
 
   const onSelectLevelType = useCallback((levelType: LevelType) => {
     return () => showLevels(levelType);
@@ -110,10 +125,30 @@ export default function Ui() {
           <div className="overlayHeading">BLOCTRIX</div>
           <div className="subHeading">Levels</div>
           <div className="buttonGroup buttonGroup-column">
-            <div className="button-light" onClick={onSelectLevelType('EASY')}>EASY</div>
-            <div className="button-light" onClick={onSelectLevelType('MEDIUM')}>MEDIUM</div>
-            <div className="button-light" onClick={onSelectLevelType('HARD')}>HARD</div>
-            <div className="button-light" onClick={onSelectLevelType('CUSTOM')}>CUSTOM</div>
+            <div className="button-light button-level" onClick={onSelectLevelType('EASY')}>
+              <div>EASY</div>
+              <div className="levelStatsContainer">
+                <LevelStats levelType='EASY' />
+              </div>
+            </div>
+            <div className="button-light button-level" onClick={onSelectLevelType('MEDIUM')}>
+              <div>MEDIUM</div>
+              <div className="levelStatsContainer">
+                <LevelStats levelType='MEDIUM' />
+              </div>
+            </div>
+            <div className="button-light button-level" onClick={onSelectLevelType('HARD')}>
+              <div>HARD</div>
+              <div className="levelStatsContainer">
+                <LevelStats levelType='HARD' />
+              </div>
+            </div>
+            <div className="button-light button-level" onClick={onSelectLevelType('CUSTOM')}>
+              <div>CUSTOM</div>
+              <div className="levelStatsContainer">
+                <LevelStats levelType='CUSTOM' />
+              </div>
+            </div>
           </div>
           <div className="subHeading">Options</div>
           <div className="buttonGroup">
@@ -133,51 +168,70 @@ export default function Ui() {
       {gameMode === 'LEVEL_MENU' ? (
         <div className={'hud show'}>
           <div className="hudHeader">
-            <div className="subHeading">
-              <div className="levelName">{currentLevel.name}</div>
-              <div className="levelInfo">{levelType} {levelIndex + 1} of {levels.length}</div>
-            </div>
+            {levels.length > 0 ? (
+              <div className="subHeading">
+                  <div className="levelName">{currentLevel.name}</div>
+                  <div className="levelInfo">{levelType} {levelIndex + 1} of {levels.length}</div>
+                  <div className={`levelCompletedStatus ${currentLevelCompletedStatus}`}><i className="fa-solid fa-square-check"></i></div>
+              </div>
+            ) : null}
           </div>
           <div className="hudMain">
             {levels.length > 0 ? (
               <div className="button-light levelMenuPlayButton" onClick={onSelectLevel(levelIndex)}>
                 <i className="fa-solid fa-play"></i>
               </div>
-            ) : null}
+            ) : (
+              <div className="noLevelsMessage">
+                <div>No custom levels yet.</div>
+                <div>Press <i className="fa-solid fa-plus"></i> to add a level.</div>
+              </div>
+            )}
           </div>
           <div className="hudFooter">
-            <div className="buttonGroup">
-              <div className="button-dark" onClick={onSelectMenu} title="Back"><i className="fa-solid fa-bars"></i></div>
-              <div 
-                className={`button-dark ${levelType === 'CUSTOM' ? 'button-icon' : 'button-icon-hidden'}`} 
-                onClick={onSelectNewLevel} 
-                title="New Level"
-              >
-                <i className="fa-solid fa-plus"></i>
-              </div>
-              <div 
-                className={`button-dark ${levelType === 'CUSTOM' ? 'button-icon' : 'button-icon-hidden'}`}
-                onClick={onEditLevel(currentLevel)} 
-                title="Edit">
-                  <i className="fa-solid fa-pen"></i>
-              </div>    
-              {levels.length > 0 ? (
-                <div 
-                  className={`button-dark ${isSelectPreviousLevel() ? '' : 'button-disabled'}`} 
-                  onClick={onSelectPreviousLevel}
-                >
-                  <i className="fa-solid fa-chevron-left"></i>
+              {levels.length === 0 ? (
+                // -- NO LEVELS --
+                <div className="buttonGroup">
+                  <div className="button-dark" onClick={onSelectMenu} title="Back"><i className="fa-solid fa-bars"></i></div>
+                  <div 
+                    className="button-dark button-icon" 
+                    onClick={onSelectNewLevel} 
+                    title="New Level"
+                  >
+                    <i className="fa-solid fa-plus"></i>
+                  </div>
                 </div>
-              ) : null}
-              {levels.length > 0 ? (
-                <div 
-                  className={`button-dark ${isSelectNextLevel() ? '' : 'button-disabled'}`} 
-                  onClick={onSelectNextLevel}
-                >
-                    <i className="fa-solid fa-chevron-right"></i>
-                </div>              
-            ) : null}
-            </div>
+              ) : (
+                // -- HAVE LEVELS --
+                <div className="buttonGroup">
+                  <div className="button-dark" onClick={onSelectMenu} title="Back"><i className="fa-solid fa-bars"></i></div>
+                  <div 
+                      className={`button-dark ${levelType === 'CUSTOM' ? 'button-icon' : 'button-icon-hidden'}`} 
+                      onClick={onSelectNewLevel} 
+                      title="New Level"
+                  >
+                    <i className="fa-solid fa-plus"></i>
+                  </div>
+                  <div 
+                    className={`button-dark ${(levelType === 'CUSTOM') ? 'button-icon' : 'button-icon-hidden'}`}
+                    onClick={onEditLevel(currentLevel)} 
+                    title="Edit">
+                      <i className="fa-solid fa-pen"></i>
+                  </div>    
+                  <div 
+                    className={`button-dark ${isSelectPreviousLevel() ? '' : 'button-disabled'}`} 
+                    onClick={onSelectPreviousLevel}
+                  >
+                    <i className="fa-solid fa-chevron-left"></i>
+                  </div>
+                  <div 
+                    className={`button-dark ${isSelectNextLevel() ? '' : 'button-disabled'}`} 
+                    onClick={onSelectNextLevel}
+                  >
+                      <i className="fa-solid fa-chevron-right"></i>
+                  </div>              
+                </div>
+              )}
           </div>
         </div>
       ) : null}
@@ -189,6 +243,7 @@ export default function Ui() {
             <div className="subHeading">
               <div className="levelName">{levelName}</div>
               <div className="levelInfo">{levelType} {levelIndex + 1} of {levels.length}</div>
+              <div className={`levelCompletedStatus ${currentLevelCompletedStatus}`}><i className="fa-solid fa-square-check"></i></div>
             </div>
           </div>
           <div className="hudMain"></div>
