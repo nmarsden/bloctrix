@@ -510,7 +510,7 @@ const encodedURIToLevel = (encodedURIComponent: string): Level => {
 
 const toCustomLevelURL = (level: Level): string => {
   const encodedURIComponent = levelToEncodedURI(level);
-  return window.location.protocol + window.location.host + window.location.pathname + '#cl=' + encodedURIComponent;
+  return window.location.origin + window.location.pathname + '#cl=' + encodedURIComponent;
 }
 
 const hashToCustomLevel = (hash: string): Level => {
@@ -740,19 +740,20 @@ export const useGlobalStore = create<GlobalState>()(
           return await copyToClipboard(customLevelURL);
         },
 
-        openCustomLevel: (hash: string) => set(({ playLevel, customLevels }) => {
+        openCustomLevel: (hash: string) => {
+          const { playLevel, customLevels } = get();
           const level = hashToCustomLevel(hash);
 
           // Store custom level
+          const newCustomLevels = [...customLevels];
           if (isNotExistingLevel(level, customLevels)) {
-            customLevels = [...customLevels, level];
+            newCustomLevels.push(level);
+            set({ customLevels: newCustomLevels });
           }
-          const levelIndex = customLevels.findIndex(lvl => lvl.id === level.id);
+          const levelIndex = newCustomLevels.findIndex(lvl => lvl.id === level.id);
 
           playLevel(levelIndex, 'CUSTOM');
-
-          return { customLevels };
-        }),
+        },
 
         showLevels: (levelType: LevelType) => {
           const { customLevels, levelIndex } = get();
