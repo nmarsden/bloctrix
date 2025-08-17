@@ -10,7 +10,8 @@ export default function Camera({ children } : { children?: ReactNode }) {
   const cameraControls = useRef<CameraControls>(null!);
 
   const fov = useRef(40);
-  const cameraPosition = useRef<Vector3>(new Vector3(8, 8, 8));
+  const cameraPositionPlaying = useRef<Vector3>(new Vector3(8, 8, 8));
+  const cameraPositionNotPlaying = useRef<Vector3>(new Vector3(6, 6, 6));
   const cameraTarget = useRef<Vector3>(new Vector3(0, 0, 0));
 
   const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
@@ -27,9 +28,12 @@ export default function Camera({ children } : { children?: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (gameMode === 'PLAYING') {
+    if (gameMode === 'PLAYING' || gameMode === 'EDITING') {
       cameraControls.current.normalizeRotations();
-      cameraControls.current.setPosition(cameraPosition.current.x, cameraPosition.current.y, cameraPosition.current.z, true);
+      cameraControls.current.setPosition(cameraPositionPlaying.current.x, cameraPositionPlaying.current.y, cameraPositionPlaying.current.z, true);
+    } else {
+      cameraControls.current.normalizeRotations();
+      cameraControls.current.setPosition(cameraPositionNotPlaying.current.x, cameraPositionNotPlaying.current.y, cameraPositionNotPlaying.current.z, true);
     }
     if (gameMode === 'LEVEL_COMPLETED') {
       cameraControls.current.enabled = false;
@@ -83,25 +87,25 @@ export default function Camera({ children } : { children?: ReactNode }) {
         }
       },
       positionY: { 
-        value: cameraPosition.current.y, 
+        value: cameraPositionPlaying.current.y, 
         label: 'positionY', 
         min: 0, 
         max: 50, 
         step: 0.01, 
         onChange: (value) => {
-          cameraPosition.current.y = value;
-          cameraControls.current.setPosition(cameraPosition.current.x, cameraPosition.current.y, cameraPosition.current.z);
+          cameraPositionPlaying.current.y = value;
+          cameraControls.current.setPosition(cameraPositionPlaying.current.x, cameraPositionPlaying.current.y, cameraPositionPlaying.current.z);
         }
       },
       positionZ: { 
-        value: cameraPosition.current.z, 
+        value: cameraPositionPlaying.current.z, 
         label: 'positionZ', 
         min: -20, 
         max: 10, 
         step: 0.01,
         onChange: (value) => {
-          cameraPosition.current.z = value;
-          cameraControls.current.setPosition(cameraPosition.current.x, cameraPosition.current.y, cameraPosition.current.z);
+          cameraPositionPlaying.current.z = value;
+          cameraControls.current.setPosition(cameraPositionPlaying.current.x, cameraPositionPlaying.current.y, cameraPositionPlaying.current.z);
         }
       },
       targetZ: { 
@@ -129,7 +133,7 @@ export default function Camera({ children } : { children?: ReactNode }) {
           fov={fov.current}
           near={0.1}
           far={150}
-          position={[cameraPosition.current.x, cameraPosition.current.y, cameraPosition.current.z]}
+          position={[cameraPositionNotPlaying.current.x, cameraPositionNotPlaying.current.y, cameraPositionNotPlaying.current.z]}
           rotation-x={Math.PI * -0.25}
         >
           { children }
