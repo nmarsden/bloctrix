@@ -146,7 +146,7 @@ export default function Camera({ children } : { children?: ReactNode }) {
           // minPolarAngle={0}
           // maxPolarAngle={Math.PI}
           minDistance={10.0}
-          maxDistance={30.0}
+          maxDistance={20.0}
           draggingSmoothTime={0.2}
         />
       </group>

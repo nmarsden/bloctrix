@@ -9,6 +9,7 @@ import Ui from './ui/ui.tsx';
 import Blocks from './blocks.tsx';
 import Editor from './editor/editor.tsx';
 import { GlobalState, useGlobalStore } from '../stores/useGlobalStore.ts';
+// import Background from './background.tsx';
 
 export default function App() {
   const openCustomLevel = useGlobalStore((state: GlobalState) => state.openCustomLevel);
@@ -29,7 +30,9 @@ export default function App() {
         <Suspense>
           <Performance />
           <Lights />
-          <Camera />
+          <Camera>
+            {/* <Background /> */}
+          </Camera>
           <Blocks />
         </Suspense>
       </Canvas>
