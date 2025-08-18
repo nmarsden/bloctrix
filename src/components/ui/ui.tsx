@@ -16,6 +16,7 @@ export default function Ui() {
   const levels = useGlobalStore((state: GlobalState) => state.levels);
   const musicOn = useGlobalStore((state: GlobalState) => state.musicOn);
   const soundFXOn = useGlobalStore((state: GlobalState) => state.soundFXOn);
+  const isNextLevel = useGlobalStore((state: GlobalState) => state.isNextLevel);
   const toggleMusic = useGlobalStore((state: GlobalState) => state.toggleMusic);
   const toggleSoundFx = useGlobalStore((state: GlobalState) => state.toggleSoundFx);
 
@@ -257,7 +258,7 @@ export default function Ui() {
                   <i className="fa-solid fa-rotate"></i>
               </div>
               <div className="button-dark button-icon button-hidden"></div>
-              <div className="button-dark" onClick={onSelectNext} title="Next Level">
+              <div className={`button-dark ${!isNextLevel ? 'button-disabled' : ''}`} onClick={onSelectNext} title="Next Level">
                   <i className="fa-solid fa-chevron-right"></i>
               </div>
             </div>

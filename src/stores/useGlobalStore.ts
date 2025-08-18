@@ -575,6 +575,20 @@ const copyToClipboard = (text: string): Promise<void> => {
     });
 }
 
+const nextLevelIndexAndType = (levels: Level[], levelIndex: number, levelType: LevelType): { nextLevelIndex: number; nextLevelType: LevelType } => {
+  let nextLevelIndex = levelIndex + 1;
+  let nextLevelType = levelType;
+  if (nextLevelIndex >= levels.length) {
+    nextLevelIndex = 0;
+    switch (levelType) {
+      case 'EASY':   nextLevelType = 'MEDIUM'; break;
+      case 'MEDIUM': nextLevelType = 'HARD';   break;
+      case 'HARD':   nextLevelType = 'CUSTOM'; break;
+    }
+  }
+  return { nextLevelIndex, nextLevelType };
+};
+
 // -------------------
 // --- GlobalState ---
 // -------------------
@@ -640,6 +654,7 @@ export type GlobalState = {
   musicOn: boolean;
   soundFXOn: boolean;
   levelToBestNumMoves: { [key: string]: number; };
+  isNextLevel: boolean;
 
   shareCustomLevel: () => Promise<void>;
   openCustomLevel: (hash: string) => void;
@@ -731,6 +746,7 @@ export const useGlobalStore = create<GlobalState>()(
         musicOn: true,
         soundFXOn: true,
         levelToBestNumMoves: {},
+        isNextLevel: true,
 
         shareCustomLevel: async () => {
           Sounds.getInstance().playSoundFX('BLOCK_TOGGLE');
@@ -856,19 +872,9 @@ export const useGlobalStore = create<GlobalState>()(
 
         playNextLevel: () => {
           const { levels, playLevel, levelIndex, levelType } = get();
-          
-          let newLevelIndex = levelIndex + 1;
-          let newLevelType = levelType;
-          if (newLevelIndex >= levels.length) {
-            newLevelIndex = 0;
-            switch (levelType) {
-              case 'EASY':   newLevelType = 'MEDIUM'; break;
-              case 'MEDIUM': newLevelType = 'HARD';   break;
-              case 'HARD':   newLevelType = 'CUSTOM'; break;
-            }
-          }
+          const { nextLevelIndex, nextLevelType } = nextLevelIndexAndType(levels, levelIndex, levelType);
 
-          playLevel(newLevelIndex, newLevelType);
+          playLevel(nextLevelIndex, nextLevelType);
         },
 
         showMainMenu: () => set(() => {
@@ -953,7 +959,11 @@ export const useGlobalStore = create<GlobalState>()(
               if (bestNumMoves === undefined || newMoveCount < bestNumMoves) {
                 set({ levelToBestNumMoves: {...levelToBestNumMoves, [currentLevel.id]: newMoveCount} });
               }
-              set({ gameMode: 'LEVEL_COMPLETED', hoveredIds: [] });
+              const { levels, levelIndex, levelType, customLevels } = get();
+              const { nextLevelType } = nextLevelIndexAndType(levels, levelIndex, levelType);
+              const isNextLevel = !(nextLevelType == 'CUSTOM' && customLevels.length === 0);
+
+              set({ gameMode: 'LEVEL_COMPLETED', isNextLevel, hoveredIds: [] });
             }
 
             set({ 
