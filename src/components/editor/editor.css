@@ -45,27 +45,27 @@
 }
 
 .editor-all-button {
-  background-image: url('textures/block_label_all.png');
+  background-image: url('/textures/block_label_all.png');
 }
 
 .editor-edges-and-corners-button {
-  background-image: url('textures/block_label_edges_and_corners.png');
+  background-image: url('/textures/block_label_edges_and_corners.png');
 }
 
 .editor-self-and-edges-button {
-  background-image: url('textures/block_label_self_and_edges.png');
+  background-image: url('/textures/block_label_self_and_edges.png');
 }
 
 .editor-edges-button {
-  background-image: url('textures/block_label_edges.png');
+  background-image: url('/textures/block_label_edges.png');
 }
 
 .editor-self-and-corners-button {
-  background-image: url('textures/block_label_self_and_corners.png');
+  background-image: url('/textures/block_label_self_and_corners.png');
 }
 
 .editor-corners-button {
-  background-image: url('textures/block_label_corners.png');
+  background-image: url('/textures/block_label_corners.png');
 }
 
 .editor-none-button {
