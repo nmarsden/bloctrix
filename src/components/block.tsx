@@ -37,7 +37,7 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   const onIds = useGlobalStore((state: GlobalState) => state.onIds);  
   const idToToggleDelay = useGlobalStore((state: GlobalState) => state.idToToggleDelay);  
   const blockHovered = useGlobalStore((state: GlobalState) => state.blockHovered);
-  const toggleHovered = useGlobalStore((state: GlobalState) => state.toggleHovered);
+  const toggleBlock = useGlobalStore((state: GlobalState) => state.toggleBlock);
   const toggleMode = useGlobalStore((state: GlobalState) => state.toggleMode);
   const idToBlock = useGlobalStore((state: GlobalState) => state.idToBlock);
   const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
@@ -92,7 +92,7 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
 
       // Is this a click?
       if (time < 300 && distance < 5) {
-        toggleHovered();
+        toggleBlock(id);
       }
     }
     event.stopPropagation();

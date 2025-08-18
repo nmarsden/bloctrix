@@ -667,7 +667,7 @@ export type GlobalState = {
   showPreviousLevel: () => void;
   showNextLevel: () => void;
   blockHovered: (id: string, isHovered: boolean) => void;
-  toggleHovered: () => void;
+  toggleBlock: (id: string) => void;
   setActivePlane: (activePlane: number) => void;
   setColors: (colors: Colors) => void;
   setToggleMode: (toggleMode: ToggleMode) => void;
@@ -941,9 +941,9 @@ export const useGlobalStore = create<GlobalState>()(
           return { hoveredIds };
         }),
 
-        toggleHovered: () => {
-          const { idToBlock, hoveredIds, moves, onIds, toggleMode, blocks, moveCount, gameMode, gridSize, currentLevel, levelToBestNumMoves } = get();
-          const hoveredBlock = idToBlock.get(hoveredIds[0]) as BlockInfo;
+        toggleBlock: (id: string) => {
+          const { idToBlock, moves, onIds, toggleMode, blocks, moveCount, gameMode, gridSize, currentLevel, levelToBestNumMoves } = get();
+          const hoveredBlock = idToBlock.get(id) as BlockInfo;
 
           if (toggleMode === 'TOGGLE_ON') {
             // TODO fix bug: hoveredBlock can be undefined
