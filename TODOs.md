@@ -161,6 +161,7 @@
 
     - [x] hud
       - [x] moves
+      - [ ] 'gold' requires [N] moves
       - [x] reset - use icon
       - [x] quit - use icon
     - [x] toast messages

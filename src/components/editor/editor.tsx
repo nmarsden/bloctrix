@@ -11,6 +11,7 @@ export default function Editor (){
   const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
   const toggleMode = useGlobalStore((state: GlobalState) => state.toggleMode);
   const levelName = useGlobalStore((state: GlobalState) => state.levelName);
+  const moves = useGlobalStore((state: GlobalState) => state.moves);
   const unsavedChanges = useGlobalStore((state: GlobalState) => state.unsavedChanges);
 
   const editLevelName = useGlobalStore((state: GlobalState) => state.editLevelName);
@@ -131,6 +132,10 @@ export default function Editor (){
           </div>          
           <div className="hudMain"></div>
           <div className="hudFooter">
+            <div className="levelCompletedHint">
+              <div className="levelCompletedStatus-Gold"><i className="fa-solid fa-square-check"></i></div>
+              <div>requires {moves.length} {moves.length === 1 ? 'move' : 'moves'}</div>
+            </div>
             <div className="editor-buttonGroup">
               {/* SELECT MODE */}
               <div className="editor-editModeLabel">Mode:</div>

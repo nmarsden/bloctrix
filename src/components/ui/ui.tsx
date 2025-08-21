@@ -235,7 +235,13 @@ export default function Ui() {
               >
                 <i className="fa-solid fa-left-long"></i>
               </div>
-              <div className="moves">Moves: {moveCount}</div>
+              <div>
+                <div className="moves">Moves: {moveCount}</div>
+                <div className="levelCompletedHint">
+                  <div className="levelCompletedStatus-Gold"><i className="fa-solid fa-square-check"></i></div>
+                  <div>requires {currentLevel.moves.length} {currentLevel.moves.length === 1 ? 'move' : 'moves'}</div>
+                </div>
+              </div>
               <div 
                 className={`button-dark ${gameMode === 'LEVEL_COMPLETED' ? 'button-hidden' : ''}`} 
                 onClick={onSelectReset} 
@@ -254,11 +260,11 @@ export default function Ui() {
               <div className={moveCount <= currentLevel.moves.length ? "levelCompletedStatus-Gold" : "levelCompletedStatus-Silver"}>
                 <i className="fa-solid fa-square-check"></i>achieved
               </div>
-              <div>Solved in {moveCount} moves</div>
+              <div>Solved in {moveCount} {moveCount === 1 ? 'move' : 'moves'}</div>
               {moveCount > currentLevel.moves.length ? (
                 <div className="levelCompletedHint">
                   <div className="levelCompletedStatus-Gold"><i className="fa-solid fa-square-check"></i></div>
-                  <div>requires {currentLevel.moves.length} moves</div>
+                  <div>requires {currentLevel.moves.length} {currentLevel.moves.length === 1 ? 'move': 'moves'}</div>
                 </div>
               ) : null}
             </div>

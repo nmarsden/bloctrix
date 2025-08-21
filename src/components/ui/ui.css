@@ -458,6 +458,7 @@ body::after {
   justify-content: center;
   gap: 5px;
   font-size: 12px;
+  line-height: 12px;
 }
 .levelCompletedHint .levelCompletedStatus-Gold {
   font-size: 16px;
@@ -466,6 +467,7 @@ body::after {
 .moves {
   text-align: center;
   min-width: 160px;
+  padding-bottom: 5px;
 }
 
 .noLevelsMessage {
