@@ -1053,21 +1053,30 @@ export const useGlobalStore = create<GlobalState>()(
         },
 
         editFill: (blockType: BlockType) => {
-          const { blocks, gridSize, toggleMode } = get();
-          const updatedBlocks = blocks.map(block => ({
+          const { blocks, gridSize, moves, toggleMode } = get();
+
+          // Update blocks with block type & also temporarily toggleIds for 'TOGGLE_ON' mode so that moves can be re-applied
+          let updatedBlocks = blocks.map(block => ({
             ...block, 
             blockType: block.blockType === 'EMPTY' ? 'EMPTY' : blockType,
-            toggleIds: calcToggleIds(blockType, block.id, toggleMode, gridSize), 
-            on: false
+            toggleIds: calcToggleIds(blockType, block.id, 'TOGGLE_ON', gridSize), 
           }));
+
+          // Re-apply moves
+          updatedBlocks = applyMoves(updatedBlocks, moves);
+          const updatedOnIds = updatedBlocks.filter(block => block.on).map(block => block.id);
+          // Reset toggleIds for origin toggle mode
+          updatedBlocks = updatedBlocks.map(block => ({
+            ...block, 
+            toggleIds: calcToggleIds(block.blockType, block.id, toggleMode, gridSize)
+          }));            
 
           Sounds.getInstance().playSoundFX('BLOCK_TOGGLE');
 
           set({ 
-            onIds: [],
-            idToToggleDelay: populateIdToToggleDelay(updatedBlocks, ''),
             blocks: updatedBlocks,
-            moves: [],
+            onIds: updatedOnIds,
+            idToToggleDelay: populateIdToToggleDelay(updatedBlocks, ''),
             idToBlock: populateIdToBlock(updatedBlocks)
           });
           get().updateUnsavedChanges();

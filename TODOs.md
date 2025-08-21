@@ -49,8 +49,8 @@
         - [x] block type: all
         - [x] block type: neighbours
         - [x] block type: none
-        - [ ] improve fill mode
-          - [ ] instead of clearing all moves, re-apply moves based on the new block types
+        - [x] improve fill mode
+          - [x] instead of clearing all moves, re-apply moves based on the new block types
     - [x] block mode    
       - [x] clicking a block toggles block type
       - [x] improve block mode
