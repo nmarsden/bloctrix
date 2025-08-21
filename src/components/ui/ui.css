@@ -426,6 +426,43 @@ body::after {
   text-transform: uppercase;
 }
 
+.levelCompletedInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 16px;
+  line-height: 16px;
+  text-align: center;
+  text-transform: uppercase;
+  padding-bottom: 10px;
+}
+
+.levelCompletedStatus-Silver,
+.levelCompletedStatus-Gold {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 30px;
+}
+.levelCompletedStatus-Silver {
+  color: rgba(var(--silver-color), 0.7);
+}
+.levelCompletedStatus-Gold {
+  color: rgba(var(--gold-color), 0.8);
+}
+
+.levelCompletedHint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 12px;
+}
+.levelCompletedHint .levelCompletedStatus-Gold {
+  font-size: 16px;
+}
+
 .moves {
   text-align: center;
   min-width: 160px;

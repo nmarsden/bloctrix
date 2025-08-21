@@ -250,6 +250,18 @@ export default function Ui() {
             <div className="editor-modal-header">
               <div className="levelCompleted">Level Completed</div>
             </div>
+            <div className="levelCompletedInfo">
+              <div className={moveCount <= currentLevel.moves.length ? "levelCompletedStatus-Gold" : "levelCompletedStatus-Silver"}>
+                <i className="fa-solid fa-square-check"></i>achieved
+              </div>
+              <div>Solved in {moveCount} moves</div>
+              {moveCount > currentLevel.moves.length ? (
+                <div className="levelCompletedHint">
+                  <div className="levelCompletedStatus-Gold"><i className="fa-solid fa-square-check"></i></div>
+                  <div>requires {currentLevel.moves.length} moves</div>
+                </div>
+              ) : null}
+            </div>
             <div className="editor-buttonGroup">
               <div className="button-dark button-icon" onClick={onSelectMenu} title="Back">
                 <i className="fa-solid fa-bars"></i>

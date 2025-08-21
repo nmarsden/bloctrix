@@ -49,6 +49,8 @@
         - [x] block type: all
         - [x] block type: neighbours
         - [x] block type: none
+        - [ ] improve fill mode
+          - [ ] instead of clearing all moves, re-apply moves based on the new block types
     - [x] block mode    
       - [x] clicking a block toggles block type
       - [x] improve block mode
@@ -132,6 +134,14 @@
       - [x] Menu button
       - [x] Replay button
       - [x] Next button
+      - [x] Indicate whether 'gold' or 'silver' tick achieved
+        - [x] when solved in minimum moves...
+          - [x] 'gold' achieved
+          - [x] Solved in [n] moves
+        - [x] when NOT solved in minimum moves...
+          - [x] 'silver' achieved
+          - [x] Solved in [n] moves  
+          - [x] 'gold' requires [N] moves
 
   - [x] ui
     - [x] main menu
@@ -208,3 +218,11 @@
   - [x] not completed
   - [x] completed - but NOT minimum moves
   - [x] completed best - minimum moves
+
+- [ ] particles
+  - [ ] show particles on click - extruding from the block label squares
+
+- [ ] ribbons
+  - [ ] show ribbons on rotate - wind effect extruding from the edges of the cube
+
+
