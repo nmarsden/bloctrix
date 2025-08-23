@@ -655,6 +655,7 @@ export type GlobalState = {
   soundFXOn: boolean;
   levelToBestNumMoves: { [key: string]: number; };
   isNextLevel: boolean;
+  toggledBlock: BlockInfo | null,
 
   shareCustomLevel: () => Promise<void>;
   openCustomLevel: (hash: string) => void;
@@ -747,6 +748,7 @@ export const useGlobalStore = create<GlobalState>()(
         soundFXOn: true,
         levelToBestNumMoves: {},
         isNextLevel: true,
+        toggledBlock: null,
 
         shareCustomLevel: async () => {
           Sounds.getInstance().playSoundFX('BLOCK_TOGGLE');
@@ -970,7 +972,8 @@ export const useGlobalStore = create<GlobalState>()(
               moves: newMoves, 
               onIds: newOnIds,
               idToToggleDelay,
-              moveCount: newMoveCount
+              moveCount: newMoveCount,
+              toggledBlock: {...hoveredBlock}
             });
           }
           if (toggleMode === 'TOGGLE_BLOCK_TYPE') {

@@ -161,7 +161,7 @@
 
     - [x] hud
       - [x] moves
-      - [ ] 'gold' requires [N] moves
+      - [x] 'gold' requires [N] moves
       - [x] reset - use icon
       - [x] quit - use icon
     - [x] toast messages
@@ -220,8 +220,7 @@
   - [x] completed - but NOT minimum moves
   - [x] completed best - minimum moves
 
-- [ ] particles
-  - [ ] show particles on click - extruding from the block label squares
+- [x] show a shock wave effect on block toggle
 
 - [ ] ribbons
   - [ ] show ribbons on rotate - wind effect extruding from the edges of the cube

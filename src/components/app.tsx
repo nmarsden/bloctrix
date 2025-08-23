@@ -9,6 +9,7 @@ import Ui from './ui/ui.tsx';
 import Blocks from './blocks.tsx';
 import Editor from './editor/editor.tsx';
 import { GlobalState, useGlobalStore } from '../stores/useGlobalStore.ts';
+import ShockWaves from './shockWaves.tsx';
 // import Background from './background.tsx';
 
 export default function App() {
@@ -34,6 +35,7 @@ export default function App() {
             {/* <Background /> */}
           </Camera>
           <Blocks />
+          <ShockWaves />
         </Suspense>
       </Canvas>
       <Ui />
