@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BufferAttribute, BufferGeometry, Color, CubicBezierCurve3, DoubleSide, Mesh, ShaderMaterial, Uniform, Vector3 } from "three";
 import vertexShader from '../shaders/windStream/vertex.glsl';
 import fragmentShader from '../shaders/windStream/fragment.glsl';
@@ -9,35 +9,117 @@ import { useControls } from "leva";
 import { GlobalState, useGlobalStore } from "../stores/useGlobalStore";
 import gsap from "gsap";
 
+const NUM_CURVES = 20;
 const NUM_CURVE_POINTS = 30;
+
+type CurveData = {
+  rotationX: number;
+  rotationY: number;
+};
+
+const CURVE_DATA: CurveData[] = [];
+
+for (let i=0; i<NUM_CURVES; i++) {
+  const rotationY = (Math.PI * 2) * ((i + 1) / NUM_CURVES);
+  CURVE_DATA.push({ rotationX: 0,       rotationY });
+  CURVE_DATA.push({ rotationX: Math.PI, rotationY });
+}
 
 const startPoint = new Vector3(0.8, -12.3, 0.1);
 const controlPoint1 = new Vector3(-0.6, 0.2, 0);
 const controlPoint2 = new Vector3(2.6, -1.1, 0);
 const endPoint = new Vector3(5.3, -4.0, 0);
 
-export default function WindStream ({ rotationY }: { rotationY: number; }) {
-  const editorEnabled = useRef(false);
+function Curve({ rotationX, rotationY, geometry, debug } : { rotationX: number, rotationY: number, geometry: BufferGeometry, debug: boolean }) {
+  const alphaFactorTimeline = useRef<gsap.core.Timeline | undefined>(null);
+
+  const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
+
+  const material = useMemo(() => {
+    return new ShaderMaterial({
+        uniforms: {
+          uColor: new Uniform(new Color("white")),
+          uAlphaFactor: new Uniform(0),
+          uProgressOffset: new Uniform(Math.random()),
+          uTime: new Uniform(0),
+          uDebug: new Uniform(debug ? 1 : 0)
+        },
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader,
+        side: DoubleSide,
+        transparent: true,
+        depthTest: true,
+    });
+  }, []);
+
+  useEffect(() => {
+    material.uniforms.uDebug.value = debug ? 1 : 0;
+  }, [debug]);
+
+  useEffect(() => {
+    if (gameMode !== 'LEVEL_COMPLETED') {    
+      if (alphaFactorTimeline.current) return;
+
+      const duration = 3; 
+
+      alphaFactorTimeline.current = gsap.timeline().to(
+        material.uniforms.uAlphaFactor,
+        {
+          keyframes: [
+            { value: 0.0, ease: 'linear' },
+            { value: 0.1 + (Math.random() * 0.3), ease: 'linear', duration },
+          ],
+          delay: Math.random() * 5,
+          repeat: -1,
+          yoyo: true
+        }
+      );
+    } else {
+      // Remove animation
+      if (alphaFactorTimeline.current) {
+        alphaFactorTimeline.current.kill();
+        alphaFactorTimeline.current = undefined;
+        material.uniforms.uAlphaFactor.value = 0;
+      }
+    }
+  }, [gameMode]);
+
+  useFrame(({ clock }) => {
+    material.uniforms.uTime.value = clock.getElapsedTime() * 0.25;
+  });
+
+  return (
+    <group
+      rotation-x={rotationX}
+      rotation-y={rotationY}
+    >
+      <mesh 
+        material={material}
+        geometry={geometry}
+      />
+    </group>
+  )
+}
+
+export default function WindStream () {
   const transformControls = useRef<TransformControlsImpl>(null!);
   const startPointRef = useRef<Mesh>(null!);
   const controlPoint1Ref = useRef<Mesh>(null!);
   const controlPoint2Ref = useRef<Mesh>(null!);
   const endPointRef = useRef<Mesh>(null!);
-  const alphaFactorTimelines = useRef<gsap.core.Timeline[]>([]);
 
   const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
-  
+
+  const [ debug, setDebug ] = useState(false);
+
   useControls(
     'Wind Stream',
     {
-      editorEnabled: {
-        value: editorEnabled.current,
-        label: 'editorEnabled',
+      debug: {
+        value: debug,
+        label: 'debug',
         onChange: (value) => {
-          curve1Material.uniforms.uDebug.value = value ? 1 : 0;
-          curve2Material.uniforms.uDebug.value = value ? 1 : 0;
-          curve3Material.uniforms.uDebug.value = value ? 1 : 0;
-          curve4Material.uniforms.uDebug.value = value ? 1 : 0;
+          setDebug(value);
           startPointRef.current.visible = value;
           endPointRef.current.visible = value;
           controlPoint1Ref.current.visible = value;
@@ -56,84 +138,6 @@ export default function WindStream ({ rotationY }: { rotationY: number; }) {
       collapsed: true
     }
   );
-
-  useEffect(() => {
-    if (gameMode !== 'LEVEL_COMPLETED') {    
-      if (alphaFactorTimelines.current.length > 0) return;
-
-      const duration = 5; 
-
-      alphaFactorTimelines.current.push(
-        gsap.timeline().to(
-          curve1Material.uniforms.uAlphaFactor,
-          {
-            keyframes: [
-              { value: 0.0, ease: 'linear' },
-              { value: 0.1, ease: 'linear', duration },
-            ],
-            delay: Math.random() * 5,
-            repeat: -1,
-            yoyo: true
-          }
-        )
-      );
-      alphaFactorTimelines.current.push(
-        gsap.timeline().to(
-          curve2Material.uniforms.uAlphaFactor,
-          {
-            keyframes: [
-              { value: 0.0, ease: 'linear' },
-              { value: 0.2, ease: 'linear', duration },
-            ],
-            delay: Math.random() * 5,
-            repeat: -1,
-            yoyo: true
-          }
-        )
-      );
-      alphaFactorTimelines.current.push(
-        gsap.timeline().to(
-          curve3Material.uniforms.uAlphaFactor,
-          {
-            keyframes: [
-              { value: 0.0, ease: 'linear' },
-              { value: 0.3, ease: 'linear', duration },
-            ],
-            delay: Math.random() * 5,
-            repeat: -1,
-            yoyo: true
-          }
-        )
-      );
-      alphaFactorTimelines.current.push(
-        gsap.timeline().to(
-          curve4Material.uniforms.uAlphaFactor,
-          {
-            keyframes: [
-              { value: 0.0, ease: 'linear' },
-              { value: 0.4, ease: 'linear', duration },
-            ],
-            delay: Math.random() * 5,
-            repeat: -1,
-            yoyo: true
-          }
-        )
-      );
-    } else {
-      // Remove animations
-      if (alphaFactorTimelines.current.length > 0) {
-        const numTweens = alphaFactorTimelines.current.length;
-        for (let i=0; i<numTweens; i++) {
-          const tween = alphaFactorTimelines.current.pop() as gsap.core.Timeline;
-          tween.kill();
-        }
-        curve1Material.uniforms.uAlphaFactor.value = 0;
-        curve2Material.uniforms.uAlphaFactor.value = 0;
-        curve3Material.uniforms.uAlphaFactor.value = 0;
-        curve4Material.uniforms.uAlphaFactor.value = 0;
-      }
-    }
-  }, [gameMode]);
   
   const updateCurveGeometry = useCallback((geometry: BufferGeometry, points: Vector3[]) => {
     points.forEach((b, i) => {
@@ -196,175 +200,94 @@ export default function WindStream ({ rotationY }: { rotationY: number; }) {
     return geometry;
   }, []);
 
-  const { 
-    curve1Material, 
-    curve2Material, 
-    curve3Material, 
-    curve4Material 
-  } = useMemo(() => {
-    const material1 = new ShaderMaterial({
-        uniforms: {
-          uColor: new Uniform(new Color("white")),
-          uAlphaFactor: new Uniform(0),
-          uProgressOffset: new Uniform(Math.random()),
-          uTime: new Uniform(0),
-          uDebug: new Uniform(editorEnabled.current ? 1 : 0)
-        },
-        vertexShader: vertexShader,
-        fragmentShader: fragmentShader,
-        side: DoubleSide,
-        transparent: true,
-        depthTest: true,
-    });
-    const material2 = material1.clone();
-    material2.uniforms.uProgressOffset.value = Math.random();
-
-    const material3 = material1.clone();
-    material3.uniforms.uProgressOffset.value = Math.random();
-
-    const material4 = material1.clone();
-    material4.uniforms.uProgressOffset.value = Math.random();
-
-    return {
-      curve1Material: material1,
-      curve2Material: material2,
-      curve3Material: material3,
-      curve4Material: material4,
-    }
-  }, []);
-  
-  useFrame(({ clock }) => {
-    curve1Material.uniforms.uTime.value = clock.getElapsedTime() * 0.25;
-    curve2Material.uniforms.uTime.value = clock.getElapsedTime() * 0.25;
-    curve3Material.uniforms.uTime.value = clock.getElapsedTime() * 0.25;
-    curve4Material.uniforms.uTime.value = clock.getElapsedTime() * 0.25;
-  });
-  
   return (
     <group
-      rotation-y={rotationY}
       visible={gameMode !== 'LEVEL_COMPLETED'}
     >
-      {/* ---- Curve 1 (Editable) ---- */}
-      <group
-        scale={1}
-      >
-        {/* Curve */}
-        <mesh 
-          material={curve1Material}
-          geometry={curveGeometry}
-        />
+      {/* Curves */}
+      {CURVE_DATA.map((curveData, index) => {
+        return (
+          <Curve key={`curve-${index}`} rotationX={curveData.rotationX} rotationY={curveData.rotationY} geometry={curveGeometry} debug={debug} />
+        )
+      })}
 
-        {/* Transform Controls */}
-        {editorEnabled.current ? (
-          <TransformControls 
-            // @ts-ignore
-            ref={transformControls}
-            mode="translate" 
-            onObjectChange={() => {
-              // Re-calc points
-              const curve = new CubicBezierCurve3(
-                startPointRef.current.position, 
-                controlPoint1Ref.current.position, 
-                controlPoint2Ref.current.position, 
-                endPointRef.current.position
-              );
-              const points = curve.getPoints(NUM_CURVE_POINTS);
+      {/* Transform Controls */}
+      {debug ? (
+        <TransformControls 
+          // @ts-ignore
+          ref={transformControls}
+          mode="translate" 
+          attach={endPointRef.current}
+          onObjectChange={() => {
+            // Re-calc points
+            const curve = new CubicBezierCurve3(
+              startPointRef.current.position, 
+              controlPoint1Ref.current.position, 
+              controlPoint2Ref.current.position, 
+              endPointRef.current.position
+            );
+            const points = curve.getPoints(NUM_CURVE_POINTS);
 
-              updateCurveGeometry(curveGeometry, points);
-            }}
-          />
-        ) : null}
-
-        {/* Start Point */}
-        <mesh
-          ref={startPointRef}
-          position={startPoint}
-          scale={0.2}
-          onClick={() => {
-            if (!editorEnabled.current) return;
-            transformControls.current.attach(startPointRef.current)
+            updateCurveGeometry(curveGeometry, points);
           }}
-        >
-          <meshBasicMaterial />
-          <sphereGeometry />
-        </mesh>
-
-        {/* Control Point 1 */}
-        <mesh
-          ref={controlPoint1Ref}
-          position={controlPoint1}
-          scale={0.2}
-          onClick={() => {
-            if (!editorEnabled.current) return;
-            transformControls.current.attach(controlPoint1Ref.current)
-          }}
-        >
-          <meshBasicMaterial />
-          <sphereGeometry />
-        </mesh>
-
-        {/* Control Point 2 */}
-        <mesh
-          ref={controlPoint2Ref}
-          position={controlPoint2}
-          scale={0.2}
-          onClick={() => {
-            if (!editorEnabled.current) return;
-            transformControls.current.attach(controlPoint2Ref.current)
-          }}
-        >
-          <meshBasicMaterial />
-          <sphereGeometry />
-        </mesh>
-
-        {/* End Point */}
-        <mesh
-          ref={endPointRef}
-          position={endPoint}
-          scale={0.2}
-          onClick={() => {
-            if (!editorEnabled.current) return;
-            transformControls.current.attach(endPointRef.current)
-          }}
-        >
-          <meshBasicMaterial />
-          <sphereGeometry />
-        </mesh>
-      </group>
-
-      {/* ---- Curve 2 (Rotated 90) ---- */}
-      <group
-        scale={1}
-        rotation-y={Math.PI * 0.5}
-      >
-        <mesh 
-          material={curve2Material}
-          geometry={curveGeometry}
         />
-      </group>
+      ) : null}
 
-      {/* ---- Curve 3 (Rotated 180) ---- */}
-      <group
-        scale={1}
-        rotation-y={Math.PI}
+      {/* Start Point */}
+      <mesh
+        ref={startPointRef}
+        position={startPoint}
+        scale={0.2}
+        onClick={() => {
+          if (!debug) return;
+          transformControls.current.attach(startPointRef.current)
+        }}
       >
-        <mesh 
-          material={curve3Material}
-          geometry={curveGeometry}
-        />
-      </group>
+        <meshBasicMaterial />
+        <sphereGeometry />
+      </mesh>
 
-      {/* ---- Curve 4 (Rotated 270) ---- */}
-      <group
-        scale={1}
-        rotation-y={Math.PI * 1.5}
+      {/* Control Point 1 */}
+      <mesh
+        ref={controlPoint1Ref}
+        position={controlPoint1}
+        scale={0.2}
+        onClick={() => {
+          if (!debug) return;
+          transformControls.current.attach(controlPoint1Ref.current)
+        }}
       >
-        <mesh 
-          material={curve4Material}
-          geometry={curveGeometry}
-        />
-      </group>
+        <meshBasicMaterial />
+        <sphereGeometry />
+      </mesh>
+
+      {/* Control Point 2 */}
+      <mesh
+        ref={controlPoint2Ref}
+        position={controlPoint2}
+        scale={0.2}
+        onClick={() => {
+          if (!debug) return;
+          transformControls.current.attach(controlPoint2Ref.current)
+        }}
+      >
+        <meshBasicMaterial />
+        <sphereGeometry />
+      </mesh>
+
+      {/* End Point */}
+      <mesh
+        ref={endPointRef}
+        position={endPoint}
+        scale={0.2}
+        onClick={() => {
+          if (!debug) return;
+          transformControls.current.attach(endPointRef.current)
+        }}
+      >
+        <meshBasicMaterial />
+        <sphereGeometry />
+      </mesh>
     </group>
   )
 }

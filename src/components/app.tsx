@@ -37,11 +37,7 @@ export default function App() {
           </Camera>
           <Blocks />
           <ShockWaves />
-          <WindStream rotationY={Math.PI * 0} />
-          <WindStream rotationY={Math.PI * 0.2} />
-          <WindStream rotationY={Math.PI * 0.4} />
-          <WindStream rotationY={Math.PI * 0.6} />
-          <WindStream rotationY={Math.PI * 0.8} />
+          <WindStream />
         </Suspense>
       </Canvas>
       <Ui />
