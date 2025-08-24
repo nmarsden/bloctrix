@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { BufferAttribute, BufferGeometry, Color, CubicBezierCurve3, DoubleSide, Mesh, ShaderMaterial, Uniform, Vector3 } from "three";
 import vertexShader from '../shaders/windStream/vertex.glsl';
 import fragmentShader from '../shaders/windStream/fragment.glsl';
@@ -7,6 +7,7 @@ import { TransformControls } from "@react-three/drei";
 import type { TransformControls as TransformControlsImpl } from 'three/addons';
 import { useControls } from "leva";
 import { GlobalState, useGlobalStore } from "../stores/useGlobalStore";
+import gsap from "gsap";
 
 const NUM_CURVE_POINTS = 30;
 
@@ -22,6 +23,7 @@ export default function WindStream ({ rotationY }: { rotationY: number; }) {
   const controlPoint1Ref = useRef<Mesh>(null!);
   const controlPoint2Ref = useRef<Mesh>(null!);
   const endPointRef = useRef<Mesh>(null!);
+  const alphaFactorTimelines = useRef<gsap.core.Timeline[]>([]);
 
   const gameMode = useGlobalStore((state: GlobalState) => state.gameMode);
   
@@ -55,6 +57,84 @@ export default function WindStream ({ rotationY }: { rotationY: number; }) {
     }
   );
 
+  useEffect(() => {
+    if (gameMode !== 'LEVEL_COMPLETED') {    
+      if (alphaFactorTimelines.current.length > 0) return;
+
+      const duration = 5; 
+
+      alphaFactorTimelines.current.push(
+        gsap.timeline().to(
+          curve1Material.uniforms.uAlphaFactor,
+          {
+            keyframes: [
+              { value: 0.0, ease: 'linear' },
+              { value: 0.1, ease: 'linear', duration },
+            ],
+            delay: Math.random() * 5,
+            repeat: -1,
+            yoyo: true
+          }
+        )
+      );
+      alphaFactorTimelines.current.push(
+        gsap.timeline().to(
+          curve2Material.uniforms.uAlphaFactor,
+          {
+            keyframes: [
+              { value: 0.0, ease: 'linear' },
+              { value: 0.2, ease: 'linear', duration },
+            ],
+            delay: Math.random() * 5,
+            repeat: -1,
+            yoyo: true
+          }
+        )
+      );
+      alphaFactorTimelines.current.push(
+        gsap.timeline().to(
+          curve3Material.uniforms.uAlphaFactor,
+          {
+            keyframes: [
+              { value: 0.0, ease: 'linear' },
+              { value: 0.3, ease: 'linear', duration },
+            ],
+            delay: Math.random() * 5,
+            repeat: -1,
+            yoyo: true
+          }
+        )
+      );
+      alphaFactorTimelines.current.push(
+        gsap.timeline().to(
+          curve4Material.uniforms.uAlphaFactor,
+          {
+            keyframes: [
+              { value: 0.0, ease: 'linear' },
+              { value: 0.4, ease: 'linear', duration },
+            ],
+            delay: Math.random() * 5,
+            repeat: -1,
+            yoyo: true
+          }
+        )
+      );
+    } else {
+      // Remove animations
+      if (alphaFactorTimelines.current.length > 0) {
+        const numTweens = alphaFactorTimelines.current.length;
+        for (let i=0; i<numTweens; i++) {
+          const tween = alphaFactorTimelines.current.pop() as gsap.core.Timeline;
+          tween.kill();
+        }
+        curve1Material.uniforms.uAlphaFactor.value = 0;
+        curve2Material.uniforms.uAlphaFactor.value = 0;
+        curve3Material.uniforms.uAlphaFactor.value = 0;
+        curve4Material.uniforms.uAlphaFactor.value = 0;
+      }
+    }
+  }, [gameMode]);
+  
   const updateCurveGeometry = useCallback((geometry: BufferGeometry, points: Vector3[]) => {
     points.forEach((b, i) => {
         let ribbonWidth = 0.1;
@@ -125,7 +205,7 @@ export default function WindStream ({ rotationY }: { rotationY: number; }) {
     const material1 = new ShaderMaterial({
         uniforms: {
           uColor: new Uniform(new Color("white")),
-          uAlphaFactor: new Uniform(0.1),
+          uAlphaFactor: new Uniform(0),
           uProgressOffset: new Uniform(Math.random()),
           uTime: new Uniform(0),
           uDebug: new Uniform(editorEnabled.current ? 1 : 0)
@@ -138,15 +218,12 @@ export default function WindStream ({ rotationY }: { rotationY: number; }) {
     });
     const material2 = material1.clone();
     material2.uniforms.uProgressOffset.value = Math.random();
-    material2.uniforms.uAlphaFactor.value = 0.1 + Math.random() * 0.2;
 
     const material3 = material1.clone();
     material3.uniforms.uProgressOffset.value = Math.random();
-    material3.uniforms.uAlphaFactor.value = 0.1 + Math.random() * 0.2;
 
     const material4 = material1.clone();
     material4.uniforms.uProgressOffset.value = Math.random();
-    material4.uniforms.uAlphaFactor.value = 0.1 + Math.random() * 0.6;
 
     return {
       curve1Material: material1,
