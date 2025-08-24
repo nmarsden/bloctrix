@@ -61,13 +61,14 @@ function Curve({ rotationX, rotationY, geometry, debug } : { rotationX: number, 
       if (alphaFactorTimeline.current) return;
 
       const duration = 3; 
+      const maxAlphaFactor = (Math.random() > 0.9) ? 0.2 : 0.05;
 
       alphaFactorTimeline.current = gsap.timeline().to(
         material.uniforms.uAlphaFactor,
         {
           keyframes: [
-            { value: 0.0, ease: 'linear' },
-            { value: 0.1 + (Math.random() * 0.3), ease: 'linear', duration },
+            { value: 0.0,            ease: 'linear' },
+            { value: maxAlphaFactor, ease: 'linear', duration },
           ],
           delay: Math.random() * 5,
           repeat: -1,
@@ -140,26 +141,26 @@ export default function WindStream () {
   );
   
   const updateCurveGeometry = useCallback((geometry: BufferGeometry, points: Vector3[]) => {
+    let ribbonWidth = 0.05 + (Math.random() * 0.2);
+
     points.forEach((b, i) => {
-        let ribbonWidth = 0.1;
+      geometry.attributes.position.setXYZ(i * 2 + 0, b.x, b.y, b.z + ribbonWidth);
+      geometry.attributes.position.setXYZ(i * 2 + 1, b.x, b.y, b.z - ribbonWidth);
 
-        geometry.attributes.position.setXYZ(i * 2 + 0, b.x, b.y + ribbonWidth, b.z);
-        geometry.attributes.position.setXYZ(i * 2 + 1, b.x, b.y - ribbonWidth, b.z);
+      geometry.attributes.uv.setXY(i * 2 + 0, i / (points.length - 1), 0);
+      geometry.attributes.uv.setXY(i * 2 + 1, i / (points.length - 1), 1);
 
-        geometry.attributes.uv.setXY(i * 2 + 0, i / (points.length - 1), 0);
-        geometry.attributes.uv.setXY(i * 2 + 1, i / (points.length - 1), 1);
+      const geometryIndex = geometry.getIndex() as BufferAttribute;
 
-        const geometryIndex = geometry.getIndex() as BufferAttribute;
+      if (i < points.length - 1) {
+          geometryIndex.setX(i * 6 + 0, i * 2);
+          geometryIndex.setX(i * 6 + 1, i * 2 + 1);
+          geometryIndex.setX(i * 6 + 2, i * 2 + 2);
 
-        if (i < points.length - 1) {
-            geometryIndex.setX(i * 6 + 0, i * 2);
-            geometryIndex.setX(i * 6 + 1, i * 2 + 1);
-            geometryIndex.setX(i * 6 + 2, i * 2 + 2);
-
-            geometryIndex.setX(i * 6 + 0 + 3, i * 2 + 1);
-            geometryIndex.setX(i * 6 + 1 + 3, i * 2 + 2);
-            geometryIndex.setX(i * 6 + 2 + 3, i * 2 + 3);
-        }
+          geometryIndex.setX(i * 6 + 0 + 3, i * 2 + 1);
+          geometryIndex.setX(i * 6 + 1 + 3, i * 2 + 2);
+          geometryIndex.setX(i * 6 + 2 + 3, i * 2 + 3);
+      }
     });
     geometry.attributes.position.needsUpdate = true;
 
