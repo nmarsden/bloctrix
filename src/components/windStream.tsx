@@ -141,7 +141,7 @@ export default function WindStream () {
   );
   
   const updateCurveGeometry = useCallback((geometry: BufferGeometry, points: Vector3[]) => {
-    let ribbonWidth = 0.05 + (Math.random() * 0.2);
+    const ribbonWidth = (Math.random() > 0.9) ? 0.1 : 0.2;
 
     points.forEach((b, i) => {
       geometry.attributes.position.setXYZ(i * 2 + 0, b.x, b.y, b.z + ribbonWidth);
