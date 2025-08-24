@@ -9,6 +9,7 @@ export default function Camera({ children } : { children?: ReactNode }) {
   const cameraGroup = useRef<Group>(null!);
   const cameraControls = useRef<CameraControls>(null!);
 
+  const controlsEnabled = useRef(true);
   const fov = useRef(40);
   const cameraPositionPlaying = useRef<Vector3>(new Vector3(8, 8, 8));
   const cameraPositionNotPlaying = useRef<Vector3>(new Vector3(6, 6, 6));
@@ -75,6 +76,11 @@ export default function Camera({ children } : { children?: ReactNode }) {
   useControls(
     'Camera',
     {
+      controlsEnabled: {
+        value: controlsEnabled.current,
+        label: 'controlsEnabled',
+        onChange: (value) => cameraControls.current.enabled = value
+      },
       fov: { 
         value: fov.current, 
         label: 'fov', 

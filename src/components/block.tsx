@@ -22,8 +22,8 @@ const BLOCK_DISTANCE_THRESHOLD = (BLOCK_SIZE * 3) + (BLOCK_GAP * 2);
 const BLOCK_ALPHA_FALLOFF = BLOCK_DISTANCE_THRESHOLD * 0.5;
 
 export default function Block ({ id, position, blockType, toggleIds }: BlockInfo ){
+  const visible = useRef(true);
   const block = useRef<Mesh>(null!);
-  const distanceThreshold = useRef(0);
   const blockLabelAll = useTexture("textures/block_label_all.png");
   const blockLabelEdgesAndCorners = useTexture("textures/block_label_edges_and_corners.png");
   const blockLabelSelfAndEdges = useTexture("textures/block_label_self_and_edges.png");
@@ -141,33 +141,9 @@ export default function Block ({ id, position, blockType, toggleIds }: BlockInfo
   useControls(
     'Block',
     {
-      distanceThreshold: { 
-        value: distanceThreshold.current,    
-        min: 0,
-        max: 10,
-        step: 0.01,
-        onChange: value => {
-          distanceThreshold.current = value;
-          material.uniforms.uDistanceThreshold.value = value;
-        }
-      },
-      alphaFalloff: { 
-        value: BLOCK_ALPHA_FALLOFF,
-        min: 0,
-        max: 10,
-        step: 0.01,
-        onChange: value => {
-          material.uniforms.uAlphaFalloff.value = value;
-        }
-      },
-      opacity: {
-        value: BLOCK_SHOWN_OPACITY,
-        min: 0,
-        max: 1,
-        step: 0.01,
-        onChange: value => {
-          material.uniforms.uOpacity.value = value;
-        }
+      visible: {
+        value: visible.current,
+        onChange: value => block.current.visible = value
       }
     },
     {

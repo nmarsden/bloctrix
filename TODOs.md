@@ -222,7 +222,9 @@
 
 - [x] show a shock wave effect on block toggle
 
-- [ ] ribbons
-  - [ ] show ribbons on rotate - wind effect extruding from the edges of the cube
-
+- [ ] wind effect
+  - [ ] extruding from the edges of the cube on rotate?
+  - [x] wind stream holding up the cube, coming up and around it?
+    - [x] use bezier curves to layout the points
+    - [x] bezier curve editor: start point, control points, & end point - view & move
 
